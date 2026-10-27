@@ -2,6 +2,7 @@
 @font-face { font-family: 'LU Geist'; src: url('fonts/geist-variable.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
 @font-face { font-family: 'LU Geist Mono'; src: url('fonts/geist-mono-variable.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
 
+*, *::before, *::after { box-sizing: border-box; }
 html { background: #0a0b0a; color-scheme: dark; }
 body { margin: 0; touch-action: manipulation; }
 @media (pointer: fine) { html { overscroll-behavior: none; } }
