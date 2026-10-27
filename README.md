@@ -42,3 +42,13 @@ assets/fonts/         Geist e Geist Mono (SIL Open Font License)
 
 É um site estático: funciona em GitHub Pages, Vercel, Netlify ou qualquer hospedagem.
 No GitHub Pages: *Settings → Pages → Deploy from a branch → `main` / root*.
+
+## Atualizações e cache do navegador
+
+O `index.html` carrega CSS e JS com `?v=<versão>` (e os módulos se importam com a mesma versão),
+para que cada navegador (Chrome, Opera GX, Edge…) baixe os arquivos novos a cada publicação.
+Ao mudar CSS ou JS, troque a versão em todos os pontos de uma vez:
+
+```bash
+V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.js
+```

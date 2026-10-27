@@ -1,4 +1,4 @@
-import { $, clone, PRESETS, intervalo, presetDe, trocarFiltros } from './core.js';
+import { $, clone, PRESETS, intervalo, presetDe, trocarFiltros } from './core.js?v=202610271521';
 
 /* Barra de filtros (loja + período). Mudanças vão para a URL, que recarrega a página atual. */
 export const montarFiltros = (slot, ctx, rota) => {

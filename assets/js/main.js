@@ -1,7 +1,7 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO } from './core.js';
-import { renderPainel } from './painel.js';
-import { renderAcessos } from './acessos.js';
-import { renderRelatorio } from './relatorio.js';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO } from './core.js?v=202610271521';
+import { renderPainel } from './painel.js?v=202610271521';
+import { renderAcessos } from './acessos.js?v=202610271521';
+import { renderRelatorio } from './relatorio.js?v=202610271521';
 
 const app = $('#app');
 let ctx = null;          // { me, admin, filtros, trocar }

@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202610271521';
 
 export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, storageKey: 'lu-atendimentos-auth' },

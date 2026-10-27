@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast } from './core.js';
-import { montarFiltros } from './filtros.js';
-import * as G from './charts.js';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast } from './core.js?v=202610271521';
+import { montarFiltros } from './filtros.js?v=202610271521';
+import * as G from './charts.js?v=202610271521';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],

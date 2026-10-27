@@ -1,5 +1,5 @@
-import { $, el, clone, rpc, fmt, isNum, toast, copiar } from './core.js';
-import { montarFiltros } from './filtros.js';
+import { $, el, clone, rpc, fmt, isNum, toast, copiar } from './core.js?v=202610271521';
+import { montarFiltros } from './filtros.js?v=202610271521';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
