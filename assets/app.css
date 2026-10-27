@@ -1,0 +1,143 @@
+/* Dashboard de Atendimentos - Level Up — estilos do site (complementa base.css) */
+@font-face { font-family: 'LU Geist'; src: url('fonts/geist-variable.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'LU Geist Mono'; src: url('fonts/geist-mono-variable.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+html { background: #0a0b0a; color-scheme: dark; }
+body { margin: 0; touch-action: manipulation; }
+@media (pointer: fine) { html { overscroll-behavior: none; } }
+[hidden] { display: none !important; }
+.lu-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.lu-skip { position: absolute; left: 12px; top: -60px; z-index: 50; padding: 10px 14px; border-radius: 10px; background: var(--lu-accent); color: var(--lu-on-accent); font-weight: 600; text-decoration: none; }
+.lu-skip:focus { top: 12px; }
+
+/* Esqueleto de carregamento */
+.sk { position: relative; color: transparent !important; }
+.sk::after { content: ""; position: absolute; inset: 15% 0; max-width: 9ch; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.1), rgba(255,255,255,.05)); background-size: 200% 100%; }
+.lu-chart.sk::after, .lu-spark.sk::after { inset: 8px 0; max-width: none; }
+@media (prefers-reduced-motion: no-preference) { .sk::after { animation: lu-sk 1.4s var(--lu-spring) infinite; } }
+@keyframes lu-sk { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.lu-busy { opacity: .5; transition: opacity .5s var(--lu-spring); }
+
+/* Login */
+.lu-login { min-height: 100dvh; display: grid; place-items: center; padding: 32px 16px; }
+.lu-login-box { width: min(420px, 100%); }
+.lu-login-head { display: grid; justify-items: center; gap: 14px; text-align: center; margin-bottom: 28px; }
+.lu-login-head .lu-logo-xl { width: 76px; height: 76px; filter: drop-shadow(0 0 18px rgba(128, 255, 0, .35)); }
+.lu-login-head h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.035em; line-height: 1.15; }
+.lu-login-head h1 span { display: block; color: var(--lu-accent); }
+.lu-login-head p { margin: 0; color: var(--lu-ink3); font-size: 14px; }
+.lu-form { display: grid; gap: 16px; }
+.lu-form .lu-field input, .lu-form .lu-field select { width: 100%; box-sizing: border-box; }
+.lu-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px; cursor: pointer;
+  font: 600 15px/1 var(--lu-sans); color: var(--lu-on-accent); background: var(--lu-accent);
+  box-shadow: 0 0 0 1px rgba(128, 255, 0, .4), 0 8px 30px -10px rgba(128, 255, 0, .55); transition: transform .3s var(--lu-spring), background-color .3s var(--lu-spring); }
+.lu-primary:hover { background: var(--lu-accent-hi); }
+.lu-primary:active { transform: scale(.98); }
+.lu-primary[disabled] { opacity: .6; cursor: progress; }
+.lu-ghost { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border-radius: 10px; cursor: pointer;
+  font: 500 13px/1 var(--lu-sans); color: var(--lu-ink2); background: rgba(255, 255, 255, .04); border: 1px solid var(--lu-line2);
+  transition: background-color .3s var(--lu-spring), border-color .3s var(--lu-spring), color .3s var(--lu-spring); text-decoration: none; }
+.lu-ghost:hover { background: rgba(255, 255, 255, .08); color: var(--lu-ink); border-color: rgba(128, 255, 0, .3); }
+.lu-ghost.danger:hover { border-color: rgba(255, 90, 95, .5); color: var(--lu-bad); }
+.lu-ghost.sm { min-height: 32px; padding: 0 10px; font-size: 12px; }
+.lu-msg { font-size: 13px; line-height: 1.45; padding: 10px 12px; border-radius: 10px; }
+.lu-msg.erro { color: #ffb3b5; background: rgba(255, 90, 95, .1); border: 1px solid rgba(255, 90, 95, .25); }
+.lu-msg.ok { color: var(--lu-accent-hi); background: rgba(128, 255, 0, .08); border: 1px solid rgba(128, 255, 0, .22); }
+.lu-msg.info { color: var(--lu-ink2); background: rgba(255, 255, 255, .04); border: 1px solid var(--lu-line2); }
+.lu-login-foot { margin-top: 18px; text-align: center; font-size: 12px; color: var(--lu-ink4); }
+
+/* Nav: menu do usuário e submenu de administração */
+.lu-menu { position: relative; }
+.lu-menu > button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; color: var(--lu-ink3); font-size: 13px; font-weight: 500;
+  padding: 7px 12px; border-radius: 999px; white-space: nowrap; transition: color .4s var(--lu-spring), background-color .4s var(--lu-spring); }
+.lu-menu > button:hover, .lu-menu > button[aria-expanded="true"] { color: var(--lu-ink); background: rgba(255, 255, 255, .06); }
+.lu-menu > button:focus-visible { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+.lu-menu > button.on { color: var(--lu-accent); background: var(--lu-accent-soft); }
+.lu-menu > button svg { width: 10px; height: 10px; transition: transform .4s var(--lu-spring); }
+.lu-menu > button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.lu-avatar { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--lu-accent-deep); color: var(--lu-accent); font: 600 12px/1 var(--lu-sans); border: 1px solid rgba(128, 255, 0, .35); }
+.lu-pop { position: absolute; right: 0; top: calc(100% + 10px); min-width: 240px; padding: 6px; border-radius: 16px; z-index: 30;
+  background: rgba(18, 20, 18, .97); border: 1px solid var(--lu-line2); box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .8);
+  transform-origin: top right; }
+@media (prefers-reduced-motion: no-preference) {
+  .lu-pop { animation: lu-pop .35s var(--lu-spring); }
+  @keyframes lu-pop { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+}
+.lu-pop a, .lu-pop button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; color: var(--lu-ink2); font-size: 13px; }
+.lu-pop a:hover, .lu-pop button:hover, .lu-pop a:focus-visible, .lu-pop button:focus-visible { background: rgba(255, 255, 255, .06); color: var(--lu-ink); }
+.lu-pop a b, .lu-pop button b { display: block; color: var(--lu-ink); font-weight: 500; }
+.lu-pop small { display: block; color: var(--lu-ink4); font-size: 12px; margin-top: 2px; }
+.lu-pop i { font-style: normal; width: 22px; height: 22px; flex: none; display: grid; place-items: center; border-radius: 7px; background: var(--lu-accent-soft); color: var(--lu-accent); font-size: 12px; }
+.lu-pop hr { border: 0; border-top: 1px solid var(--lu-line); margin: 6px 4px; }
+.lu-pop .who { padding: 10px 12px 6px; font-size: 12px; color: var(--lu-ink4); }
+.lu-pop .who b { color: var(--lu-ink); font-size: 14px; display: block; }
+.lu-nav-right { display: flex; align-items: center; gap: 2px; margin-left: 4px; }
+@media (max-width: 760px) { .lu-menu .lbl { display: none; } }
+
+/* Páginas de administração */
+.lu-page-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px; padding: clamp(48px, 7vw, 88px) 0 28px; }
+.lu-page-head > div { display: grid; gap: 14px; max-width: 720px; }
+.lu-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .05); color: var(--lu-ink2); white-space: nowrap; }
+.lu-badge.admin { background: var(--lu-accent-soft); color: var(--lu-accent); }
+.lu-badge.off { background: rgba(255, 90, 95, .1); color: var(--lu-bad); }
+.lu-chips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 28rem; }
+.lu-chips span { padding: 2px 8px; border-radius: 6px; font-size: 12px; background: rgba(255, 255, 255, .05); color: var(--lu-ink2); white-space: nowrap; }
+.lu-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Diálogos */
+.lu-dialog { width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); padding: 0; border: 0; background: transparent; color: var(--lu-ink); overscroll-behavior: contain; }
+.lu-dialog::backdrop { background: rgba(5, 6, 5, .72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+@media (prefers-reduced-motion: no-preference) {
+  .lu-dialog[open] .lu-shell { animation: lu-dlg .5s var(--lu-spring); }
+  @keyframes lu-dlg { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
+}
+.lu-dialog .lu-shell { background: rgba(255, 255, 255, .03); }
+.lu-dialog .lu-core { max-height: calc(100dvh - 72px); overflow: auto; display: grid; gap: 18px; }
+.lu-dialog h3 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+.lu-dialog p.sub { margin: -10px 0 0; font-size: 13px; color: var(--lu-ink3); }
+.lu-dialog-foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
+.lu-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .lu-grid-2 { grid-template-columns: minmax(0, 1fr); } }
+.lu-seg { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; border-radius: 12px; background: var(--lu-s2); border: 1px solid var(--lu-line2); }
+.lu-seg label { cursor: pointer; padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--lu-ink3); text-transform: none; letter-spacing: 0; transition: background-color .3s var(--lu-spring), color .3s var(--lu-spring); }
+.lu-seg input { position: absolute; opacity: 0; pointer-events: none; }
+.lu-seg label:has(input:checked) { background: var(--lu-accent); color: var(--lu-on-accent); }
+.lu-seg label:has(input:focus-visible) { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+.lu-checklist { max-height: 220px; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--lu-line2); border-radius: 12px; padding: 6px; background: var(--lu-s2); display: grid; gap: 2px; }
+.lu-checklist label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--lu-ink2); text-transform: none; letter-spacing: 0; font-weight: 400; }
+.lu-checklist label:hover { background: rgba(255, 255, 255, .04); }
+.lu-check { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; margin: 0; flex: none; border-radius: 5px; border: 1px solid var(--lu-line2); background: var(--lu-s1); display: grid; place-items: center; cursor: pointer; }
+.lu-check:checked { background: var(--lu-accent); border-color: var(--lu-accent); }
+.lu-check:checked::after { content: ""; width: 9px; height: 5px; border-left: 2px solid var(--lu-on-accent); border-bottom: 2px solid var(--lu-on-accent); transform: translateY(-1px) rotate(-45deg); }
+.lu-check:focus-visible { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+.lu-inline { display: flex; gap: 8px; align-items: stretch; }
+.lu-inline input { flex: 1 1 auto; }
+.lu-field .hint { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--lu-ink4); font-size: 12px; }
+.lu-cred { font-family: var(--lu-mono); font-size: 13px; line-height: 1.7; white-space: pre-wrap; padding: 14px; border-radius: 12px; background: var(--lu-s2); border: 1px solid var(--lu-line2); color: var(--lu-ink); word-break: break-word; }
+.lu-toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; color: var(--lu-ink2); text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+/* Montar relatório */
+.lu-report { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 14px; align-items: start; }
+@media (max-width: 980px) { .lu-report { grid-template-columns: minmax(0, 1fr); } }
+.lu-report .lu-core { display: grid; gap: 18px; }
+.lu-report h3 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+.lu-opts { display: grid; gap: 10px; }
+.lu-text { width: 100%; box-sizing: border-box; min-height: 420px; resize: vertical; font: 400 13px/1.6 var(--lu-mono); color: var(--lu-ink); background: var(--lu-s2); border: 1px solid var(--lu-line2); border-radius: 12px; padding: 14px; }
+.lu-text:focus-visible { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+.lu-wa { background: #0b141a; border-radius: 16px; padding: 18px 14px; border: 1px solid var(--lu-line); min-height: 200px; }
+.lu-bubble { max-width: 92%; margin-left: auto; background: #144d37; color: #e9edef; border-radius: 12px 4px 12px 12px; padding: 10px 12px 18px; font: 14px/1.45 var(--lu-sans); white-space: pre-wrap; word-break: break-word; position: relative; box-shadow: 0 1px 1px rgba(0, 0, 0, .3); }
+.lu-bubble small { position: absolute; right: 10px; bottom: 4px; font-size: 11px; color: rgba(233, 237, 239, .6); }
+.lu-report-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.lu-report-meta span { padding: 4px 10px; border-radius: 8px; font-size: 12px; background: rgba(255, 255, 255, .05); color: var(--lu-ink2); }
+.lu-report-meta b { color: var(--lu-accent); font-weight: 500; }
+
+/* Aviso flutuante */
+.lu-toast { position: fixed; z-index: 60; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); padding: 12px 16px; border-radius: 12px; font-size: 14px;
+  background: rgba(18, 20, 18, .97); border: 1px solid rgba(128, 255, 0, .3); color: var(--lu-ink); box-shadow: 0 20px 50px -18px rgba(0, 0, 0, .8); max-width: calc(100vw - 32px); }
+.lu-toast.erro { border-color: rgba(255, 90, 95, .45); }
+@media (prefers-reduced-motion: no-preference) { .lu-toast { animation: lu-toast .45s var(--lu-spring); } @keyframes lu-toast { from { opacity: 0; transform: translate(-50%, 12px); } } }
+
+/* Tela de carregamento */
+.lu-boot { min-height: 100dvh; display: grid; place-items: center; }
+.lu-boot svg { width: 64px; height: 64px; filter: drop-shadow(0 0 16px rgba(128, 255, 0, .35)); }
+@media (prefers-reduced-motion: no-preference) { .lu-boot svg { animation: lu-pulse 1.6s var(--lu-spring) infinite alternate; } @keyframes lu-pulse { to { opacity: .55; transform: scale(.96); } } }
