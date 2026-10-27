@@ -377,33 +377,56 @@
 </template>
 
 <!-- ================= DIÁLOGOS ================= -->
-<dialog class="lu-dialog" id="dlg-membro" aria-labelledby="dlg-membro-t">
+<dialog class="lu-dialog lu-dialog-lg" id="dlg-membro" aria-labelledby="dlg-membro-t">
   <div class="lu-shell"><div class="lu-core">
-    <h3 id="dlg-membro-t">Novo acesso</h3>
-    <p class="sub">Defina quem é a pessoa e o que ela pode ver.</p>
+    <div class="lu-dlg-head">
+      <div>
+        <h3 id="dlg-membro-t">Novo acesso</h3>
+        <p class="sub">Defina quem é a pessoa e o que ela pode ver.</p>
+      </div>
+      <button class="lu-x act-cancelar" type="button" aria-label="Fechar">×</button>
+    </div>
     <form class="lu-form" id="f-membro" novalidate>
       <div class="lu-grid-2">
         <label class="lu-field">Nome
-          <input name="nome" type="text" autocomplete="off" required placeholder="Ex.: João da Avenida…">
+          <input name="nome" type="text" autocomplete="off" required placeholder="Ex.: João da Silva">
         </label>
         <label class="lu-field">E-mail
-          <input name="email" type="email" autocomplete="off" inputmode="email" spellcheck="false" required placeholder="joao@loja.com.br…">
+          <input name="email" type="email" autocomplete="off" inputmode="email" spellcheck="false" required placeholder="joao@loja.com.br">
         </label>
       </div>
-      <div class="lu-field">Perfil
-        <div class="lu-seg" role="radiogroup" aria-label="Perfil">
-          <label><input type="radio" name="papel" value="loja" checked> Membro de loja</label>
-          <label><input type="radio" name="papel" value="admin"> Administrador</label>
+
+      <fieldset class="lu-fs">
+        <legend>Perfil</legend>
+        <div class="lu-roles">
+          <label class="lu-role"><input type="radio" name="papel" value="loja" checked>
+            <span class="dot" aria-hidden="true"></span>
+            <span><b>Membro de loja</b><small>Vê só as lojas marcadas abaixo</small></span></label>
+          <label class="lu-role"><input type="radio" name="papel" value="admin">
+            <span class="dot" aria-hidden="true"></span>
+            <span><b>Administrador</b><small>Vê todas as lojas e gerencia acessos</small></span></label>
         </div>
-      </div>
-      <div class="lu-field f-lojas-box">Lojas que a pessoa vê <span class="hint">(marque uma ou mais)</span>
-        <input type="search" class="f-lojas-q" name="busca-lojas" autocomplete="off" placeholder="Filtrar lojas…" aria-label="Filtrar lojas">
+      </fieldset>
+
+      <fieldset class="lu-fs f-lojas-box">
+        <legend>Lojas que a pessoa vê</legend>
+        <div class="lu-lojas-bar">
+          <label class="lu-search lu-search-sm"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+            <input type="search" class="f-lojas-q" name="busca-lojas" autocomplete="off" placeholder="Buscar loja…" aria-label="Buscar loja"></label>
+          <span class="lu-count f-contagem" aria-live="polite">Nenhuma selecionada</span>
+          <span class="lu-lojas-acts">
+            <button class="lu-link act-todas" type="button">Marcar todas</button>
+            <button class="lu-link act-nenhuma" type="button">Limpar</button>
+          </span>
+        </div>
         <div class="lu-checklist f-lojas" role="group" aria-label="Lojas"></div>
-      </div>
-      <label class="lu-field f-senha-box">Senha inicial <span class="hint">(mín. 8 caracteres — se o e-mail já tiver login, a senha atual dele é mantida)</span>
-        <span class="lu-inline"><input name="senha" type="text" autocomplete="off" spellcheck="false" minlength="8"><button class="lu-ghost act-gerar-senha" type="button">Gerar</button></span>
+      </fieldset>
+
+      <label class="lu-field f-senha-box">Senha inicial
+        <span class="lu-inline"><input name="senha" type="text" autocomplete="off" spellcheck="false" minlength="8"><button class="lu-ghost act-gerar-senha" type="button">Gerar nova</button></span>
+        <small class="lu-help">Mínimo de 8 caracteres. Se o e-mail já tiver login nos painéis da Level Up, a senha atual da pessoa é mantida.</small>
       </label>
-      <label class="lu-toggle f-ativo-box"><input class="lu-check" type="checkbox" name="ativo" checked> Acesso ativo</label>
+      <label class="lu-toggle f-ativo-box"><input class="lu-check" type="checkbox" name="ativo" checked> Acesso ativo (desmarque para bloquear sem apagar)</label>
       <div class="lu-msg erro" role="alert" hidden></div>
       <div class="lu-dialog-foot">
         <button class="lu-ghost act-cancelar" type="button">Cancelar</button>

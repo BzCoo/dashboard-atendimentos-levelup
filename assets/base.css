@@ -1,6 +1,7 @@
 
 /* Geist e Geist Mono — SIL Open Font License 1.1 (github.com/vercel/geist-font) */
-.lu {
+/* Tokens no :root para valerem também nas janelas (dialog), que ficam fora de .lu */
+:root {
   --lu-canvas: #0a0b0a; --lu-s1: #121412; --lu-s2: #181a18; --lu-s3: #1e211e;
   --lu-line: rgba(255, 255, 255, .07); --lu-line2: rgba(255, 255, 255, .12);
   --lu-ink: #f7f8f8; --lu-ink2: #d0d6e0; --lu-ink3: #8a8f98; --lu-ink4: #62666d;
@@ -10,6 +11,9 @@
   --lu-mono: 'LU Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --lu-spring: cubic-bezier(.32, .72, 0, 1);
   --lu-pad: clamp(16px, 4vw, 56px);
+}
+body { font-family: var(--lu-sans); color: var(--lu-ink); -webkit-font-smoothing: antialiased; }
+.lu {
   color-scheme: dark;
   position: relative; isolation: isolate; overflow-x: clip; min-height: 100dvh;
   background: var(--lu-canvas); color: var(--lu-ink);

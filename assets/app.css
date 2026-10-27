@@ -141,3 +141,77 @@ body { margin: 0; touch-action: manipulation; }
 .lu-boot { min-height: 100dvh; display: grid; place-items: center; }
 .lu-boot svg { width: 64px; height: 64px; filter: drop-shadow(0 0 16px rgba(128, 255, 0, .35)); }
 @media (prefers-reduced-motion: no-preference) { .lu-boot svg { animation: lu-pulse 1.6s var(--lu-spring) infinite alternate; } @keyframes lu-pulse { to { opacity: .55; transform: scale(.96); } } }
+
+/* ===== Janelas (dialog): tipografia legível e layout do formulário de acesso ===== */
+.lu-dialog { font-family: var(--lu-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; color-scheme: dark; }
+.lu-dialog-lg { width: min(680px, calc(100vw - 24px)); }
+.lu-dialog .lu-core { overflow-x: hidden; padding: clamp(20px, 3vw, 32px); gap: 22px; }
+.lu-dlg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.lu-dlg-head h3 { font-size: 22px; letter-spacing: -.025em; }
+.lu-dlg-head .sub { margin: 4px 0 0; font-size: 14px; color: var(--lu-ink3); }
+.lu-x { all: unset; cursor: pointer; flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; font-size: 22px; line-height: 1; color: var(--lu-ink3); background: rgba(255, 255, 255, .04); transition: background-color .3s var(--lu-spring), color .3s var(--lu-spring); }
+.lu-x:hover { background: rgba(255, 255, 255, .09); color: var(--lu-ink); }
+.lu-x:focus-visible { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+.lu-dialog .lu-form { gap: 22px; }
+
+/* Rótulos em texto normal, sem caixa alta pequena */
+.lu-dialog .lu-field { font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--lu-ink); gap: 8px; }
+.lu-dialog .lu-field input, .lu-dialog .lu-field select { font-size: 15px; font-weight: 400; min-height: 46px; padding: 11px 14px; background-color: var(--lu-s2); }
+.lu-dialog .lu-field input::placeholder { color: var(--lu-ink4); }
+.lu-dialog .lu-field input:focus-visible { outline: 2px solid var(--lu-accent); outline-offset: 0; border-color: transparent; }
+.lu-dialog .lu-field input[readonly] { color: var(--lu-ink3); background-color: var(--lu-s1); }
+.lu-help { font-size: 13px; font-weight: 400; color: var(--lu-ink3); line-height: 1.45; }
+.lu-dialog .lu-inline input { font-family: var(--lu-mono); letter-spacing: .02em; }
+.lu-dialog .lu-ghost { min-height: 46px; font-size: 14px; padding: 0 16px; }
+.lu-dialog .lu-toggle { font-size: 14px; color: var(--lu-ink2); }
+
+/* Grupos */
+.lu-fs { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 10px; }
+.lu-fs legend { padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 500; color: var(--lu-ink); }
+
+/* Perfil em cartões */
+.lu-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .lu-roles { grid-template-columns: minmax(0, 1fr); } }
+.lu-role { position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; cursor: pointer;
+  background: var(--lu-s2); border: 1px solid var(--lu-line2); transition: border-color .3s var(--lu-spring), background-color .3s var(--lu-spring); }
+.lu-role:hover { border-color: rgba(128, 255, 0, .35); }
+.lu-role input { position: absolute; opacity: 0; pointer-events: none; }
+.lu-role .dot { flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; border: 1.5px solid var(--lu-ink4); display: grid; place-items: center; }
+.lu-role b { display: block; font-size: 15px; font-weight: 600; color: var(--lu-ink); }
+.lu-role small { display: block; margin-top: 2px; font-size: 13px; color: var(--lu-ink3); }
+.lu-role:has(input:checked) { border-color: var(--lu-accent); background: var(--lu-accent-soft); }
+.lu-role:has(input:checked) .dot { border-color: var(--lu-accent); }
+.lu-role:has(input:checked) .dot::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--lu-accent); }
+.lu-role:has(input:focus-visible) { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+
+/* Lojas: busca, contador e grade de opções */
+.lu-lojas-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.lu-search-sm { flex: 1 1 12rem; max-width: none; }
+.lu-dialog .lu-search input { min-height: 42px; font-size: 14px; }
+.lu-count { font-size: 13px; color: var(--lu-ink3); white-space: nowrap; }
+.lu-count b { color: var(--lu-accent); font-weight: 600; }
+.lu-lojas-acts { display: inline-flex; gap: 4px; margin-left: auto; }
+.lu-link { all: unset; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--lu-ink2); padding: 6px 10px; border-radius: 8px; }
+.lu-link:hover { background: rgba(255, 255, 255, .06); color: var(--lu-ink); }
+.lu-link:focus-visible { outline: 2px solid var(--lu-accent-hi); outline-offset: 2px; }
+.lu-dialog .lu-checklist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 6px;
+  max-height: 268px; overflow-y: auto; overflow-x: hidden; padding: 8px; border-radius: 14px; background: var(--lu-s1); border: 1px solid var(--lu-line2); }
+@media (max-width: 520px) { .lu-dialog .lu-checklist { grid-template-columns: minmax(0, 1fr); } }
+.lu-dialog .lu-checklist label { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; color: var(--lu-ink2); text-transform: none; letter-spacing: 0; cursor: pointer;
+  background: var(--lu-s2); border: 1px solid transparent; transition: border-color .25s var(--lu-spring), background-color .25s var(--lu-spring); }
+.lu-dialog .lu-checklist label span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lu-dialog .lu-checklist label:hover { border-color: var(--lu-line2); }
+.lu-dialog .lu-checklist label:has(input:checked) { color: var(--lu-ink); border-color: rgba(128, 255, 0, .45); background: var(--lu-accent-soft); }
+.lu-dialog .lu-checklist .vazio { grid-column: 1 / -1; padding: 14px; font-size: 13px; color: var(--lu-ink3); text-align: center; }
+
+/* Rodapé fixo da janela */
+.lu-dialog { overflow: visible; }
+.lu-dialog .lu-core { padding-bottom: 0; scroll-padding-bottom: 96px; }
+.lu-dialog .lu-dialog-foot { position: sticky; bottom: 0; z-index: 2; margin: 0 calc(-1 * clamp(20px, 3vw, 32px)); padding: 16px clamp(20px, 3vw, 32px) clamp(20px, 3vw, 28px);
+  background: linear-gradient(to top, var(--lu-s1) 78%, rgba(18, 20, 18, 0)); }
+.lu-dialog .lu-primary { min-height: 46px; padding: 0 22px; }
+.lu-dialog .lu-dlg-head .sub, .lu-dialog p.sub { margin: 6px 0 0; line-height: 1.45; }
+.lu-dlg-head h3 { line-height: 1.2; }
+.lu-dialog .lu-inline .lu-ghost { white-space: nowrap; flex: none; }
+.lu-dialog > .lu-shell > .lu-core > .lu-dialog-foot:last-child { margin-bottom: 0; }

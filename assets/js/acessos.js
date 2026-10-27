@@ -53,11 +53,28 @@ export const renderAcessos = async (main, ctx) => {
   /* ---- Formulário de acesso (novo / editar) ---- */
   const dlg = $('#dlg-membro'), form = $('#f-membro');
   const lista = $('.f-lojas', form), filtroLojas = $('.f-lojas-q', form);
-  const montarLojas = (marcadas) => {
-    lista.replaceChildren(...todasLojas.map((l) => el('label', { 'data-nome': String(l.loja).toLowerCase() },
-      el('input', { type: 'checkbox', class: 'lu-check', name: 'lojas', value: l.loja_id, checked: marcadas.includes(Number(l.loja_id)) }), String(l.loja))));
+  const contagem = $('.f-contagem', form);
+  const atualizarContagem = () => {
+    const n = $$('input[name=lojas]:checked', form).length;
+    contagem.replaceChildren(n ? el('b', { text: String(n) }) : '', n === 0 ? 'Nenhuma selecionada' : n === 1 ? ' loja selecionada' : ' lojas selecionadas');
   };
-  filtroLojas.oninput = () => { const t = filtroLojas.value.trim().toLowerCase(); $$('label', lista).forEach((l) => { l.hidden = t && !l.dataset.nome.includes(t); }); };
+  const montarLojas = (marcadas) => {
+    lista.replaceChildren(...todasLojas.map((l) => el('label', { 'data-nome': String(l.loja).toLowerCase(), title: String(l.loja) },
+      el('input', { type: 'checkbox', class: 'lu-check', name: 'lojas', value: l.loja_id, checked: marcadas.includes(Number(l.loja_id)) }),
+      el('span', { text: String(l.loja) }))),
+      el('p', { class: 'vazio', hidden: true, text: 'Nenhuma loja encontrada.' }));
+    atualizarContagem();
+  };
+  lista.addEventListener('change', atualizarContagem);
+  filtroLojas.oninput = () => {
+    const t = filtroLojas.value.trim().toLowerCase();
+    let vis = 0;
+    $$('label', lista).forEach((l) => { l.hidden = !!t && !l.dataset.nome.includes(t); if (!l.hidden) vis++; });
+    const v = $('.vazio', lista); if (v) v.hidden = vis > 0;
+  };
+  const marcarVisiveis = (sim) => { $$('label:not([hidden]) input[name=lojas]', lista).forEach((i) => { i.checked = sim; }); atualizarContagem(); };
+  $('.act-todas', form).onclick = () => marcarVisiveis(true);
+  $('.act-nenhuma', form).onclick = () => marcarVisiveis(false);
   const papelAtual = () => $('input[name=papel]:checked', form).value;
   const syncPapel = () => { $('.f-lojas-box', form).hidden = papelAtual() === 'admin'; };
   $$('input[name=papel]', form).forEach((r) => { r.onchange = syncPapel; });
@@ -65,12 +82,13 @@ export const renderAcessos = async (main, ctx) => {
   let editando = null;
   const abrirForm = (m) => {
     editando = m || null;
-    form.reset(); erroEm(form, ''); filtroLojas.value = ''; filtroLojas.oninput();
+    form.reset(); erroEm(form, ''); filtroLojas.value = '';
     $('#dlg-membro-t').textContent = m ? 'Editar acesso' : 'Novo acesso';
     form.nome.value = m?.nome || '';
     form.email.value = m?.email || ''; form.email.readOnly = !!m;
     $(`input[name=papel][value=${m?.papel || 'loja'}]`, form).checked = true;
     montarLojas((m?.lojas || []).map(Number));
+    filtroLojas.oninput();
     $('.f-senha-box', form).hidden = !!m;
     form.senha.value = m ? '' : gerarSenha();
     $('.f-ativo-box', form).hidden = !m;
