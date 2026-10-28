@@ -1,9 +1,9 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO } from './core.js?v=202610281339';
-import { renderPainel } from './painel.js?v=202610281339';
-import { renderAcessos } from './acessos.js?v=202610281339';
-import { renderRelatorio } from './relatorio.js?v=202610281339';
-import { renderMetas } from './metas.js?v=202610281339';
-import { renderEtapas } from './etapas.js?v=202610281339';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO } from './core.js?v=202610281425';
+import { renderPainel } from './painel.js?v=202610281425';
+import { renderAcessos } from './acessos.js?v=202610281425';
+import { renderRelatorio } from './relatorio.js?v=202610281425';
+import { renderMetas } from './metas.js?v=202610281425';
+import { renderEtapas } from './etapas.js?v=202610281425';
 
 const PAGINAS_ADM = { acessos: ['Acessos', renderAcessos], relatorio: ['Montar relatório', renderRelatorio], metas: ['Metas', renderMetas], etapas: ['Etapas do funil', renderEtapas] };
 

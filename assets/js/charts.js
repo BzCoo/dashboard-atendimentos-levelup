@@ -1,5 +1,5 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202610281339';
+import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202610281425';
 
 export { d3 };
 
@@ -173,9 +173,18 @@ export const sla = (box, serie) => {
 };
 
 /* Barras horizontais: entradas por etapa */
+/* Mantém a ordem do pipeline (vinda do banco); se houver etapas demais, fica com as de maior volume e as de venda */
+export const etapasVisiveis = (rows, max) => {
+  const com = (rows || []).filter((d) => Number(d.leads) > 0 || Number(d.leads_ant) > 0);
+  if (com.length <= max) return com;
+  const vol = (d) => Math.max(Number(d.leads) || 0, Number(d.leads_ant) || 0);
+  const fica = new Set([...com].sort((a, b) => vol(b) - vol(a)).slice(0, max));
+  com.filter((d) => d.venda).forEach((d) => fica.add(d));
+  return com.filter((d) => fica.has(d));
+};
 export const etapas = (box, rows) => {
   box.replaceChildren();
-  const data = rows.filter((d) => Number(d.leads) > 0 || Number(d.leads_ant) > 0).slice(0, 12);
+  const data = etapasVisiveis(rows, 14);
   if (!data.length) return vazio(box, 'Nenhuma mudança de etapa no período.');
   const W = Math.max(280, box.clientWidth);
   const row = 32, top = 2, Hh = top + data.length * row;

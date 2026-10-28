@@ -1,5 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610281339';
-import { montarFiltros } from './filtros.js?v=202610281339';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610281425';
+import { etapasVisiveis } from './charts.js?v=202610281425';
+import { montarFiltros } from './filtros.js?v=202610281425';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
@@ -33,9 +34,9 @@ const montarTexto = (d, o, escopo) => {
   }
 
   if (o.funil && d.etapas?.length) {
-    const et = d.etapas.filter((e) => Number(e.leads) > 0).slice(0, 10);
+    const et = etapasVisiveis(d.etapas, 12).filter((e) => Number(e.leads) > 0);
     if (et.length) {
-      L.push('', '🔄 *MOVIMENTO NO FUNIL*', 'Leads que entraram em cada etapa no período');
+      L.push('', '🔄 *MOVIMENTO NO FUNIL*', 'Leads que entraram em cada etapa, na ordem do funil');
       for (const e of et) L.push(`• ${e.etapa}: ${fmt.int(e.leads)}` + (o.comp ? ` (antes ${fmt.int(e.leads_ant)})` : ''));
     }
   }
