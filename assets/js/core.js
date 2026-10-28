@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202610281446';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202610281531';
 
 export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, storageKey: 'lu-atendimentos-auth' },
@@ -88,8 +88,16 @@ const traduzErro = (e) => {
   if (/JWT|token/i.test(m)) return 'Sua sessão expirou. Entre novamente.';
   return m || 'Não foi possível carregar os dados.';
 };
+/* Se o token de acesso venceu (ex.: PC voltou da suspensão antes da renovação automática),
+   renova a sessão uma vez e repete a chamada, em vez de mandar a pessoa para o login */
+let renovando = null;
+const renovar = () => (renovando ??= sb.auth.refreshSession().finally(() => { renovando = null; }));
 export const rpc = async (nome, args = {}) => {
-  const { data, error } = await sb.rpc(nome, args);
+  let { data, error } = await sb.rpc(nome, args);
+  if (error && /JWT|token/i.test(String(error.message || ''))) {
+    const r = await renovar();
+    if (!r.error && r.data?.session) ({ data, error } = await sb.rpc(nome, args));
+  }
   if (error) throw new Error(traduzErro(error));
   return data;
 };
