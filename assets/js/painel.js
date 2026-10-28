@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta } from './core.js?v=202610281531';
-import { montarFiltros } from './filtros.js?v=202610281531';
-import * as G from './charts.js?v=202610281531';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias } from './core.js?v=202610281538';
+import { montarFiltros } from './filtros.js?v=202610281538';
+import * as G from './charts.js?v=202610281538';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -172,7 +172,19 @@ export const renderPainel = async (main, ctx) => {
   const desenhar = { spark: null, volume: null, sla: null, etapas: null, horarios: null };
 
   const tarefas = {
-    lojas: rpc('atend_lojas').then((r) => { $('.slot-carga', main).textContent = r?.[0] ? fmt.dt(r[0].ultima_carga) : '—'; }),
+    lojas: rpc('atend_lojas').then((r) => {
+      const carga = r?.[0]?.ultima_carga;
+      $('.slot-carga', main).textContent = carga ? fmt.dt(carga) : '—';
+      // A carga roda de madrugada: o dia dela e os seguintes ainda estão incompletos
+      if (!carga) return;
+      const diaCarga = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(carga));
+      if (f.fim >= diaCarga) {
+        const av = $('.slot-aviso-carga', main);
+        av.replaceChildren(el('b', { text: 'Período inclui dias ainda não carregados. ' }),
+          'Os dados vão até ' + fmt.dm(addDias(diaCarga, -1)) + '; os atendimentos de ' + fmt.dm(diaCarga) + (f.fim > diaCarga ? ' em diante' : '') + ' entram na próxima carga, de madrugada.');
+        av.hidden = false;
+      }
+    }),
     kpis: rpc('atend_kpis', args).then((rows) => preencherKpis(main, comVendas(rows?.[0]), nomeLoja, meta)),
     investimento: rpc('atend_investimento', args).then((d) => preencherInv(main, d, meta, tbInv, navInv)),
     anuncios: rpc('atend_anuncios', args).then((d) => {
