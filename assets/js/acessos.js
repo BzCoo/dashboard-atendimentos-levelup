@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha } from './core.js?v=202610271521';
+import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha } from './core.js?v=202610281339';
 
 const SITE = () => location.origin + location.pathname;
 
@@ -35,7 +35,7 @@ export const renderAcessos = async (main, ctx) => {
       el('td', { class: 'txt name' }, el('div', { text: m.nome || '—' }), el('div', { class: 'muted', style: 'font-weight:400;font-size:12px', text: m.email + (m.eu ? ' · você' : '') })),
       el('td', { class: 'txt' }, el('span', { class: 'lu-badge' + (m.papel === 'admin' ? ' admin' : ''), text: m.papel === 'admin' ? 'Administrador' : 'Membro de loja' })),
       el('td', { class: 'txt' }, m.papel === 'admin' ? el('span', { class: 'muted', text: 'Todas as lojas' }) : el('div', { class: 'lu-chips' }, ...(m.lojas_nomes || []).map((n) => el('span', { text: n })))),
-      el('td', { class: 'mono hide-sm', text: m.ultimo_acesso ? fmt.dt(m.ultimo_acesso) : 'nunca entrou' }),
+      el('td', { class: 'mono hide-sm' }, el('div', { text: m.ultimo_acesso ? fmt.dt(m.ultimo_acesso) : 'nunca entrou' }), Number(m.acessos_30d) ? el('div', { class: 'muted', style: 'font-size:12px', text: fmt.int(m.acessos_30d) + (Number(m.acessos_30d) === 1 ? ' acesso' : ' acessos') + ' em 30 dias' }) : null),
       el('td', { class: 'txt' }, el('span', { class: 'lu-badge' + (m.ativo ? '' : ' off'), text: m.ativo ? 'Ativo' : 'Bloqueado' })),
       el('td', {}, el('div', { class: 'lu-actions' },
         el('button', { type: 'button', class: 'lu-ghost sm', 'data-act': 'editar', text: 'Editar' }),
@@ -174,4 +174,26 @@ export const renderAcessos = async (main, ctx) => {
 
   $('#dlg-cred').addEventListener('close', () => { $('#dlg-cred-t').textContent = 'Acesso pronto'; $('.lu-cred', $('#dlg-cred')).textContent = ''; }, { once: false });
   await carregar();
+  historico(main);
+};
+
+const historico = async (main) => {
+  const tbody = $('#tb-hist tbody', main), busca = $('.q-hist', main);
+  let rows = [];
+  const draw = () => {
+    const t = busca.value.trim().toLowerCase();
+    const r = rows.filter((x) => !t || [x.nome, x.email, x.lojas].join(' ').toLowerCase().includes(t));
+    const pessoas = new Set(rows.map((x) => x.email)).size;
+    $('.slot-hist-total', main).textContent = rows.length ? fmt.int(rows.length) + ' aberturas · ' + pessoas + (pessoas === 1 ? ' pessoa' : ' pessoas') : '';
+    if (!r.length) { tbody.replaceChildren(el('tr', {}, el('td', { class: 'txt muted', colspan: 4, text: t ? 'Nada encontrado.' : 'Ninguém abriu o painel ainda.' }))); return; }
+    tbody.replaceChildren(...r.map((x) => el('tr', {},
+      el('td', { class: 'txt mono', text: fmt.dt(x.em) }),
+      el('td', { class: 'txt name' }, el('div', { text: x.nome || x.email || '—' }), x.nome ? el('div', { class: 'muted', style: 'font-weight:400;font-size:12px', text: x.email }) : null),
+      el('td', { class: 'txt hide-sm' }, el('span', { class: 'lu-badge' + (x.papel === 'admin' ? ' admin' : ''), text: x.papel === 'admin' ? 'Administrador' : 'Membro de loja' })),
+      el('td', { class: 'txt hide-sm muted wrap', text: x.papel === 'admin' ? 'Todas' : x.lojas || '—' }))));
+  };
+  busca.addEventListener('input', draw);
+  tbody.replaceChildren(el('tr', {}, el('td', { class: 'txt sk', colspan: 4, text: 'Carregando…' })));
+  try { rows = await rpc('atend_admin_acessos') || []; draw(); }
+  catch (e) { tbody.replaceChildren(el('tr', {}, el('td', { class: 'txt', colspan: 4 }, el('div', { class: 'lu-fail', text: e.message })))); }
 };

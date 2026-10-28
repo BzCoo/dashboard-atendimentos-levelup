@@ -10,9 +10,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202610271521">
-<link rel="stylesheet" href="assets/app.css?v=202610271521">
-<script type="module" src="assets/js/main.js?v=202610271521"></script>
+<link rel="stylesheet" href="assets/base.css?v=202610281339">
+<link rel="stylesheet" href="assets/app.css?v=202610281339">
+<script type="module" src="assets/js/main.js?v=202610281339"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -70,8 +70,10 @@
       <a class="lu-brand" href="#/painel" data-rota="painel" aria-label="Level Up, ir para o painel"><span class="slot-logo"></span><span translate="no">Level Up</span></a>
       <div class="lu-links" id="nav-secoes">
         <a href="#/painel/visao-geral" data-go="visao-geral">Visão geral</a>
+        <a href="#/painel/investimento" data-go="investimento" data-inv>Investimento</a>
         <a href="#/painel/desempenho" data-go="desempenho">Desempenho</a>
         <a href="#/painel/funil" data-go="funil">Funil</a>
+        <a href="#/painel/anuncios" data-go="anuncios">Anúncios</a>
         <a href="#/painel/lojas" data-go="lojas" data-multi>Lojas</a>
         <a href="#/painel/vendedores" data-go="vendedores">Equipe</a>
         <a href="#/painel/automacao" data-go="automacao" data-admin>Operação</a>
@@ -85,7 +87,9 @@
           <div class="lu-pop" id="menu-admin" role="menu" hidden>
             <a role="menuitem" href="#/painel" data-rota="painel"><i aria-hidden="true">◧</i><span><b>Painel</b><small>Indicadores, gráficos e tabelas</small></span></a>
             <a role="menuitem" href="#/acessos" data-rota="acessos"><i aria-hidden="true">⚿</i><span><b>Acessos</b><small>Criar logins e definir lojas de cada pessoa</small></span></a>
-            <a role="menuitem" href="#/relatorio" data-rota="relatorio"><i aria-hidden="true">✉</i><span><b>Montar relatório</b><small>Mensagem no formato do WhatsApp com os filtros atuais</small></span></a>
+            <a role="menuitem" href="#/relatorio" data-rota="relatorio"><i aria-hidden="true">✉</i><span><b>Montar e enviar relatório</b><small>Mensagem do WhatsApp com os filtros atuais</small></span></a>
+            <a role="menuitem" href="#/metas" data-rota="metas"><i aria-hidden="true">◎</i><span><b>Metas</b><small>SLA, resposta, tempo e custo por loja</small></span></a>
+            <a role="menuitem" href="#/etapas" data-rota="etapas"><i aria-hidden="true">≡</i><span><b>Etapas do funil</b><small>Nomes vindos do CRM e ajustes</small></span></a>
           </div>
         </div>
         <div class="lu-menu">
@@ -165,28 +169,75 @@
         <span class="lu-kpi-label">Taxa de resposta</span>
         <span class="lu-kpi-value sk k-taxa_resposta">—</span>
         <div class="lu-kpi-foot"><span class="lu-delta d-taxa_resposta">—</span><span>vs. anterior</span></div>
+        <div class="lu-meta-bar" data-meta="meta_resposta" hidden><span class="txt"></span><i><s></s></i></div>
       </div></div>
       <div class="lu-shell lu-kpi lu-reveal"><div class="lu-core">
         <span class="lu-kpi-label">Respondidos no SLA de <span class="k-sla_min">—</span>&nbsp;min</span>
         <span class="lu-kpi-value sk k-taxa_sla">—</span>
         <div class="lu-kpi-foot"><span class="lu-delta d-taxa_sla">—</span><span>vs. anterior</span></div>
+        <div class="lu-meta-bar" data-meta="meta_sla" hidden><span class="txt"></span><i><s></s></i></div>
       </div></div>
       <div class="lu-shell lu-kpi lu-reveal"><div class="lu-core">
         <span class="lu-kpi-label">1ª resposta média (horário comercial)</span>
         <span class="lu-kpi-value sk k-tempo_medio_min">—</span>
         <div class="lu-kpi-foot"><span class="lu-delta d-tempo_medio_min">—</span><span>mediana <span class="k-tempo_mediano_min">—</span></span></div>
+        <div class="lu-meta-bar" data-meta="meta_tempo_min" hidden><span class="txt"></span><i><s></s></i></div>
       </div></div>
       <div class="lu-shell lu-kpi lu-reveal"><div class="lu-core">
-        <span class="lu-kpi-label">Vendas marcadas como ganhas</span>
-        <span class="lu-kpi-value sk k-vendas">—</span>
-        <div class="lu-kpi-foot"><span class="lu-delta d-vendas">—</span><span>vs. anterior</span></div>
+        <span class="lu-kpi-label">Vendas no período</span>
+        <span class="lu-kpi-value sk k-vendas_total">—</span>
+        <div class="lu-kpi-foot"><span class="lu-delta d-vendas_total">—</span><span>vs. anterior</span></div>
+        <div class="lu-kpi-sub"><span><b class="k-vendas">—</b> ganhas no CRM</span><span><b class="k-vendas_etapa">—</b> em etapa de venda</span></div>
       </div></div>
     </div>
   </section>
 
+  <section class="lu-section" id="investimento" aria-labelledby="h-inv" data-inv>
+    <div class="lu-section-head lu-reveal">
+      <span class="lu-eyebrow"><b class="n-sec"></b> Investimento e retorno</span>
+      <h2 class="lu-h2" id="h-inv">Quanto custou cada atendimento</h2>
+      <p class="lu-sub slot-inv-nota">Investimento do Meta Ads da empresa no período dividido pelos novos atendimentos de todas as subcontas dela.</p>
+    </div>
+    <div class="lu-inv-tiles">
+      <div class="lu-shell lu-kpi lu-reveal"><div class="lu-core">
+        <span class="lu-kpi-label">Investimento em anúncios</span>
+        <span class="lu-kpi-value sk i-investimento">—</span>
+        <div class="lu-kpi-foot"><span class="lu-delta di-var_investimento">—</span><span>vs. <span class="i-investimento_ant">—</span> antes</span></div>
+      </div></div>
+      <div class="lu-shell lu-kpi lu-reveal"><div class="lu-core">
+        <span class="lu-kpi-label">Custo por atendimento</span>
+        <span class="lu-kpi-value sk i-custo_atend">—</span>
+        <div class="lu-kpi-foot"><span class="lu-delta di-var_custo_atend">—</span><span>vs. <span class="i-custo_atend_ant">—</span> antes</span></div>
+        <div class="lu-meta-bar" data-meta="meta_custo_atend" hidden><span class="txt"></span><i><s></s></i></div>
+      </div></div>
+      <div class="lu-shell lu-kpi lu-reveal"><div class="lu-core">
+        <span class="lu-kpi-label">Custo por venda</span>
+        <span class="lu-kpi-value sk i-custo_venda">—</span>
+        <div class="lu-kpi-foot"><span><span class="i-vendas">—</span> vendas · <span class="i-atendimentos">—</span> atendimentos</span></div>
+      </div></div>
+    </div>
+    <div class="lu-shell lu-reveal slot-inv-tabela" style="margin-top:14px"><div class="lu-core">
+      <div class="lu-card-head"><div><h3>Por empresa</h3><p>Empresas com mais de uma subconta somam os atendimentos de todas elas.</p></div></div>
+      <div class="lu-tablewrap">
+        <table class="lu-table" id="tb-inv">
+          <thead><tr>
+            <th class="txt"><button type="button" data-sort="empresa">Empresa</button></th>
+            <th><button type="button" data-sort="investimento">Investimento</button></th>
+            <th class="hide-sm"><button type="button" data-sort="var_investimento">Var.</button></th>
+            <th><button type="button" data-sort="atendimentos">Atendimentos</button></th>
+            <th><button type="button" data-sort="custo_atend">Custo/atend.</button></th>
+            <th class="hide-sm"><button type="button" data-sort="vendas">Vendas</button></th>
+            <th class="hide-sm"><button type="button" data-sort="custo_venda">Custo/venda</button></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div></div>
+  </section>
+
   <section class="lu-section" id="desempenho" aria-labelledby="h-desempenho">
     <div class="lu-section-head lu-reveal">
-      <span class="lu-eyebrow"><b>01</b> Volume e velocidade</span>
+      <span class="lu-eyebrow"><b class="n-sec"></b> Volume e velocidade</span>
       <h2 class="lu-h2" id="h-desempenho">Quantos leads chegaram e com que rapidez foram atendidos</h2>
     </div>
     <div class="lu-grid2">
@@ -209,7 +260,7 @@
 
   <section class="lu-section" id="funil" aria-labelledby="h-funil">
     <div class="lu-section-head lu-reveal">
-      <span class="lu-eyebrow"><b>02</b> Funil e demanda</span>
+      <span class="lu-eyebrow"><b class="n-sec"></b> Funil e demanda</span>
       <h2 class="lu-h2" id="h-funil">Onde os leads avançaram e quando eles chegam</h2>
     </div>
     <div class="lu-grid2">
@@ -227,9 +278,42 @@
     </div>
   </section>
 
+  <section class="lu-section" id="anuncios" aria-labelledby="h-anuncios">
+    <div class="lu-section-head lu-reveal">
+      <span class="lu-eyebrow"><b class="n-sec"></b> Anúncios e veículos</span>
+      <h2 class="lu-h2" id="h-anuncios">O que está trazendo lead</h2>
+      <p class="lu-sub slot-anuncios-nota">Leads que chegaram pelo botão do anúncio no período. “Avançaram” = chegaram a condição de pagamento, simulação, visita, negociação ou venda.</p>
+    </div>
+    <div class="lu-grid2 lu-grid-ads">
+      <div class="lu-shell lu-reveal"><div class="lu-core">
+        <div class="lu-card-head"><div><h3>Veículos mais procurados</h3><p>Leads por veículo do anúncio. Parte escura da barra: quantos avançaram no funil.</p></div>
+          <div class="lu-legend"><span><i class="bar"></i>Leads</span><span><i class="bar" style="background:#3d6b14"></i>Avançaram</span></div></div>
+        <div class="lu-chart tall sk" id="ch-veiculos"></div>
+      </div></div>
+      <div class="lu-shell lu-reveal"><div class="lu-core">
+        <div class="lu-card-head"><div><h3>Anúncios com mais leads</h3><p class="slot-ads-sub">Custo por lead = investimento do anúncio ÷ leads que ele trouxe para a empresa.</p></div></div>
+        <div class="lu-tablebar"><label class="lu-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+          <input type="search" class="q-ads" name="busca-anuncio" autocomplete="off" placeholder="Buscar anúncio ou veículo…" aria-label="Buscar anúncio"></label></div>
+        <div class="lu-tablewrap" style="max-height:420px">
+          <table class="lu-table" id="tb-ads">
+            <thead><tr>
+              <th class="txt"><button type="button" data-sort="anuncio">Anúncio</button></th>
+              <th><button type="button" data-sort="leads">Leads</button></th>
+              <th class="hide-sm"><button type="button" data-sort="taxa_resposta">Resposta</button></th>
+              <th><button type="button" data-sort="taxa_avanco">Avançaram</button></th>
+              <th class="hide-sm"><button type="button" data-sort="vendas">Vendas</button></th>
+              <th class="col-inv"><button type="button" data-sort="custo_lead">Custo/lead</button></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
   <section class="lu-section" id="lojas" aria-labelledby="h-lojas" data-multi>
     <div class="lu-section-head lu-reveal">
-      <span class="lu-eyebrow"><b>03</b> Lojas</span>
+      <span class="lu-eyebrow"><b class="n-sec"></b> Lojas</span>
       <h2 class="lu-h2" id="h-lojas">Comparativo entre as lojas</h2>
       <p class="lu-sub">Todas as lojas que você acompanha, no período escolhido. Clique numa loja para filtrar o painel por ela.</p>
     </div>
@@ -249,7 +333,7 @@
             <th><button type="button" data-sort="taxa_sla">No SLA</button></th>
             <th class="hide-sm"><button type="button" data-sort="var_taxa_sla">Var. SLA</button></th>
             <th><button type="button" data-sort="tempo_medio_min">1ª resp. (min)</button></th>
-            <th class="hide-sm"><button type="button" data-sort="vendas">Vendas</button></th>
+            <th class="hide-sm"><button type="button" data-sort="vendas_total">Vendas</button></th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -259,7 +343,7 @@
 
   <section class="lu-section" id="vendedores" aria-labelledby="h-vend">
     <div class="lu-section-head lu-reveal">
-      <span class="lu-eyebrow"><b class="n-vend">04</b> Equipe</span>
+      <span class="lu-eyebrow"><b class="n-sec"></b> Equipe</span>
       <h2 class="lu-h2" id="h-vend">Desempenho por vendedor</h2>
       <p class="lu-sub">Pelo responsável cadastrado no lead, dentro do filtro de loja e período.</p>
     </div>
@@ -279,7 +363,7 @@
             <th><button type="button" data-sort="taxa_resposta">Resposta</button></th>
             <th><button type="button" data-sort="taxa_sla">No SLA</button></th>
             <th><button type="button" data-sort="tempo_medio_min">1ª resp. (min)</button></th>
-            <th class="hide-sm"><button type="button" data-sort="vendas">Vendas</button></th>
+            <th class="hide-sm"><button type="button" data-sort="vendas_total">Vendas</button></th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -289,7 +373,7 @@
 
   <section class="lu-section" id="automacao" aria-labelledby="h-auto" data-admin>
     <div class="lu-section-head lu-reveal">
-      <span class="lu-eyebrow"><b>05</b> Operação</span>
+      <span class="lu-eyebrow"><b class="n-sec"></b> Operação</span>
       <h2 class="lu-h2" id="h-auto">Saúde da automação</h2>
       <p class="lu-sub">Última carga do banco e último relatório semanal enviado, por loja. As lojas com falha aparecem primeiro. Visível só para administradores.</p>
     </div>
@@ -333,6 +417,82 @@
       </table>
     </div>
   </div></div>
+  <div class="lu-section-head" style="margin:48px 0 18px">
+    <h2 class="lu-h2" style="font-size:24px">Histórico de acessos</h2>
+    <p class="lu-sub">Cada abertura do painel (no máximo uma a cada 30 minutos por pessoa). Mostra quem realmente está usando.</p>
+  </div>
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-tablebar">
+      <label class="lu-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+        <input type="search" class="q-hist" name="busca-historico" autocomplete="off" placeholder="Buscar pessoa ou loja…" aria-label="Buscar no histórico"></label>
+      <span class="lu-hint slot-hist-total"></span>
+    </div>
+    <div class="lu-tablewrap" style="max-height:440px">
+      <table class="lu-table" id="tb-hist">
+        <thead><tr><th class="txt">Quando</th><th class="txt">Pessoa</th><th class="txt hide-sm">Perfil</th><th class="txt hide-sm">Lojas</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div></div>
+</template>
+
+<!-- ================= METAS (ADM) ================= -->
+<template id="tpl-metas">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>ADM</b> Administração</span>
+      <h1 class="lu-h2">Metas</h1>
+      <p class="lu-sub">A meta padrão vale para todas as lojas. Preencha uma loja só se ela tiver uma meta diferente; campo vazio usa a padrão. Os indicadores mostram uma barra de progresso e ficam vermelhos quando abaixo da meta.</p>
+    </div>
+  </div>
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-card-head"><div><h3>Meta padrão</h3><p>Aplicada às lojas sem meta própria e à visão “Todas as lojas”.</p></div></div>
+    <form class="lu-metas-padrao" id="f-meta-padrao" novalidate>
+      <label class="lu-field">Respondidos no SLA (%)<input name="sla" type="number" inputmode="decimal" min="0" max="100" step="0.1" placeholder="Ex.: 80"></label>
+      <label class="lu-field">Taxa de resposta (%)<input name="resposta" type="number" inputmode="decimal" min="0" max="100" step="0.1" placeholder="Ex.: 95"></label>
+      <label class="lu-field">1ª resposta máx. (min)<input name="tempo" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Ex.: 10"></label>
+      <label class="lu-field">Custo por atend. máx. (R$)<input name="custo" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ex.: 12"></label>
+      <button class="lu-primary" type="submit">Salvar meta padrão</button>
+    </form>
+  </div></div>
+  <div class="lu-shell" style="margin-top:14px"><div class="lu-core">
+    <div class="lu-card-head"><div><h3>Metas por loja</h3><p>Deixe em branco para usar a padrão. Use “Limpar” para voltar tudo à padrão.</p></div></div>
+    <div class="lu-tablebar"><label class="lu-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+      <input type="search" class="q-metas" name="busca-meta" autocomplete="off" placeholder="Buscar loja…" aria-label="Buscar loja"></label></div>
+    <div class="lu-tablewrap" style="max-height:640px">
+      <table class="lu-table lu-table-form" id="tb-metas">
+        <thead><tr><th class="txt">Loja</th><th>SLA (%)</th><th>Resposta (%)</th><th>1ª resp. (min)</th><th>Custo/atend. (R$)</th><th><span class="lu-sr">Ações</span></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div></div>
+</template>
+
+<!-- ================= ETAPAS (ADM) ================= -->
+<template id="tpl-etapas">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>ADM</b> Administração</span>
+      <h1 class="lu-h2">Etapas do funil</h1>
+      <p class="lu-sub">Os nomes vêm do CRM automaticamente uma vez por dia. Se quiser outro nome no painel e no relatório, escreva um nome próprio — ele tem prioridade sobre o do CRM. Etapas com “venda” no nome contam como venda; as de condição, simulação, visita e negociação contam como avanço.</p>
+    </div>
+    <button class="lu-primary act-sync" type="button">Sincronizar com o CRM agora</button>
+  </div>
+  <div class="lu-msg info slot-sync" style="margin-bottom:14px"></div>
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-tablebar">
+      <label class="lu-field" style="min-width:14rem">Loja<select class="f-etapa-loja" name="loja-etapa"><option value="">Todas as lojas</option></select></label>
+      <label class="lu-search" style="align-self:end"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+        <input type="search" class="q-etapas" name="busca-etapa" autocomplete="off" placeholder="Buscar etapa…" aria-label="Buscar etapa"></label>
+      <label class="lu-toggle" style="align-self:end;padding-bottom:10px"><input class="lu-check f-usadas" type="checkbox" checked> Só etapas usadas nos últimos 30 dias</label>
+    </div>
+    <div class="lu-tablewrap" style="max-height:680px">
+      <table class="lu-table lu-table-form" id="tb-etapas">
+        <thead><tr><th class="txt">Loja</th><th class="txt">Etapa no painel</th><th class="txt hide-sm">Nome no CRM</th><th class="txt">Nome próprio</th><th>Entradas 30d</th><th class="txt hide-sm">Conta como</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div></div>
 </template>
 
 <!-- ================= RELATÓRIO (ADM) ================= -->
@@ -354,6 +514,8 @@
         <label class="lu-toggle"><input class="lu-check o-vend" type="checkbox" checked> Vendedores</label>
         <label class="lu-toggle"><input class="lu-check o-lojas" type="checkbox" checked> Ranking de lojas (quando for mais de uma)</label>
         <label class="lu-toggle"><input class="lu-check o-horas" type="checkbox"> Horário de pico</label>
+        <label class="lu-toggle"><input class="lu-check o-inv" type="checkbox"> Investimento e custo por atendimento</label>
+        <label class="lu-toggle"><input class="lu-check o-ads" type="checkbox"> Veículos que mais trouxeram leads</label>
       </div>
       <label class="lu-field">Observação no final <span class="hint">(opcional)</span>
         <input class="o-obs" name="observacao" type="text" autocomplete="off" placeholder="Ex.: Reforçar o atendimento aos sábados…">
@@ -365,6 +527,7 @@
       <div class="lu-actions" style="justify-content:flex-start">
         <button class="lu-primary act-copiar" type="button">Copiar mensagem</button>
         <a class="lu-ghost act-wa" href="#" target="_blank" rel="noopener">Abrir no WhatsApp ↗</a>
+        <button class="lu-ghost act-pdf" type="button">Baixar PDF</button>
         <button class="lu-ghost act-baixar" type="button">Baixar .txt</button>
         <button class="lu-ghost act-gerar" type="button">Gerar de novo ↺</button>
       </div>
@@ -374,9 +537,37 @@
       <div class="lu-wa"><div class="lu-bubble"><span class="o-preview"></span><small class="o-hora"></small></div></div>
     </div></div>
   </div>
+  <div class="lu-shell" style="margin-top:14px"><div class="lu-core lu-envio">
+    <div class="lu-card-head"><div><h3>Enviar pelo WhatsApp da Level Up</h3><p>Sai pelo mesmo número do relatório semanal, em até 1 minuto. Envia o texto como está na caixa “Mensagem”.</p></div></div>
+    <div class="lu-envio-form">
+      <label class="lu-field">Para onde<select class="o-destino" name="destino"></select></label>
+      <button class="lu-primary act-enviar" type="button">Enviar mensagem</button>
+    </div>
+    <div class="lu-msg info slot-envio" hidden></div>
+    <div class="lu-tablewrap" style="margin-top:6px">
+      <table class="lu-table" id="tb-envios">
+        <thead><tr><th class="txt">Quando</th><th class="txt">Para</th><th class="txt">Situação</th><th class="txt hide-sm">Por</th><th class="txt hide-sm">Início da mensagem</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div></div>
 </template>
 
+<div id="print-area" aria-hidden="true"></div>
+
 <!-- ================= DIÁLOGOS ================= -->
+<dialog class="lu-dialog" id="dlg-enviar" aria-labelledby="dlg-enviar-t">
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-dlg-head"><div><h3 id="dlg-enviar-t">Enviar esta mensagem?</h3><p class="sub slot-para"></p></div>
+      <button class="lu-x act-cancelar" type="button" aria-label="Fechar">×</button></div>
+    <div class="lu-wa" style="max-height:340px;overflow:auto"><div class="lu-bubble"><span class="slot-previa"></span></div></div>
+    <p class="lu-help">Depois de enviada, a mensagem não pode ser apagada por aqui.</p>
+    <div class="lu-dialog-foot">
+      <button class="lu-ghost act-cancelar" type="button">Cancelar</button>
+      <button class="lu-primary act-confirmar" type="button">Enviar agora</button>
+    </div>
+  </div></div>
+</dialog>
 <dialog class="lu-dialog lu-dialog-lg" id="dlg-membro" aria-labelledby="dlg-membro-t">
   <div class="lu-shell"><div class="lu-core">
     <div class="lu-dlg-head">

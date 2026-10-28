@@ -1,13 +1,13 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast } from './core.js?v=202610271521';
-import { montarFiltros } from './filtros.js?v=202610271521';
-import * as G from './charts.js?v=202610271521';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta } from './core.js?v=202610281339';
+import { montarFiltros } from './filtros.js?v=202610281339';
+import * as G from './charts.js?v=202610281339';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
   ['taxa_resposta', fmt.pct, 'var_taxa_resposta', 'pp', 'up'],
   ['taxa_sla', fmt.pct, 'var_taxa_sla', 'pp', 'up'],
   ['tempo_medio_min', fmt.min, 'var_tempo_medio_min', 'min', 'down'],
-  ['vendas', fmt.int, 'var_vendas', 'abs', 'up'],
+  ['vendas_total', fmt.int, 'var_vendas_total', 'abs', 'up'],
   ['sem_resposta', fmt.int, 'var_sem_resposta', 'abs', 'down'],
 ];
 
@@ -71,6 +71,37 @@ const barra = (f) => (td, r, max) => {
   w.append(b, el('em', { text: fmt.int(r[f]) })); td.append(w);
 };
 const pill = (v) => el('span', { class: 'lu-pill ' + (v === 'success' ? 'ok' : v === 'failed' || v === 'error' ? 'bad' : v ? 'warn' : ''), text: v === 'success' ? 'ok' : v === 'failed' ? 'falhou' : v ? String(v) : '—' });
+const comVendas = (r) => {
+  if (!r) return r;
+  const v = Math.max(Number(r.vendas) || 0, Number(r.vendas_etapa) || 0);
+  const va = Math.max(Number(r.vendas_ant) || 0, Number(r.vendas_etapa_ant) || 0);
+  return { ...r, vendas_total: v, vendas_total_ant: va, var_vendas_total: v - va };
+};
+const slaMeta = (metas) => (td, r) => {
+  td.textContent = fmt.pct(r.taxa_sla);
+  const m = metaPara(metas, r.loja_id), st = m ? frenteMeta(r.taxa_sla, m.meta_sla) : null;
+  if (st) { td.classList.add('meta-' + st); td.title = 'Meta ' + fmt.pct(m.meta_sla) + (st === 'ok' ? ' · atingida' : ' · abaixo'); }
+};
+/* Barra de meta embaixo de um indicador */
+const META_INFO = {
+  meta_sla: ['taxa_sla', false, fmt.pct, 'pp'], meta_resposta: ['taxa_resposta', false, fmt.pct, 'pp'],
+  meta_tempo_min: ['tempo_medio_min', true, fmt.min, 'min'], meta_custo_atend: ['custo_atend', true, fmt.brl, 'brl'],
+};
+export const pintarMeta = (bar, meta, valor) => {
+  const [, menor, f] = META_INFO[bar.dataset.meta];
+  const st = frenteMeta(valor, meta, menor);
+  bar.hidden = !st; if (!st) return;
+  const v = Number(valor), m = Number(meta);
+  const frac = menor ? (v <= 0 ? 1 : Math.min(1, m / v)) : (m <= 0 ? 1 : Math.min(1, v / m));
+  bar.className = 'lu-meta-bar ' + st;
+  $('s', bar).style.width = Math.round(frac * 100) + '%';
+  const falta = menor ? v - m : m - v;
+  $('.txt', bar).replaceChildren('Meta ', el('b', { text: f(m) }), ' · ', st === 'ok' ? 'atingida' : (menor ? 'acima em ' : 'faltam ') + (META_INFO[bar.dataset.meta][3] === 'pp' ? fmt.num1(falta) + ' p.p.' : f(falta)));
+};
+const numerar = (main) => {
+  let n = 0;
+  for (const sec of $$('.lu-section', main)) { const b = $('.n-sec', sec); if (b && !sec.hidden) b.textContent = String(++n).padStart(2, '0'); }
+};
 const DIAS = ['', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
 
 /* ---------- Página ---------- */
@@ -80,11 +111,13 @@ export const renderPainel = async (main, ctx) => {
   const multi = (me.lojas || []).length > 1;
   $$('[data-admin]', main).forEach((n) => { n.hidden = !admin; });
   $$('[data-multi]', main).forEach((n) => { n.hidden = !multi; });
-  if (!multi) $('.n-vend', main).textContent = '03';
   montarFiltros($('.slot-filtros', main), ctx, 'painel');
   const nomeLoja = f.conta ? (me.lojas.find((l) => Number(l.loja_id) === Number(f.conta)) || {}).loja : (me.lojas.length === 1 ? me.lojas[0].loja : null);
   $('.slot-escopo', main).textContent = nomeLoja ? nomeLoja : admin ? 'Todas as lojas' : 'Suas lojas';
 
+  const lojaMeta = f.conta || (me.lojas.length === 1 ? me.lojas[0].loja_id : null);
+  const meta = metaPara(ctx.metas, lojaMeta);
+  numerar(main);
   const args = { p_inicio: f.inicio, p_fim: f.fim, p_conta: f.conta };
   const per = { p_inicio: f.inicio, p_fim: f.fim };
 
@@ -93,13 +126,13 @@ export const renderPainel = async (main, ctx) => {
     selecionado: (r) => Number(f.conta) === Number(r.loja_id),
     clique: (k) => ctx.trocar({ conta: Number(f.conta) === Number(k) ? null : Number(k) }),
     cols: [['txt name', txt('loja')], [null, barra('atendimentos')], ['mono', dlt('var_atendimentos', 'pct', null)],
-      [null, num('taxa_resposta', fmt.pct), true], [null, num('taxa_sla', fmt.pct)], ['mono', dlt('var_taxa_sla', 'pp', 'up'), true],
-      [null, num('tempo_medio_min', fmt.num1)], [null, num('vendas', fmt.int), true]],
+      [null, num('taxa_resposta', fmt.pct), true], [null, slaMeta(ctx.metas)], ['mono', dlt('var_taxa_sla', 'pp', 'up'), true],
+      [null, num('tempo_medio_min', fmt.num1)], [null, num('vendas_total', fmt.int), true]],
   });
   const tbVend = tabela($('#tb-vend', main), {
     chave: 'chave', sort: 'atendimentos', busca: $('.q-vend', main), texto: (r) => String(r.vendedor || '') + ' ' + String(r.loja || ''),
     cols: [['txt name', txt('vendedor')], ['txt muted', txt('loja'), true], [null, barra('atendimentos')], ['mono', dlt('var_atendimentos', 'pct', null), true],
-      [null, num('taxa_resposta', fmt.pct)], [null, num('taxa_sla', fmt.pct)], [null, num('tempo_medio_min', fmt.num1)], [null, num('vendas', fmt.int), true]],
+      [null, num('taxa_resposta', fmt.pct)], [null, num('taxa_sla', fmt.pct)], [null, num('tempo_medio_min', fmt.num1)], [null, num('vendas_total', fmt.int), true]],
   });
   const tbAuto = tabela($('#tb-auto', main), {
     chave: 'loja_id', sort: null, texto: (r) => String(r.loja || ''),
@@ -109,7 +142,30 @@ export const renderPainel = async (main, ctx) => {
       ['mono', (td, r) => { td.textContent = isNum(r.dia_envio) ? DIAS[Number(r.dia_envio)] + ' ' + (isNum(r.hora_envio) ? Number(r.hora_envio) + 'h' : '') : '—'; }, true],
       ['txt wrap muted', (td, r) => { td.textContent = r.erro ? String(r.erro) : '—'; }, true]],
   });
-  tbLojas.carregando(); tbVend.carregando(); tbAuto.carregando();
+  const tbInv = tabela($('#tb-inv', main), {
+    chave: 'cliente_id', sort: 'investimento', texto: (r) => String(r.empresa || ''),
+    cols: [['txt name', (td, r) => {
+      td.append(el('div', { text: r.empresa || '—' }));
+      const sub = [Number(r.subcontas) > 1 ? r.subcontas + ' subcontas' : null, r.tem_dados ? null : 'sem dados do Meta no período'].filter(Boolean).join(' · ');
+      if (sub) td.append(el('div', { class: 'muted', style: 'font-weight:400;font-size:12px', text: sub, title: (r.subcontas_nomes || []).join(', ') }));
+    }], [null, (td, r) => { td.textContent = r.tem_dados ? fmt.brl(r.investimento) : '—'; }], ['mono', dlt('var_investimento', 'pct', null), true],
+      [null, num('atendimentos', fmt.int)], [null, (td, r) => {
+        td.textContent = fmt.brl(r.custo_atend);
+        const st = frenteMeta(r.custo_atend, meta?.meta_custo_atend, true); if (st) td.classList.add('meta-' + st);
+      }], [null, num('vendas', fmt.int), true], [null, num('custo_venda', fmt.brl), true]],
+  });
+  const tbAds = tabela($('#tb-ads', main), {
+    chave: 'chave', sort: 'leads', busca: $('.q-ads', main), texto: (r) => String(r.anuncio || '') + ' ' + String(r.veiculo || ''),
+    cols: [['txt name wrap', (td, r) => {
+      td.append(el('div', { text: r.anuncio || '—' }));
+      const sub = [r.veiculo && !String(r.anuncio || '').toUpperCase().startsWith(r.veiculo) ? r.veiculo : null, isNum(r.preco) && Number(r.preco) > 0 ? fmt.brl0(r.preco) : null, Number(r.lojas) > 1 ? r.lojas + ' lojas' : null].filter(Boolean).join(' · ');
+      if (sub) td.append(el('div', { class: 'muted', style: 'font-weight:400;font-size:12px', text: sub }));
+    }], [null, num('leads', fmt.int)], [null, num('taxa_resposta', fmt.pct), true],
+      [null, (td, r) => { td.textContent = fmt.int(r.avancaram) + (Number(r.leads) ? ' · ' + fmt.pct(r.taxa_avanco) : ''); }],
+      [null, num('vendas', fmt.int), true], ['col-inv', num('custo_lead', fmt.brl)]],
+  });
+  tbLojas.carregando(); tbVend.carregando(); tbAuto.carregando(); tbInv.carregando(); tbAds.carregando();
+  const navInv = $$('#nav-secoes [data-inv]');
 
   const box = (id) => $('#' + id, main);
   const pronto = (b) => b.classList.remove('sk');
@@ -117,7 +173,17 @@ export const renderPainel = async (main, ctx) => {
 
   const tarefas = {
     lojas: rpc('atend_lojas').then((r) => { $('.slot-carga', main).textContent = r?.[0] ? fmt.dt(r[0].ultima_carga) : '—'; }),
-    kpis: rpc('atend_kpis', args).then((rows) => preencherKpis(main, rows?.[0], nomeLoja)),
+    kpis: rpc('atend_kpis', args).then((rows) => preencherKpis(main, comVendas(rows?.[0]), nomeLoja, meta)),
+    investimento: rpc('atend_investimento', args).then((d) => preencherInv(main, d, meta, tbInv, navInv)),
+    anuncios: rpc('atend_anuncios', args).then((d) => {
+      const nota = $('.slot-anuncios-nota', main);
+      if (d && Number(d.leads_com_anuncio)) nota.textContent = fmt.int(d.leads_com_anuncio) + ' leads chegaram pelo botão do anúncio, vindos de ' + fmt.int(d.anuncios_distintos) + ' anúncios e ' + fmt.int(d.veiculos_distintos) + ' veículos. “Avançaram” = chegaram a condição, simulação, visita, negociação ou venda.';
+      const semInv = !d?.investimento_visivel;
+      $('#tb-ads', main).classList.toggle('sem-inv', semInv);
+      if (semInv) $('.slot-ads-sub', main).textContent = 'Ordenado por leads. Clique no título da coluna para reordenar.';
+      tbAds.dados(d?.anuncios || []);
+      pronto(box('ch-veiculos')); desenhar.veiculos = () => G.veiculos(box('ch-veiculos'), d?.veiculos || []); desenhar.veiculos();
+    }),
     serie: rpc('atend_serie', args).then((s) => {
       desenhar.spark = () => G.spark(box('ch-spark'), s); desenhar.volume = () => G.volume(box('ch-volume'), s); desenhar.sla = () => G.sla(box('ch-sla'), s);
       ['ch-spark', 'ch-volume', 'ch-sla'].forEach((i) => pronto(box(i)));
@@ -125,18 +191,18 @@ export const renderPainel = async (main, ctx) => {
     }),
     etapas: rpc('atend_etapas', args).then((r) => { pronto(box('ch-etapas')); desenhar.etapas = () => G.etapas(box('ch-etapas'), r); desenhar.etapas(); }),
     horarios: rpc('atend_horarios', args).then((r) => { pronto(box('ch-horarios')); desenhar.horarios = () => G.horarios(box('ch-horarios'), r); desenhar.horarios(); }),
-    vendedores: rpc('atend_vendedores', args).then((r) => tbVend.dados(r)),
+    vendedores: rpc('atend_vendedores', args).then((r) => tbVend.dados((r || []).map(comVendas))),
   };
-  if (multi) tarefas.por_loja = rpc('atend_por_loja', per).then((r) => tbLojas.dados(r));
+  if (multi) tarefas.por_loja = rpc('atend_por_loja', per).then((r) => tbLojas.dados((r || []).map(comVendas)));
   if (admin) tarefas.automacao = rpc('atend_automacao').then((r) => tbAuto.dados(r));
 
-  const falhas = { serie: ['ch-spark', 'ch-volume', 'ch-sla'], etapas: ['ch-etapas'], horarios: ['ch-horarios'] };
+  const falhas = { serie: ['ch-spark', 'ch-volume', 'ch-sla'], etapas: ['ch-etapas'], horarios: ['ch-horarios'], anuncios: ['ch-veiculos'] };
   const resultados = await Promise.allSettled(Object.values(tarefas));
   Object.keys(tarefas).forEach((k, i) => {
     if (resultados[i].status !== 'rejected') return;
     const m = resultados[i].reason?.message;
     if (falhas[k]) falhas[k].forEach((id) => { pronto(box(id)); G.falha(box(id)); });
-    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m);
+    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m);
     if (k === 'kpis') { $('#resumo', main).textContent = m || 'Não foi possível carregar os indicadores.'; }
   });
   const erro = resultados.find((r) => r.status === 'rejected');
@@ -152,7 +218,36 @@ export const renderPainel = async (main, ctx) => {
   return () => ro.disconnect();
 };
 
-const preencherKpis = (main, r, nomeLoja) => {
+const preencherInv = (main, d, meta, tb, navInv) => {
+  const sec = $('#investimento', main);
+  const t = d?.total;
+  const visivel = !!t && Number(t.empresas) > 0;
+  sec.hidden = !visivel; navInv.forEach((n) => { n.hidden = !visivel; });
+  numerar(main);
+  if (!visivel) return;
+  const put = (c, v) => { const n = $('.i-' + c, sec); if (n) { n.classList.remove('sk'); n.textContent = v; } };
+  put('investimento', fmt.brl(t.investimento)); put('investimento_ant', fmt.brl(t.investimento_ant));
+  put('custo_atend', fmt.brl(t.custo_atend)); put('custo_atend_ant', fmt.brl(t.custo_atend_ant));
+  put('custo_venda', fmt.brl(t.custo_venda)); put('vendas', fmt.int(t.vendas)); put('atendimentos', fmt.int(t.atendimentos));
+  delta($('.di-var_investimento', sec), t.var_investimento, 'pct', null);
+  delta($('.di-var_custo_atend', sec), t.var_custo_atend, 'brl', 'down');
+  const bar = $('[data-meta=meta_custo_atend]', sec); if (bar) pintarMeta(bar, meta?.meta_custo_atend, t.custo_atend);
+  const notas = ['Investimento do Meta Ads da empresa ÷ novos atendimentos de todas as subcontas dela.'];
+  if (Number(t.empresas_sem_dados)) notas.push('Sem dados do Meta no período (fora do cálculo): ' + (t.nomes_sem_dados || []).join(', ') + '.');
+  if (Number(d.empresas_ocultas)) notas.push(d.empresas_ocultas + (d.empresas_ocultas === 1 ? ' empresa não aparece' : ' empresas não aparecem') + ' porque o investimento é da empresa inteira e seu acesso cobre só parte das lojas dela.');
+  $('.slot-inv-nota', sec).textContent = notas.join(' ');
+  const linhas = d.empresas || [];
+  $('.slot-inv-tabela', sec).hidden = linhas.length <= 1 && Number(linhas[0]?.subcontas || 0) <= 1;
+  tb.dados(linhas);
+};
+
+const preencherKpis = (main, r, nomeLoja, meta) => {
+  const vEt = $('.k-vendas_etapa', main); if (vEt) vEt.textContent = r ? fmt.int(r.vendas_etapa) : '—';
+  const vG = $('.k-vendas', main); if (vG) vG.textContent = r ? fmt.int(r.vendas) : '—';
+  for (const bar of $$('.lu-meta-bar[data-meta]', $('#visao-geral', main) || main)) {
+    if (bar.dataset.meta === 'meta_custo_atend') continue;
+    pintarMeta(bar, meta?.[bar.dataset.meta], r?.[META_INFO[bar.dataset.meta][0]]);
+  }
   for (const [k, fn, d, kind, better] of KPIS) {
     const v = $('.k-' + k, main); if (v) { v.classList.remove('sk'); v.textContent = r ? fn(r[k]) : '—'; }
     const dd = $('.d-' + k, main); if (dd) delta(dd, r ? r[d] : null, kind, better);

@@ -1,5 +1,5 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202610271521';
+import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202610281339';
 
 export { d3 };
 
@@ -235,4 +235,40 @@ export const horarios = (box, rows) => {
       showTip(box, tip, event, NOMES[c.d - 1] + ', ' + c.h + 'h–' + (c.h + 1) + 'h', [[ACC, 'Atendimentos', r ? fmt.int(r.atendimentos) : '0'], [null, 'Respondidos no SLA', s]]);
     })
     .on('mouseleave', () => { rects.style('stroke', 'none'); hideTip(tip); });
+};
+
+/* Veículos: barra de leads com a parte que avançou destacada */
+export const veiculos = (box, rows) => {
+  box.replaceChildren();
+  const data = (rows || []).filter((d) => Number(d.leads) > 0).slice(0, 12);
+  if (!data.length) return vazio(box, 'Nenhum lead com anúncio identificado no período.');
+  const W = Math.max(280, box.clientWidth);
+  const row = 30, top = 2, Hh = top + data.length * row;
+  const svg = svgIn(box, W, Hh);
+  const probe = svg.append('g');
+  let labelW = 0;
+  for (const d of data) { const t = probe.append('text').attr('class', 'lbl').text(d.veiculo); labelW = Math.max(labelW, t.node().getComputedTextLength()); }
+  const numW = probe.append('text').text(fmt.int(d3.max(data, (d) => Number(d.leads)))).node().getComputedTextLength();
+  probe.remove();
+  labelW = Math.min(labelW, W * 0.42);
+  const L = labelW + 14, R = numW + 14;
+  const max = d3.max(data, (d) => Number(d.leads)) || 1;
+  const x = d3.scaleLinear([0, max], [L, W - R]);
+  const g = svg.append('g').selectAll('g').data(data).join('g').attr('transform', (_, i) => `translate(0,${top + i * row})`);
+  g.append('rect').attr('x', L).attr('y', 7).attr('height', 14).attr('width', W - R - L).attr('rx', 7).style('fill', 'rgba(255,255,255,.035)');
+  g.append('text').attr('class', 'lbl').attr('x', L - 14).attr('y', 14).attr('text-anchor', 'end').attr('dominant-baseline', 'middle')
+    .text((d) => d.veiculo).each(function () { const e = this; while (e.getComputedTextLength() > labelW && e.textContent.length > 4) e.textContent = e.textContent.slice(0, -2) + '…'; });
+  g.append('rect').attr('x', L).attr('y', 7).attr('height', 14).attr('rx', 7)
+    .attr('width', (d) => Math.max(4, x(Number(d.leads)) - L)).style('fill', ACC).style('fill-opacity', 0.85);
+  g.append('rect').attr('x', L).attr('y', 7).attr('height', 14).attr('rx', 7)
+    .attr('width', (d) => (Number(d.avancaram) > 0 ? Math.max(4, x(Number(d.avancaram)) - L) : 0)).style('fill', DEEP);
+  g.append('text').attr('x', (d) => x(Number(d.leads)) + 8).attr('y', 14).attr('dominant-baseline', 'middle').text((d) => fmt.int(d.leads));
+  const tip = tipOf(box);
+  g.append('rect').attr('width', W).attr('height', row).style('fill', 'transparent')
+    .on('mousemove', (event, d) => showTip(box, tip, event, d.veiculo, [
+      [ACC, 'Leads', fmt.int(d.leads)], [DEEP, 'Avançaram', fmt.int(d.avancaram) + ' (' + fmt.pct(d.taxa_avanco) + ')'],
+      [null, 'Responderam', fmt.int(d.respondidos)], [null, 'Vendas', fmt.int(d.vendas)], [null, 'Anúncios', fmt.int(d.anuncios)],
+      ...(isNum(d.preco) && Number(d.preco) > 0 ? [[null, 'Preço anunciado', fmt.brl0(d.preco)]] : []),
+    ]))
+    .on('mouseleave', () => hideTip(tip));
 };

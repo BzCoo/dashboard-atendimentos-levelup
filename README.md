@@ -25,7 +25,10 @@ assets/js/core.js     cliente Supabase, formatação, rotas e filtros na URL
 assets/js/painel.js   indicadores, gráficos e tabelas
 assets/js/charts.js   gráficos (d3)
 assets/js/acessos.js  administração de acessos
-assets/js/relatorio.js montagem da mensagem no formato do WhatsApp
+assets/js/relatorio.js montagem da mensagem, envio pelo WhatsApp e PDF
+assets/js/metas.js    metas por loja (admin)
+assets/js/etapas.js   nomes das etapas do funil (admin)
+n8n/                  código do fluxo "DASH ATENDIMENTOS - Fila do painel"
 assets/fonts/         Geist e Geist Mono (SIL Open Font License)
 ```
 
@@ -35,8 +38,21 @@ assets/fonts/         Geist e Geist Mono (SIL Open Font License)
 - Funções públicas: `atend_me`, `atend_lojas`, `atend_kpis`, `atend_serie`, `atend_por_loja`,
   `atend_vendedores`, `atend_etapas`, `atend_horarios`, `atend_automacao` (só admin),
   `atend_admin_membros`, `atend_admin_salvar_membro`, `atend_admin_remover_membro` (só admin).
+- Versão 2 (`supabase/migrations/02..06`): investimento e custo por atendimento (`atend_investimento`),
+  anúncios e veículos (`atend_anuncios`), metas (`dash_atend.metas`, `atend_metas`), nomes de etapas vindos do CRM
+  (`dash_atend.etapa_nomes`), vendas por etapa de venda, histórico de acessos (`dash_atend.acessos`) e fila de
+  envio de mensagens (`dash_atend.envios`).
+- Investimento é por **empresa** (conta de anúncio do Meta), somando os atendimentos de todas as subcontas dela.
+  Um membro só vê o investimento de uma empresa se tiver acesso a todas as subcontas ativas dela.
 - Edge Function `atend-admin`: cria logins com senha e redefine senhas (só admin).
 - A chave em `config.js` é a **publicável** (pode ficar no navegador). Nenhuma chave secreta fica no site.
+
+## Fluxo no n8n (envio no WhatsApp e etapas)
+
+O fluxo **DASH ATENDIMENTOS - Fila do painel (WhatsApp e etapas)** roda a cada minuto: pega as mensagens que um
+admin mandou enviar pelo site (o grupo é resolvido no banco, nunca pelo navegador), envia pelo Stevo e grava
+`enviado` / `falhou` / `incerto`. Mensagens sem confirmação não são reenviadas sozinhas. O mesmo passo lê os
+nomes das etapas do pipeline principal no CRM uma vez por dia (ou quando o admin clica em “Sincronizar”).
 
 ## Publicar
 

@@ -1,7 +1,11 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO } from './core.js?v=202610271521';
-import { renderPainel } from './painel.js?v=202610271521';
-import { renderAcessos } from './acessos.js?v=202610271521';
-import { renderRelatorio } from './relatorio.js?v=202610271521';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO } from './core.js?v=202610281339';
+import { renderPainel } from './painel.js?v=202610281339';
+import { renderAcessos } from './acessos.js?v=202610281339';
+import { renderRelatorio } from './relatorio.js?v=202610281339';
+import { renderMetas } from './metas.js?v=202610281339';
+import { renderEtapas } from './etapas.js?v=202610281339';
+
+const PAGINAS_ADM = { acessos: ['Acessos', renderAcessos], relatorio: ['Montar relatório', renderRelatorio], metas: ['Metas', renderMetas], etapas: ['Etapas do funil', renderEtapas] };
 
 const app = $('#app');
 let ctx = null;          // { me, admin, filtros, trocar }
@@ -119,17 +123,20 @@ const rotear = async () => {
   // membros de loja só podem pedir lojas permitidas (o banco também bloqueia)
   if (filtros.conta && !ctx.me.lojas.some((l) => Number(l.loja_id) === filtros.conta)) filtros.conta = null;
   ctx.filtros = filtros;
-  const destino = (rota === 'acessos' || rota === 'relatorio') && !ctx.admin ? 'painel' : rota;
+  const destino = PAGINAS_ADM[rota] && ctx.admin ? rota : 'painel';
   if (!shellPronto) montarShell();
   limpar?.(); limpar = null;
   const main = $('#conteudo', app);
   $$('.btn-admin', app).forEach((b) => b.classList.toggle('on', destino !== 'painel'));
   $$('#nav-secoes a', app).forEach((a) => a.removeAttribute('aria-current'));
-  document.title = (destino === 'acessos' ? 'Acessos' : destino === 'relatorio' ? 'Montar relatório' : 'Painel') + ' · Dashboard de Atendimentos · Level Up';
+  document.title = (PAGINAS_ADM[destino]?.[0] || 'Painel') + ' · Dashboard de Atendimentos · Level Up';
   try {
-    if (destino === 'acessos') await renderAcessos(main, ctx);
-    else if (destino === 'relatorio') await renderRelatorio(main, ctx);
-    else {
+    if (PAGINAS_ADM[destino]) {
+      const p = PAGINAS_ADM[destino][1](main, ctx);
+      revelar(main); window.scrollTo({ top: 0 });
+      const l = await p; if (typeof l === 'function') limpar = l;
+      return;
+    } else {
       const p = renderPainel(main, ctx);
       revelar(main);
       if (secao) requestAnimationFrame(() => document.getElementById(secao)?.scrollIntoView({ block: 'start' }));
@@ -157,7 +164,10 @@ const iniciar = async () => {
     return;
   }
   me.lojas = me.lojas || [];
-  ctx = { me, admin: me.papel === 'admin', filtros: lerRota().filtros, trocar: (mud) => trocarFiltros(lerRota().rota === 'relatorio' ? 'relatorio' : 'painel', { ...ctx.filtros, ...mud }) };
+  rpc('atend_registrar_acesso').catch(() => {});
+  let metas = null;
+  try { metas = await rpc('atend_metas'); } catch { /* metas são opcionais */ }
+  ctx = { me, metas, admin: me.papel === 'admin', filtros: lerRota().filtros, trocar: (mud) => trocarFiltros(lerRota().rota === 'relatorio' ? 'relatorio' : 'painel', { ...ctx.filtros, ...mud }) };
   shellPronto = false;
   await rotear();
 };
