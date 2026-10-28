@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610281425';
-import { etapasVisiveis } from './charts.js?v=202610281425';
-import { montarFiltros } from './filtros.js?v=202610281425';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610281446';
+import { etapasVisiveis } from './charts.js?v=202610281446';
+import { montarFiltros } from './filtros.js?v=202610281446';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
@@ -209,20 +209,21 @@ const envio = async (main, ctx, texto) => {
 
   try {
     destinos = await rpc('atend_admin_destinos');
-    sel.replaceChildren(el('option', { value: 'levelup', text: destinos?.levelup?.nome || 'Grupo interno Level Up' }));
-    const lojas = (destinos?.lojas || []).filter((l) => l.tem_grupo);
-    if (lojas.length) {
-      const g = el('optgroup', { label: 'Grupo da loja com o cliente' });
-      for (const l of lojas) g.append(el('option', { value: 'loja:' + l.loja_id, text: l.loja + (l.empresa && l.empresa.toUpperCase() !== String(l.loja).toUpperCase() ? ' — grupo ' + l.empresa : '') }));
-      sel.append(g);
+    const grupos = destinos?.grupos || [];
+    if (!grupos.length) {
+      sel.replaceChildren(el('option', { value: '', text: 'Nenhum grupo de CRM encontrado ainda' })); btn.disabled = true;
+    } else {
+      sel.replaceChildren(el('option', { value: '', text: 'Escolha o grupo de CRM…' }),
+        ...grupos.map((g) => el('option', { value: g.jid, text: String(g.nome).replace(/^[^A-Za-z0-9À-ú]+/, '').trim() })));
+      const daLoja = grupos.filter((g) => ctx.filtros.conta && (g.lojas || []).map(Number).includes(Number(ctx.filtros.conta)));
+      if (daLoja.length === 1) sel.value = daLoja[0].jid;
     }
-    if (ctx.filtros.conta && lojas.some((l) => Number(l.loja_id) === Number(ctx.filtros.conta))) sel.value = 'loja:' + ctx.filtros.conta;
   } catch (e) { sel.replaceChildren(el('option', { value: '', text: 'Não foi possível carregar os grupos' })); btn.disabled = true; }
 
   const dlg = $('#dlg-enviar');
   btn.addEventListener('click', () => {
     const v = sel.value, msg = texto.value.trim();
-    if (!v) return;
+    if (!v) return toast('Escolha o grupo de CRM.', true);
     if (msg.length < 20 || texto.disabled) return toast('A mensagem ainda não está pronta.', true);
     const para = sel.selectedOptions[0]?.textContent || '';
     $('.slot-para', dlg).textContent = 'Para: ' + para;
@@ -234,8 +235,7 @@ const envio = async (main, ctx, texto) => {
     ok.onclick = async () => {
       ok.disabled = true;
       try {
-        const [destino, loja] = v.split(':');
-        const r = await rpc('atend_admin_enviar', { p_destino: destino, p_loja: loja ? Number(loja) : null, p_texto: msg });
+        const r = await rpc('atend_admin_enviar', { p_grupo: v, p_texto: msg });
         dlg.close(); toast('Mensagem colocada na fila de envio.');
         acompanhar(r.id, para); historico();
       } catch (e) { toast(e.message, true); ok.disabled = false; }
