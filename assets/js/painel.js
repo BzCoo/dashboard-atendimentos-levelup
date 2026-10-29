@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202610291301';
-import { montarFiltros } from './filtros.js?v=202610291301';
-import * as G from './charts.js?v=202610291301';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202610291342';
+import { montarFiltros } from './filtros.js?v=202610291342';
+import * as G from './charts.js?v=202610291342';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -141,7 +141,7 @@ export const renderPainel = async (main, ctx) => {
   const enxuto = !admin && me.lojas.length === 1;
   $('#leads', main).hidden = !umaLoja;
   $$('#nav-secoes [data-leads]').forEach((n) => { n.hidden = !umaLoja; });
-  const analise = ['investimento', 'desempenho', 'funil', 'anuncios'];
+  const analise = ['investimento', 'desempenho', 'funil', 'anuncios', 'conversao'];
   let completo = true;
   if (enxuto) { try { completo = localStorage.getItem('lu-completo') === '1'; } catch { completo = false; } }
   const aplicarModo = () => {
@@ -211,6 +211,18 @@ export const renderPainel = async (main, ctx) => {
     cols: celulasLead(true),
   });
   semResp.addEventListener('change', () => tbLeads.redesenhar());
+  const tbConv = tabela($('#tb-conv', main), {
+    chave: 'chave', sort: 'vendas', texto: (r) => r.vendedor + ' ' + r.loja,
+    clique: (k) => irPara('vendedor', f, null, { v: k }),
+    cols: [['txt name', txt('vendedor')], ['txt muted', txt('loja'), true], [null, num('leads', fmt.int)], [null, num('vendas', fmt.int)],
+      [null, num('conversao', fmt.pct)], [null, (td, r) => { td.textContent = isNum(r.dias_mediana) ? fmt.num1(r.dias_mediana) + ' d' : '—'; }, true], [null, num('retornos', fmt.int)]],
+  });
+  const tbRet = tabela($('#tb-ret', main), {
+    chave: 'k', sort: 'nova_oportunidade', texto: (r) => r.nome + ' ' + r.loja + ' ' + r.vendedor,
+    cols: [['txt name', txt('nome')], ['txt muted', txt('loja'), true], ['txt', txt('vendedor')],
+      ['txt mono', (td, r) => { td.textContent = fmt.dt(r.primeira_msg); }], ['txt mono', (td, r) => { td.textContent = fmt.dt(r.nova_oportunidade); }]],
+  });
+  tbConv.carregando(); tbRet.carregando();
   if (umaLoja) tbLeads.carregando();
   tbLojas.carregando(); tbVend.carregando(); tbAuto.carregando(); tbInv.carregando(); tbAds.carregando();
   const navInv = $$('#nav-secoes [data-inv]');
@@ -265,6 +277,18 @@ export const renderPainel = async (main, ctx) => {
     vendedores: rpc('atend_vendedores', argsC).then((r) => tbVend.dados((r || []).map(comVendas))),
   };
   if (multi) tarefas.por_loja = rpc('atend_por_loja', per).then((r) => tbLojas.dados((r || []).map(comVendas)));
+  tarefas.conversao = rpc('atend_conversao', argsC).then((d) => {
+    const a = d?.atual || {}, b = d?.anterior || {};
+    const put = (c, v) => { const n = $('.c-' + c, main); if (n) { n.classList.remove('sk'); n.textContent = v; } };
+    put('conversao', fmt.pct(a.conversao)); put('vendas', fmt.int(a.vendas)); put('leads', fmt.int(a.leads));
+    put('dias_mediana', isNum(a.dias_mediana) ? fmt.num1(a.dias_mediana) + (Number(a.dias_mediana) === 1 ? ' dia' : ' dias') : '—');
+    put('retornos', fmt.int(a.retornos));
+    delta($('.dc-conversao', main), isNum(a.conversao) && isNum(b.conversao) ? Math.round((a.conversao - b.conversao) * 10) / 10 : null, 'pp', 'up');
+    delta($('.dc-dias_mediana', main), isNum(a.dias_mediana) && isNum(b.dias_mediana) ? Math.round((a.dias_mediana - b.dias_mediana) * 10) / 10 : null, 'abs', 'down');
+    delta($('.dc-retornos', main), isNum(a.retornos) && isNum(b.retornos) ? a.retornos - b.retornos : null, 'abs', 'up');
+    tbConv.dados((d?.por_vendedor || []).filter((x) => x.leads || x.retornos));
+    tbRet.dados((d?.retornos || []).map((x, i) => ({ ...x, k: String(i) })));
+  });
   if (umaLoja) tarefas.leads = rpc('atend_leads', { p_inicio: f.inicio, p_fim: f.fim, p_conta: lojaMeta }).then((d) => {
     const ls = (d?.leads || []).map((l, i) => ({ ...l, chave_lead: String(i) }));
     const sem = ls.filter((l) => !l.respondido).length;
@@ -279,7 +303,7 @@ export const renderPainel = async (main, ctx) => {
     if (resultados[i].status !== 'rejected') return;
     const m = resultados[i].reason?.message;
     if (falhas[k]) falhas[k].forEach((id) => { pronto(box(id)); G.falha(box(id)); });
-    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m); if (k === 'leads') tbLeads.falha(m);
+    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m); if (k === 'leads') tbLeads.falha(m); if (k === 'conversao') { tbConv.falha(m); tbRet.falha(m); }
     if (k === 'kpis') { $('#resumo', main).textContent = m || 'Não foi possível carregar os indicadores.'; }
   });
   const erro = resultados.find((r) => r.status === 'rejected');

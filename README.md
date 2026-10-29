@@ -60,6 +60,13 @@ O fluxo **GERAL - Atualizacao de todas as contas** (n8n) carrega o CRM para o ba
 das 8h às 22h (horário de Brasília). Cada carga é incremental (desde a anterior, com 6h de folga) e usa a trava
 `sync-geral-contas` para nunca rodar duas ao mesmo tempo. Só a carga da madrugada dispara a automação de pipeline.
 
+## Saúde dos dados, conversão e cache
+
+- **Administração → Saúde dos dados**: alertas por loja e o vendedor padrão (responsável usado pela carga quando o lead chega
+  sem dono no CRM), mais o histórico de ações dos administradores.
+- **Painel → Conversão**: leads do período que viraram venda, tempo até a venda e clientes que voltaram.
+- Os números do painel ficam guardados no banco até a próxima carga (`dash_atend.cache`), então abrir o painel de novo é imediato.
+
 ## Esqueci minha senha
 
 A tela de login tem "Esqueci minha senha". O link do e-mail volta para o próprio site, que pede a nova senha.

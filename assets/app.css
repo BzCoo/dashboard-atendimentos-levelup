@@ -303,3 +303,12 @@ body { margin: 0; touch-action: manipulation; }
   .lu-table-form input, .lu-table-form input[type=text] { width: 100%; }
   .lu-tablebar .act-csv { margin-left: 0; }
 }
+
+/* Saúde dos dados */
+.lu-saude-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: 14px; }
+.lu-saude-item { display: grid; gap: 4px; padding: 16px 18px !important; }
+.lu-saude-item b { font-size: 28px; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.lu-saude-item span { font-size: 13px; color: var(--lu-ink3); }
+.lu-saude-item.warn b { color: var(--lu-warn); }
+.lu-inline-select { appearance: auto; font: 500 13px/1.2 var(--lu-sans); color: var(--lu-ink); background: var(--lu-s2); border: 1px solid var(--lu-line2); border-radius: 8px; padding: 6px 8px; max-width: 14rem; }
+.lu-table td.bad { color: var(--lu-bad); }
