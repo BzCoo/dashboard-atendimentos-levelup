@@ -1,9 +1,10 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE } from './core.js?v=202610291203';
-import { renderPainel } from './painel.js?v=202610291203';
-import { renderAcessos } from './acessos.js?v=202610291203';
-import { renderRelatorio } from './relatorio.js?v=202610291203';
-import { renderMetas } from './metas.js?v=202610291203';
-import { renderEtapas } from './etapas.js?v=202610291203';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202610291301';
+import { renderPainel } from './painel.js?v=202610291301';
+import { renderAcessos } from './acessos.js?v=202610291301';
+import { renderRelatorio } from './relatorio.js?v=202610291301';
+import { renderMetas } from './metas.js?v=202610291301';
+import { renderEtapas } from './etapas.js?v=202610291301';
+import { renderVendedor } from './vendedor.js?v=202610291301';
 
 const PAGINAS_ADM = { acessos: ['Acessos', renderAcessos], relatorio: ['Montar relatório', renderRelatorio], metas: ['Metas', renderMetas], etapas: ['Etapas do funil', renderEtapas] };
 
@@ -139,6 +140,15 @@ const montarShell = () => {
   });
 
   $('.act-sair', app).addEventListener('click', sair);
+  // Tema: automático → escuro → claro
+  const nomesTema = { auto: 'igual ao aparelho', escuro: 'escuro', claro: 'claro' };
+  const pintarTema = () => { $('.slot-tema', app).textContent = nomesTema[temaSalvo()] || 'automático'; };
+  pintarTema();
+  $('.act-tema', app).addEventListener('click', (e) => {
+    e.stopPropagation();
+    const ordem = ['escuro', 'claro', 'auto'];
+    aplicarTema(ordem[(ordem.indexOf(temaSalvo()) + 1) % 3]); pintarTema();
+  });
   $('.act-senha', app).addEventListener('click', () => {
     const d = $('#dlg-minha-senha'), f = $('#f-minha-senha'), msg = $('.lu-msg', f);
     f.reset(); msg.hidden = true; d.showModal();
@@ -158,20 +168,20 @@ const montarShell = () => {
 /* ---------- Rotas ---------- */
 const rotear = async () => {
   if (!ctx) return;
-  const { rota, secao, filtros } = lerRota();
+  const { rota, secao, filtros, vendedor } = lerRota();
   // membros de loja só podem pedir lojas permitidas (o banco também bloqueia)
   if (filtros.conta && !ctx.me.lojas.some((l) => Number(l.loja_id) === filtros.conta)) filtros.conta = null;
   ctx.filtros = filtros;
-  const destino = PAGINAS_ADM[rota] && ctx.admin ? rota : 'painel';
+  const destino = rota === 'vendedor' ? 'vendedor' : PAGINAS_ADM[rota] && ctx.admin ? rota : 'painel';
   if (!shellPronto) montarShell();
   limpar?.(); limpar = null;
   const main = $('#conteudo', app);
-  $$('.btn-admin', app).forEach((b) => b.classList.toggle('on', destino !== 'painel'));
+  $$('.btn-admin', app).forEach((b) => b.classList.toggle('on', !!PAGINAS_ADM[destino]));
   $$('#nav-secoes a', app).forEach((a) => a.removeAttribute('aria-current'));
   document.title = (PAGINAS_ADM[destino]?.[0] || 'Painel') + ' · Dashboard de Atendimentos · Level Up';
   try {
-    if (PAGINAS_ADM[destino]) {
-      const p = PAGINAS_ADM[destino][1](main, ctx);
+    if (destino === 'vendedor' || PAGINAS_ADM[destino]) {
+      const p = destino === 'vendedor' ? renderVendedor(main, ctx, vendedor) : PAGINAS_ADM[destino][1](main, ctx);
       revelar(main); window.scrollTo({ top: 0 });
       const l = await p; if (typeof l === 'function') limpar = l;
       return;
@@ -222,3 +232,25 @@ const iniciar = async () => {
 window.addEventListener('hashchange', rotear);
 sb.auth.onAuthStateChange((evento) => { if (evento === 'SIGNED_OUT' && ctx) { ctx = null; telaLogin(); } });
 iniciar();
+
+/* Baixar planilha de qualquer tabela com botão .act-csv */
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.act-csv'); if (!b) return;
+  const t = document.getElementById(b.dataset.tabela); if (!t) return;
+  const f = ctx?.filtros || {};
+  baixarCsv(t, (b.dataset.nome || 'tabela') + '-' + (f.inicio || '') + '-a-' + (f.fim || ''));
+});
+/* Tema automático acompanha o aparelho; ao trocar, os gráficos são redesenhados */
+matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', () => { if (temaSalvo() === 'auto') aplicarTema('auto'); });
+
+/* Celular: cada célula leva o nome da coluna, para as tabelas virarem cartões */
+const rotular = () => {
+  for (const t of document.querySelectorAll('.lu-table')) {
+    const cab = [...t.querySelectorAll('thead th')].map((th) => th.textContent.replace(/[↑↓]/g, '').trim());
+    for (const tr of t.querySelectorAll('tbody tr')) {
+      [...tr.children].forEach((td, i) => { if (!td.hasAttribute('data-label') && cab[i] && td.colSpan === 1) td.setAttribute('data-label', cab[i]); });
+    }
+  }
+};
+let rotT;
+new MutationObserver(() => { clearTimeout(rotT); rotT = setTimeout(rotular, 60); }).observe(app, { childList: true, subtree: true });

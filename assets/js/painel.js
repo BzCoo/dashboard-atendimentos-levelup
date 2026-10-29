@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias } from './core.js?v=202610291203';
-import { montarFiltros } from './filtros.js?v=202610291203';
-import * as G from './charts.js?v=202610291203';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202610291301';
+import { montarFiltros } from './filtros.js?v=202610291301';
+import * as G from './charts.js?v=202610291301';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -27,6 +27,7 @@ const tabela = (table, cfg) => {
     let r = rows.slice();
     const termo = busca ? busca.value.trim().toLowerCase() : '';
     if (termo) r = r.filter((x) => cfg.texto(x).toLowerCase().includes(termo));
+    if (cfg.filtro) r = r.filter(cfg.filtro);
     if (st.col) r.sort((a, b) => {
       const x = a[st.col], y = b[st.col], nx = isNum(x), ny = isNum(y);
       if (nx && ny) return (Number(x) - Number(y)) * st.dir;
@@ -48,7 +49,7 @@ const tabela = (table, cfg) => {
   };
   $('thead', table).addEventListener('click', (e) => {
     const b = e.target.closest('button[data-sort]'); if (!b) return;
-    if (st.col === b.dataset.sort) st.dir = -st.dir; else { st.col = b.dataset.sort; st.dir = ['loja', 'vendedor'].includes(st.col) ? 1 : -1; }
+    if (st.col === b.dataset.sort) st.dir = -st.dir; else { st.col = b.dataset.sort; st.dir = ['loja', 'vendedor', 'nome', 'etapa', 'anuncio', 'empresa'].includes(st.col) ? 1 : -1; }
     draw();
   });
   if (busca) busca.addEventListener('input', draw);
@@ -60,6 +61,7 @@ const tabela = (table, cfg) => {
     carregando: () => msg('sk', 'Carregando…'),
     falha: (t) => msg('fail', t || 'Falha ao carregar'),
     dados: (d) => { rows = Array.isArray(d) ? d : []; draw(); },
+    redesenhar: () => draw(),
   };
 };
 const txt = (f) => (td, r) => { td.textContent = r[f] == null || r[f] === '' ? '—' : String(r[f]); };
@@ -100,11 +102,24 @@ export const pintarMeta = (bar, meta, valor) => {
 };
 const numerar = (main) => {
   let n = 0;
-  for (const sec of $$('.lu-section', main)) { const b = $('.n-sec', sec); if (b && !sec.hidden) b.textContent = String(++n).padStart(2, '0'); }
+  for (const sec of $$('.lu-section', main)) { const b = $('.n-sec', sec); if (b && !sec.hidden && !sec.classList.contains('lu-oculto')) b.textContent = String(++n).padStart(2, '0'); }
 };
+/* Células da lista de leads (painel da loja e página do vendedor) */
+export const celulasLead = (comVendedor) => [
+  ['txt name', (td, r) => { td.append(el('div', { text: r.nome })); if (r.vendido) td.append(el('span', { class: 'lu-pill ok', text: 'venda' })); }],
+  ['txt mono', (td, r) => { td.textContent = fmt.dt(r.primeira_msg); td.dataset.csv = String(r.primeira_msg || '').replace('T', ' ').slice(0, 16); }],
+  ...(comVendedor ? [['txt muted', (td, r) => { td.textContent = r.vendedor || '—'; }, true]] : []),
+  [null, (td, r) => {
+    if (!r.respondido) { td.append(el('span', { class: 'lu-pill bad', text: 'sem resposta' })); td.dataset.csv = 'sem resposta'; return; }
+    td.textContent = fmt.min(r.resposta_min); td.classList.add(r.dentro_sla ? 'good' : 'bad');
+    td.title = r.dentro_sla ? 'Dentro do SLA' : 'Fora do SLA';
+  }],
+  ['txt', (td, r) => { td.textContent = r.etapa || '—'; }],
+];
 const DIAS = ['', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
 
 /* ---------- Página ---------- */
+export { tabela, txt, num, dlt, barra, comVendas };
 export const renderPainel = async (main, ctx) => {
   main.replaceChildren(clone('tpl-painel'));
   const { filtros: f, me, admin } = ctx;
@@ -119,7 +134,31 @@ export const renderPainel = async (main, ctx) => {
   const meta = metaPara(ctx.metas, lojaMeta);
   numerar(main);
   const args = { p_inicio: f.inicio, p_fim: f.fim, p_conta: f.conta };
-  const per = { p_inicio: f.inicio, p_fim: f.fim };
+  const argsC = { ...args, p_comparar: f.comparar || 'anterior' };
+  const per = { p_inicio: f.inicio, p_fim: f.fim, p_comparar: f.comparar || 'anterior' };
+  // Membro de uma loja só: abre na visão enxuta (números, leads e equipe); o resto fica em "Ver análise completa"
+  const umaLoja = !!lojaMeta;
+  const enxuto = !admin && me.lojas.length === 1;
+  $('#leads', main).hidden = !umaLoja;
+  $$('#nav-secoes [data-leads]').forEach((n) => { n.hidden = !umaLoja; });
+  const analise = ['investimento', 'desempenho', 'funil', 'anuncios'];
+  let completo = true;
+  if (enxuto) { try { completo = localStorage.getItem('lu-completo') === '1'; } catch { completo = false; } }
+  const aplicarModo = () => {
+    analise.forEach((id) => { const sec = $('#' + id, main); if (sec) sec.classList.toggle('lu-oculto', !completo); });
+    $$('#nav-secoes a').forEach((a) => { if (analise.includes(a.dataset.go)) a.classList.toggle('lu-oculto', !completo); });
+    const b = $('.act-mais', main); b.setAttribute('aria-expanded', String(completo));
+    b.replaceChildren(completo ? 'Ocultar análise completa ' : 'Ver análise completa ', el('i', { 'aria-hidden': 'true', text: completo ? '↑' : '↓' }));
+    numerar(main);
+    if (completo) requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+  };
+  if (enxuto) {
+    $('.lu-mais', main).hidden = false;
+    $('.act-mais', main).addEventListener('click', () => { completo = !completo; try { localStorage.setItem('lu-completo', completo ? '1' : '0'); } catch { /* ok */ } aplicarModo(); });
+    aplicarModo();
+  }
+  // Rótulo da comparação ("vs. mês passado" etc.)
+  if ((f.comparar || 'anterior') !== 'anterior') $$('.lu-kpi-foot span', main).forEach((n) => { if (n.textContent.trim() === 'vs. anterior') n.textContent = 'vs. ' + rotuloComp(f.comparar); });
 
   const tbLojas = tabela($('#tb-lojas', main), {
     chave: 'loja_id', sort: 'atendimentos', busca: $('.q-lojas', main), texto: (r) => String(r.loja || ''),
@@ -131,6 +170,7 @@ export const renderPainel = async (main, ctx) => {
   });
   const tbVend = tabela($('#tb-vend', main), {
     chave: 'chave', sort: 'atendimentos', busca: $('.q-vend', main), texto: (r) => String(r.vendedor || '') + ' ' + String(r.loja || ''),
+    clique: (k) => irPara('vendedor', f, null, { v: k }),
     cols: [['txt name', txt('vendedor')], ['txt muted', txt('loja'), true], [null, barra('atendimentos')], ['mono', dlt('var_atendimentos', 'pct', null), true],
       [null, num('taxa_resposta', fmt.pct)], [null, num('taxa_sla', fmt.pct)], [null, num('tempo_medio_min', fmt.num1)], [null, num('vendas_total', fmt.int), true]],
   });
@@ -164,6 +204,14 @@ export const renderPainel = async (main, ctx) => {
       [null, (td, r) => { td.textContent = fmt.int(r.avancaram) + (Number(r.leads) ? ' · ' + fmt.pct(r.taxa_avanco) : ''); }],
       [null, num('vendas', fmt.int), true], ['col-inv', num('custo_lead', fmt.brl)]],
   });
+  const semResp = $('.f-sem-resp', main);
+  const tbLeads = tabela($('#tb-leads', main), {
+    chave: 'chave_lead', sort: 'primeira_msg', busca: $('.q-leads', main), texto: (r) => [r.nome, r.vendedor, r.etapa].join(' '),
+    filtro: (r) => !semResp.checked || !r.respondido,
+    cols: celulasLead(true),
+  });
+  semResp.addEventListener('change', () => tbLeads.redesenhar());
+  if (umaLoja) tbLeads.carregando();
   tbLojas.carregando(); tbVend.carregando(); tbAuto.carregando(); tbInv.carregando(); tbAds.carregando();
   const navInv = $$('#nav-secoes [data-inv]');
 
@@ -187,8 +235,17 @@ export const renderPainel = async (main, ctx) => {
         av.hidden = false;
       }
     }),
-    kpis: rpc('atend_kpis', args).then((rows) => preencherKpis(main, comVendas(rows?.[0]), nomeLoja, meta)),
-    investimento: rpc('atend_investimento', args).then((d) => preencherInv(main, d, meta, tbInv, navInv)),
+    kpis: rpc('atend_kpis', argsC).then((rows) => {
+      preencherKpis(main, comVendas(rows?.[0]), nomeLoja, meta);
+      if ((f.comparar || 'anterior') === 'anterior') return;
+      // Troca "período anterior" pelo período escolhido nos textos já preenchidos
+      const alvo = f.comparar === 'mes' ? 'mesmos dias do mês passado' : 'mesmos dias do ano passado';
+      const w = document.createTreeWalker($('#topo', main) || main, NodeFilter.SHOW_TEXT);
+      const nos = []; while (w.nextNode()) if (/período anterior/.test(w.currentNode.nodeValue)) nos.push(w.currentNode);
+      $$('.lu-bento', main).forEach((b) => { const w2 = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); while (w2.nextNode()) if (/período anterior/.test(w2.currentNode.nodeValue)) nos.push(w2.currentNode); });
+      nos.forEach((n) => { n.nodeValue = n.nodeValue.replace(/período anterior/g, alvo); });
+    }),
+    investimento: rpc('atend_investimento', argsC).then((d) => preencherInv(main, d, meta, tbInv, navInv)),
     anuncios: rpc('atend_anuncios', args).then((d) => {
       const nota = $('.slot-anuncios-nota', main);
       if (d && Number(d.leads_com_anuncio)) nota.textContent = fmt.int(d.leads_com_anuncio) + ' leads chegaram pelo botão do anúncio, vindos de ' + fmt.int(d.anuncios_distintos) + ' anúncios e ' + fmt.int(d.veiculos_distintos) + ' veículos. “Avançaram” = chegaram a condição, simulação, visita, negociação ou venda.';
@@ -198,16 +255,22 @@ export const renderPainel = async (main, ctx) => {
       tbAds.dados(d?.anuncios || []);
       pronto(box('ch-veiculos')); desenhar.veiculos = () => G.veiculos(box('ch-veiculos'), d?.veiculos || []); desenhar.veiculos();
     }),
-    serie: rpc('atend_serie', args).then((s) => {
+    serie: rpc('atend_serie', argsC).then((s) => {
       desenhar.spark = () => G.spark(box('ch-spark'), s); desenhar.volume = () => G.volume(box('ch-volume'), s); desenhar.sla = () => G.sla(box('ch-sla'), s);
       ['ch-spark', 'ch-volume', 'ch-sla'].forEach((i) => pronto(box(i)));
       desenhar.spark(); desenhar.volume(); desenhar.sla();
     }),
-    etapas: rpc('atend_etapas', args).then((r) => { pronto(box('ch-etapas')); desenhar.etapas = () => G.etapas(box('ch-etapas'), r); desenhar.etapas(); }),
+    etapas: rpc('atend_etapas', argsC).then((r) => { pronto(box('ch-etapas')); desenhar.etapas = () => G.etapas(box('ch-etapas'), r); desenhar.etapas(); }),
     horarios: rpc('atend_horarios', args).then((r) => { pronto(box('ch-horarios')); desenhar.horarios = () => G.horarios(box('ch-horarios'), r); desenhar.horarios(); }),
-    vendedores: rpc('atend_vendedores', args).then((r) => tbVend.dados((r || []).map(comVendas))),
+    vendedores: rpc('atend_vendedores', argsC).then((r) => tbVend.dados((r || []).map(comVendas))),
   };
   if (multi) tarefas.por_loja = rpc('atend_por_loja', per).then((r) => tbLojas.dados((r || []).map(comVendas)));
+  if (umaLoja) tarefas.leads = rpc('atend_leads', { p_inicio: f.inicio, p_fim: f.fim, p_conta: lojaMeta }).then((d) => {
+    const ls = (d?.leads || []).map((l, i) => ({ ...l, chave_lead: String(i) }));
+    const sem = ls.filter((l) => !l.respondido).length;
+    $('.slot-leads-nota', main).textContent = fmt.int(d?.total) + ' leads novos no período' + (sem ? ', ' + fmt.int(sem) + ' ainda sem resposta' : '') + (Number(d?.total) > ls.length ? '. Mostrando os ' + ls.length + ' mais recentes.' : '.');
+    tbLeads.dados(ls);
+  });
   if (admin) tarefas.automacao = rpc('atend_automacao').then((r) => tbAuto.dados(r));
 
   const falhas = { serie: ['ch-spark', 'ch-volume', 'ch-sla'], etapas: ['ch-etapas'], horarios: ['ch-horarios'], anuncios: ['ch-veiculos'] };
@@ -216,7 +279,7 @@ export const renderPainel = async (main, ctx) => {
     if (resultados[i].status !== 'rejected') return;
     const m = resultados[i].reason?.message;
     if (falhas[k]) falhas[k].forEach((id) => { pronto(box(id)); G.falha(box(id)); });
-    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m);
+    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m); if (k === 'leads') tbLeads.falha(m);
     if (k === 'kpis') { $('#resumo', main).textContent = m || 'Não foi possível carregar os indicadores.'; }
   });
   const erro = resultados.find((r) => r.status === 'rejected');

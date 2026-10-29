@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610291203';
-import { etapasVisiveis } from './charts.js?v=202610291203';
-import { montarFiltros } from './filtros.js?v=202610291203';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610291301';
+import { etapasVisiveis } from './charts.js?v=202610291301';
+import { montarFiltros } from './filtros.js?v=202610291301';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
@@ -107,12 +107,13 @@ export const renderRelatorio = async (main, ctx) => {
   $('.slot-meta', main).replaceChildren(el('span', {}, 'Loja: ', el('b', { text: String(nomeLoja) })), el('span', {}, 'Período: ', el('b', { text: fmt.dmy(f.inicio) + ' a ' + fmt.dmy(f.fim) })));
 
   const args = { p_inicio: f.inicio, p_fim: f.fim, p_conta: f.conta };
+  const argsC = { ...args, p_comparar: f.comparar || 'anterior' };
   let dados;
   try {
     const [kpis, etapas, vendedores, horarios, porLoja, inv, ads] = await Promise.all([
-      rpc('atend_kpis', args), rpc('atend_etapas', args), rpc('atend_vendedores', args), rpc('atend_horarios', args),
-      multi ? rpc('atend_por_loja', { p_inicio: f.inicio, p_fim: f.fim }) : Promise.resolve([]),
-      rpc('atend_investimento', args).catch(() => null), rpc('atend_anuncios', args).catch(() => null),
+      rpc('atend_kpis', argsC), rpc('atend_etapas', argsC), rpc('atend_vendedores', argsC), rpc('atend_horarios', args),
+      multi ? rpc('atend_por_loja', { p_inicio: f.inicio, p_fim: f.fim, p_comparar: argsC.p_comparar }) : Promise.resolve([]),
+      rpc('atend_investimento', argsC).catch(() => null), rpc('atend_anuncios', args).catch(() => null),
     ]);
     dados = { kpis: kpis?.[0], etapas, vendedores, horarios, porLoja, inv, ads };
     if (!inv?.total || !Number(inv.total.empresas)) opts.inv.closest('label').hidden = true;

@@ -1,5 +1,5 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202610291203';
+import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202610291301';
 
 export { d3 };
 
@@ -78,7 +78,7 @@ export const spark = (box, serie) => {
   svg.append('path').datum(data).style('fill', 'none').style('stroke', ACC).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round')
     .attr('d', d3.line((d) => x(d.dia), (d) => y(Number(d.atendimentos))));
   const last = data[data.length - 1];
-  svg.append('circle').attr('cx', x(last.dia)).attr('cy', y(Number(last.atendimentos))).attr('r', 4).style('fill', ACC).style('stroke', '#121412').attr('stroke-width', 2);
+  svg.append('circle').attr('cx', x(last.dia)).attr('cy', y(Number(last.atendimentos))).attr('r', 4).style('fill', ACC).style('stroke', 'var(--lu-s1)').attr('stroke-width', 2);
   svg.append('text').attr('x', 6).attr('y', h - 2).text(fmt.dm(data[0].dia));
   svg.append('text').attr('x', W - 6).attr('y', h - 2).attr('text-anchor', 'end').text(fmt.dm(last.dia));
   const tip = tipOf(box);
@@ -154,9 +154,9 @@ export const sla = (box, serie) => {
     .style('fill', 'none').style('stroke', MUTED).style('stroke-opacity', 0.6).attr('stroke-width', 1.5).attr('stroke-dasharray', '3 4').attr('d', line);
   svg.append('path').datum(cur).style('fill', 'none').style('stroke', ACC).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('d', line);
   svg.append('g').selectAll('circle').data(cur.filter((p) => p.v !== null)).join('circle')
-    .attr('cx', (p) => x(p.dia)).attr('cy', (p) => y(p.v)).attr('r', data.length > 20 ? 2 : 3).style('fill', '#121412').style('stroke', ACC).attr('stroke-width', 1.5);
+    .attr('cx', (p) => x(p.dia)).attr('cy', (p) => y(p.v)).attr('r', data.length > 20 ? 2 : 3).style('fill', 'var(--lu-s1)').style('stroke', ACC).attr('stroke-width', 1.5);
   const tip = tipOf(box);
-  const hover = svg.append('line').style('stroke', 'rgba(255,255,255,.18)').attr('y1', M.t).attr('y2', H - M.b).style('display', 'none');
+  const hover = svg.append('line').style('stroke', 'rgba(var(--lu-ov), .18)').attr('y1', M.t).attr('y2', H - M.b).style('display', 'none');
   const dot = svg.append('circle').attr('r', 4.5).style('fill', ACC).style('display', 'none');
   svg.append('rect').attr('x', left).attr('width', W - left - M.r).attr('y', M.t).attr('height', H - M.t - M.b).style('fill', 'transparent')
     .on('mousemove', (event) => {
@@ -199,7 +199,7 @@ export const etapas = (box, rows) => {
   const max = d3.max(data, (d) => Math.max(Number(d.leads), Number(d.leads_ant))) || 1;
   const x = d3.scaleLinear([0, max], [L, W - R]);
   const g = svg.append('g').selectAll('g').data(data).join('g').attr('transform', (_, i) => `translate(0,${top + i * row})`);
-  g.append('rect').attr('x', L).attr('y', 6).attr('height', 14).attr('width', W - R - L).attr('rx', 7).style('fill', 'rgba(255,255,255,.035)');
+  g.append('rect').attr('x', L).attr('y', 6).attr('height', 14).attr('width', W - R - L).attr('rx', 7).style('fill', 'rgba(var(--lu-ov), .05)');
   g.append('text').attr('class', 'lbl').attr('x', L - 14).attr('y', 13).attr('text-anchor', 'end').attr('dominant-baseline', 'middle')
     .text((d) => d.etapa).each(function () { const e = this; while (e.getComputedTextLength() > labelW && e.textContent.length > 4) e.textContent = e.textContent.slice(0, -2) + '…'; });
   g.append('rect').attr('x', L).attr('y', 6).attr('height', 14).attr('rx', 7)
@@ -235,10 +235,10 @@ export const horarios = (box, rows) => {
   const rects = svg.append('g').selectAll('rect').data(cells).join('rect')
     .attr('x', (c) => L + c.h * cw + 1.5).attr('y', (c) => T + (c.d - 1) * ch + 1.5)
     .attr('width', Math.max(1, cw - 3)).attr('height', Math.max(1, ch - 3)).attr('rx', Math.min(5, cw / 4))
-    .style('fill', (c) => (c.r ? ACC : 'rgba(255,255,255,.03)'))
+    .style('fill', (c) => (c.r ? ACC : 'rgba(var(--lu-ov), .045)'))
     .style('fill-opacity', (c) => (c.r ? alpha(Number(c.r.atendimentos)) : 1))
     .on('mousemove', (event, c) => {
-      rects.style('stroke', (o) => (o === c ? '#f7f8f8' : 'none')).attr('stroke-width', 1);
+      rects.style('stroke', (o) => (o === c ? 'var(--lu-ink)' : 'none')).attr('stroke-width', 1);
       const r = c.r;
       const s = r && Number(r.respondidos) > 0 ? fmt.pct((100 * Number(r.dentro_sla)) / Number(r.respondidos)) : '—';
       showTip(box, tip, event, NOMES[c.d - 1] + ', ' + c.h + 'h–' + (c.h + 1) + 'h', [[ACC, 'Atendimentos', r ? fmt.int(r.atendimentos) : '0'], [null, 'Respondidos no SLA', s]]);
@@ -264,7 +264,7 @@ export const veiculos = (box, rows) => {
   const max = d3.max(data, (d) => Number(d.leads)) || 1;
   const x = d3.scaleLinear([0, max], [L, W - R]);
   const g = svg.append('g').selectAll('g').data(data).join('g').attr('transform', (_, i) => `translate(0,${top + i * row})`);
-  g.append('rect').attr('x', L).attr('y', 7).attr('height', 14).attr('width', W - R - L).attr('rx', 7).style('fill', 'rgba(255,255,255,.035)');
+  g.append('rect').attr('x', L).attr('y', 7).attr('height', 14).attr('width', W - R - L).attr('rx', 7).style('fill', 'rgba(var(--lu-ov), .05)');
   g.append('text').attr('class', 'lbl').attr('x', L - 14).attr('y', 14).attr('text-anchor', 'end').attr('dominant-baseline', 'middle')
     .text((d) => d.veiculo).each(function () { const e = this; while (e.getComputedTextLength() > labelW && e.textContent.length > 4) e.textContent = e.textContent.slice(0, -2) + '…'; });
   g.append('rect').attr('x', L).attr('y', 7).attr('height', 14).attr('rx', 7)

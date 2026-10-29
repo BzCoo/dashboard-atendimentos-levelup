@@ -1,4 +1,4 @@
-import { $, clone, PRESETS, intervalo, presetDe, trocarFiltros } from './core.js?v=202610291203';
+import { $, clone, PRESETS, intervalo, presetDe, trocarFiltros, COMPARAR } from './core.js?v=202610291301';
 
 /* Barra de filtros (loja + período). Mudanças vão para a URL, que recarrega a página atual. */
 export const montarFiltros = (slot, ctx, rota) => {
@@ -6,6 +6,7 @@ export const montarFiltros = (slot, ctx, rota) => {
   const selLoja = $('.f-loja', slot), selPreset = $('.f-preset', slot);
   const inIni = $('.f-ini', slot), inFim = $('.f-fim', slot);
   const f = ctx.filtros;
+  const aplicar = (mud) => trocarFiltros(rota, { ...f, ...mud });
 
   const lojas = ctx.me.lojas || [];
   const opcoes = [];
@@ -18,8 +19,11 @@ export const montarFiltros = (slot, ctx, rota) => {
   selPreset.replaceChildren(...PRESETS.map(([v, t]) => new Option(t, v)));
   selPreset.value = presetDe(f.inicio, f.fim);
   inIni.value = f.inicio; inFim.value = f.fim;
+  const selComp = $('.f-comp', slot);
+  selComp.replaceChildren(...COMPARAR.map(([v, t]) => new Option(t, v)));
+  selComp.value = f.comparar || 'anterior';
+  selComp.addEventListener('change', () => aplicar({ comparar: selComp.value }));
 
-  const aplicar = (mud) => trocarFiltros(rota, { ...f, ...mud });
   selLoja.addEventListener('change', () => aplicar({ conta: selLoja.value ? Number(selLoja.value) : null }));
   selPreset.addEventListener('change', () => {
     if (selPreset.value === 'custom') { inIni.focus(); return; }
@@ -33,5 +37,5 @@ export const montarFiltros = (slot, ctx, rota) => {
   };
   inIni.addEventListener('change', datas);
   inFim.addEventListener('change', datas);
-  $('.f-reset', slot).addEventListener('click', () => { const r = intervalo('7'); trocarFiltros(rota, { conta: null, inicio: r[0], fim: r[1] }); });
+  $('.f-reset', slot).addEventListener('click', () => { const r = intervalo('7'); trocarFiltros(rota, { conta: null, inicio: r[0], fim: r[1], comparar: 'anterior' }); });
 };

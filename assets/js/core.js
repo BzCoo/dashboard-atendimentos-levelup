@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202610291203';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202610291301';
 
 /* Volta do link de "Esqueci minha senha": lido antes do Supabase limpar o endereço */
 export const RETORNO_AUTH = (() => {
@@ -14,7 +14,8 @@ export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
 export const URL_SITE = location.origin + location.pathname;
 
 /* ---------- Formatação ---------- */
-export const ACC = '#80ff00', PREV = '#50535b', GRID = 'rgba(255,255,255,.06)', DEEP = '#3d6b14', MUTED = '#8a8f98';
+// Cores dos gráficos via variáveis do CSS: acompanham o tema claro/escuro sem redesenhar
+export const ACC = 'var(--lu-chart)', PREV = 'var(--lu-prev)', GRID = 'rgba(var(--lu-ov), .06)', DEEP = 'var(--lu-chart-deep)', MUTED = 'var(--lu-ink3)';
 export const nf0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
 export const nf1 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -148,13 +149,17 @@ export const lerRota = () => {
   if (!DATA_OK.test(de || '') || !DATA_OK.test(ate || '')) [de, ate] = padrao;
   if (de > ate) [de, ate] = [ate, de];
   const loja = Number(q.get('loja'));
-  return { rota: (path || 'painel').split('/')[0], secao: (path || '').split('/')[1] || null, filtros: { inicio: de, fim: ate, conta: Number.isInteger(loja) && loja > 0 ? loja : null } };
+  const cmp = ['mes', 'ano'].includes(q.get('cmp')) ? q.get('cmp') : 'anterior';
+  return { rota: (path || 'painel').split('/')[0], secao: (path || '').split('/')[1] || null, vendedor: q.get('v') || null,
+    filtros: { inicio: de, fim: ate, conta: Number.isInteger(loja) && loja > 0 ? loja : null, comparar: cmp } };
 };
-export const irPara = (rota, filtros, secao) => {
+export const irPara = (rota, filtros, secao, extra) => {
   const q = new URLSearchParams();
   if (filtros?.conta) q.set('loja', filtros.conta);
   if (filtros?.inicio) q.set('de', filtros.inicio);
   if (filtros?.fim) q.set('ate', filtros.fim);
+  if (filtros?.comparar && filtros.comparar !== 'anterior') q.set('cmp', filtros.comparar);
+  for (const [k, v] of Object.entries(extra || {})) if (v) q.set(k, v);
   const h = '#/' + rota + (secao ? '/' + secao : '') + (q.toString() ? '?' + q : '');
   if (location.hash === h) window.dispatchEvent(new HashChangeEvent('hashchange'));
   else location.hash = h;
@@ -163,6 +168,8 @@ export const trocarFiltros = (rota, filtros) => {
   const q = new URLSearchParams();
   if (filtros.conta) q.set('loja', filtros.conta);
   q.set('de', filtros.inicio); q.set('ate', filtros.fim);
+  if (filtros.comparar && filtros.comparar !== 'anterior') q.set('cmp', filtros.comparar);
+  const v = lerRota().vendedor; if (rota === 'vendedor' && v) q.set('v', v);
   location.hash = '#/' + rota + '?' + q;
 };
 
@@ -188,4 +195,29 @@ export const metaPara = (metas, lojaId) => {
 export const frenteMeta = (valor, meta, menorMelhor = false) => {
   if (!isNum(valor) || !isNum(meta)) return null;
   return (menorMelhor ? Number(valor) <= Number(meta) : Number(valor) >= Number(meta)) ? 'ok' : 'bad';
+};
+
+/* Período de comparação */
+export const COMPARAR = [['anterior', 'Período anterior'], ['mes', 'Mesmos dias do mês passado'], ['ano', 'Mesmos dias do ano passado']];
+export const rotuloComp = (c) => (c === 'mes' ? 'mês passado' : c === 'ano' ? 'ano passado' : 'anterior');
+
+/* Planilha (.csv, separador ; e BOM para o Excel em português) a partir de uma tabela da tela */
+export const baixarCsv = (table, nome) => {
+  const esc = (v) => { const t = String(v ?? '').replace(/\s+/g, ' ').trim(); return /[;"\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+  const cab = [...table.querySelectorAll('thead th')].map((th) => th.textContent.replace(/[↑↓]/g, '').trim());
+  const linhas = [...table.querySelectorAll('tbody tr')].filter((tr) => tr.children.length === cab.length)
+    .map((tr) => [...tr.children].map((td) => esc(td.dataset.csv ?? td.textContent)).join(';'));
+  if (!linhas.length) { toast('Não há linhas para baixar.', true); return; }
+  const blob = new Blob(['\ufeff' + [cab.map(esc).join(';'), ...linhas].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = el('a', { href: URL.createObjectURL(blob), download: nome.replace(/[^\w.-]+/g, '-').toLowerCase() + '.csv' });
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* Tema claro / escuro / automático (guardado só neste navegador) */
+export const temaSalvo = () => { try { return localStorage.getItem('lu-tema') || 'escuro'; } catch { return 'escuro'; } };
+export const aplicarTema = (t) => {
+  const escuro = t === 'escuro' || (t === 'auto' && !matchMedia('(prefers-color-scheme: light)').matches);
+  document.documentElement.dataset.theme = escuro ? 'dark' : 'light';
+  try { localStorage.setItem('lu-tema', t); } catch { /* sem armazenamento */ }
+  window.dispatchEvent(new Event('lu-tema'));
 };
