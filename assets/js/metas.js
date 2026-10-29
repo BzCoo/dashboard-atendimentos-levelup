@@ -1,4 +1,4 @@
-import { $, el, clone, rpc, fmt, isNum, toast } from './core.js?v=202610281538';
+import { $, el, clone, rpc, fmt, isNum, toast } from './core.js?v=202610291203';
 
 const CAMPOS = [['sla', 'meta_sla', 0.1, 100], ['resposta', 'meta_resposta', 0.1, 100], ['tempo', 'meta_tempo_min', 0.1, null], ['custo', 'meta_custo_atend', 0.01, null]];
 const lerNum = (v) => { const t = String(v ?? '').trim().replace(',', '.'); if (!t) return null; const n = Number(t); return Number.isFinite(n) && n >= 0 ? n : NaN; };

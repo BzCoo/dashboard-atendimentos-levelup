@@ -54,6 +54,18 @@ admin mandou enviar pelo site (o grupo é resolvido no banco, nunca pelo navegad
 `enviado` / `falhou` / `incerto`. Mensagens sem confirmação não são reenviadas sozinhas. O mesmo passo lê os
 nomes das etapas do pipeline principal no CRM uma vez por dia (ou quando o admin clica em “Sincronizar”).
 
+## Atualização dos dados
+
+O fluxo **GERAL - Atualizacao de todas as contas** (n8n) carrega o CRM para o banco à 01h e de hora em hora
+das 8h às 22h (horário de Brasília). Cada carga é incremental (desde a anterior, com 6h de folga) e usa a trava
+`sync-geral-contas` para nunca rodar duas ao mesmo tempo. Só a carga da madrugada dispara a automação de pipeline.
+
+## Esqueci minha senha
+
+A tela de login tem "Esqueci minha senha". O link do e-mail volta para o próprio site, que pede a nova senha.
+Para isso o endereço do site precisa estar em **Supabase → Authentication → URL Configuration → Redirect URLs**
+(`https://bzcoo.github.io/dashboard-atendimentos-levelup/**`). Sem isso, o Supabase manda o link para a Site URL.
+
 ## Publicar
 
 É um site estático: funciona em GitHub Pages, Vercel, Netlify ou qualquer hospedagem.

@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias } from './core.js?v=202610281538';
-import { montarFiltros } from './filtros.js?v=202610281538';
-import * as G from './charts.js?v=202610281538';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias } from './core.js?v=202610291203';
+import { montarFiltros } from './filtros.js?v=202610291203';
+import * as G from './charts.js?v=202610291203';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -175,13 +175,15 @@ export const renderPainel = async (main, ctx) => {
     lojas: rpc('atend_lojas').then((r) => {
       const carga = r?.[0]?.ultima_carga;
       $('.slot-carga', main).textContent = carga ? fmt.dt(carga) : '—';
-      // A carga roda de madrugada: o dia dela e os seguintes ainda estão incompletos
+      // Carga: 01h e de hora em hora das 8h às 22h. Avisa quando o período chega até dados ainda não carregados.
       if (!carga) return;
-      const diaCarga = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(carga));
+      const sp = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d);
+      const diaCarga = sp(new Date(carga)), hojeSp = sp(new Date());
+      const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(new Date(carga));
       if (f.fim >= diaCarga) {
         const av = $('.slot-aviso-carga', main);
-        av.replaceChildren(el('b', { text: 'Período inclui dias ainda não carregados. ' }),
-          'Os dados vão até ' + fmt.dm(addDias(diaCarga, -1)) + '; os atendimentos de ' + fmt.dm(diaCarga) + (f.fim > diaCarga ? ' em diante' : '') + ' entram na próxima carga, de madrugada.');
+        if (diaCarga === hojeSp) av.replaceChildren(el('b', { text: 'Hoje ainda está em andamento. ' }), 'Os dados vão até ' + hora + '; o painel é atualizado de hora em hora, das 8h às 22h.');
+        else av.replaceChildren(el('b', { text: 'Período inclui dias ainda não carregados. ' }), 'Os dados vão até ' + fmt.dm(diaCarga) + ' às ' + hora + '; o restante entra na próxima atualização.');
         av.hidden = false;
       }
     }),
