@@ -67,6 +67,14 @@ das 8h às 22h (horário de Brasília). Cada carga é incremental (desde a anter
 - **Painel → Conversão**: leads do período que viraram venda, tempo até a venda e clientes que voltaram.
 - Os números do painel ficam guardados no banco até a próxima carga (`dash_atend.cache`), então abrir o painel de novo é imediato.
 
+## Plano de ação no relatório
+
+Em **Montar relatório**, a opção "Plano de ação" (ligada por padrão) acrescenta até 5 problemas do período, cada um com o número
+que o comprova e as ações sugeridas. As regras ficam em `assets/js/plano.js` e usam as metas da loja (ou 80% de SLA e
+90% de resposta quando não há meta): SLA abaixo da meta ou em queda, leads sem resposta, dias sem cobertura, funil parado,
+vendas não marcadas, queda de volume, custo por atendimento subindo, concentração em um vendedor, anúncios que não avançam
+e, no relatório de várias lojas, quais lojas atacar primeiro. O texto pode ser editado antes de enviar.
+
 ## Esqueci minha senha
 
 A tela de login tem "Esqueci minha senha". O link do e-mail volta para o próprio site, que pede a nova senha.

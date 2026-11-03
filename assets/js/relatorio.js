@@ -1,6 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO } from './core.js?v=202610291342';
-import { etapasVisiveis } from './charts.js?v=202610291342';
-import { montarFiltros } from './filtros.js?v=202610291342';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611031300';
+import { diagnosticar, textoPlano } from './plano.js?v=202611031300';
+import { etapasVisiveis } from './charts.js?v=202611031300';
+import { montarFiltros } from './filtros.js?v=202611031300';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
@@ -66,6 +67,7 @@ const montarTexto = (d, o, escopo) => {
     L.push(`Faixa com mais leads: ${DIAS[top.dia_semana]}, ${top.hora}h–${Number(top.hora) + 1}h (${fmt.int(top.atendimentos)})`);
     if (diaTop) L.push(`Dia com mais leads: ${DIAS[diaTop[0]]} (${fmt.int(diaTop[1])})`);
   }
+  if (o.plano) L.push(...textoPlano(diagnosticar(d, escopo, o.meta)));
   if (o.obs) L.push('', '📝 ' + o.obs);
   L.push('', '_Dashboard de Atendimentos · Level Up_');
   return L.join('\n');
@@ -93,7 +95,7 @@ export const renderRelatorio = async (main, ctx) => {
   const escopo = Object.assign(new String(nomeLoja || 'Loja'), { multi });
 
   const texto = $('.o-texto', main), prev = $('.o-preview', main), wa = $('.act-wa', main);
-  const opts = { comp: $('.o-comp', main), funil: $('.o-funil', main), vend: $('.o-vend', main), lojas: $('.o-lojas', main), horas: $('.o-horas', main), inv: $('.o-inv', main), ads: $('.o-ads', main), obs: $('.o-obs', main) };
+  const opts = { comp: $('.o-comp', main), funil: $('.o-funil', main), vend: $('.o-vend', main), lojas: $('.o-lojas', main), horas: $('.o-horas', main), inv: $('.o-inv', main), ads: $('.o-ads', main), plano: $('.o-plano', main), obs: $('.o-obs', main) };
   if (!multi) opts.lojas.closest('label').hidden = true;
   $('.o-hora', main).textContent = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date());
 
@@ -128,7 +130,7 @@ export const renderRelatorio = async (main, ctx) => {
   texto.addEventListener('input', () => { editado = true; }, { once: true });
   const gerar = (forcar) => {
     if (editado && !forcar) return;
-    texto.value = montarTexto(dados, { comp: opts.comp.checked, funil: opts.funil.checked, vend: opts.vend.checked, lojas: opts.lojas.checked, horas: opts.horas.checked, inv: opts.inv.checked, ads: opts.ads.checked, obs: opts.obs.value.trim() }, escopo);
+    texto.value = montarTexto(dados, { comp: opts.comp.checked, funil: opts.funil.checked, vend: opts.vend.checked, lojas: opts.lojas.checked, horas: opts.horas.checked, inv: opts.inv.checked, ads: opts.ads.checked, plano: opts.plano.checked, meta: metaPara(ctx.metas, f.conta), obs: opts.obs.value.trim() }, escopo);
     texto.disabled = false; editado = false;
     texto.addEventListener('input', () => { editado = true; }, { once: true });
     atualizarSaida();
@@ -137,7 +139,7 @@ export const renderRelatorio = async (main, ctx) => {
     if (editado) { toast('Você editou o texto. Use “Gerar de novo” para aplicar as opções (suas edições serão substituídas).'); return; }
     gerar(true);
   };
-  for (const k of ['comp', 'funil', 'vend', 'lojas', 'horas', 'inv', 'ads']) opts[k].addEventListener('change', aoMudarOpcao);
+  for (const k of ['comp', 'funil', 'vend', 'lojas', 'horas', 'inv', 'ads', 'plano']) opts[k].addEventListener('change', aoMudarOpcao);
   opts.obs.addEventListener('input', aoMudarOpcao);
   $('.act-gerar', main).addEventListener('click', () => gerar(true));
   $('.act-copiar', main).addEventListener('click', () => copiar(texto.value));
