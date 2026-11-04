@@ -312,3 +312,48 @@ body { margin: 0; touch-action: manipulation; }
 .lu-saude-item.warn b { color: var(--lu-warn); }
 .lu-inline-select { appearance: auto; font: 500 13px/1.2 var(--lu-sans); color: var(--lu-ink); background: var(--lu-s2); border: 1px solid var(--lu-line2); border-radius: 8px; padding: 6px 8px; max-width: 14rem; }
 .lu-table td.bad { color: var(--lu-bad); }
+
+/* ---------- Automações ---------- */
+.lu-auto { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 14px; align-items: start; }
+@media (max-width: 960px) { .lu-auto { grid-template-columns: minmax(0, 1fr); } }
+.lu-auto .lu-core { display: grid; gap: 14px; }
+.lu-auto .lu-core > h3 { margin: 0; }
+.lu-auto .lu-form { display: grid; gap: 14px; }
+.lu-auto .slot-desc { margin: -6px 0 0; }
+.lu-auto-contas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 260px; }
+.lu-auto-contas label span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lu-auto-contas label:has(input:checked) { color: var(--lu-ink); background: var(--lu-accent-soft); }
+.lu-auto-contas .vazio { grid-column: 1 / -1; padding: 12px; font-size: 13px; color: var(--lu-ink3); text-align: center; }
+@media (max-width: 520px) { .lu-auto-contas { grid-template-columns: minmax(0, 1fr); } }
+.lu-auto-est { margin: 0; font-size: 13px; color: var(--lu-ink3); min-height: 1em; }
+.lu-auto .lu-fail { justify-content: flex-start; min-height: 0; padding: 10px 12px; border-radius: 10px; background: rgba(var(--lu-ov), .04); color: var(--lu-ink2); }
+.lu-progress { height: 10px; border-radius: 999px; background: rgba(var(--lu-ov), .08); overflow: hidden; }
+.lu-progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--lu-accent-deep), var(--lu-accent)); transition: width .8s ease; }
+.lu-auto-linha { margin: -4px 0 0; font-size: 13px; color: var(--lu-ink2); font-variant-numeric: tabular-nums; }
+.lu-auto-tot { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.lu-auto-tot > div { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; background: rgba(var(--lu-ov), .04); }
+.lu-auto-tot b { font-size: 22px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.lu-auto-tot span { font-size: 12px; color: var(--lu-ink3); }
+.lu-auto-real { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(128, 255, 0, .3); background: var(--lu-accent-soft); }
+.lu-auto-real p { margin: 0; flex: 1 1 220px; font-size: 13px; color: var(--lu-ink2); }
+.lu-auto-itens { display: grid; gap: 6px; max-height: 560px; overflow: auto; overscroll-behavior: contain; }
+.lu-auto-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(var(--lu-ov), .03); }
+.lu-auto-item .nm { display: grid; gap: 2px; min-width: 0; }
+.lu-auto-item .nm b { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lu-auto-item .nm small { font-size: 12px; color: var(--lu-ink3); }
+.lu-auto-item .tm { font-size: 12px; color: var(--lu-ink4); font-variant-numeric: tabular-nums; }
+.lu-auto-item.executando { outline: 1px solid rgba(128, 255, 0, .35); }
+.lu-auto-item.falhou .nm small { color: var(--lu-bad); }
+.lu-auto-det-box > summary { list-style: none; cursor: pointer; }
+.lu-auto-det-box > summary::-webkit-details-marker { display: none; }
+.lu-auto-det-box > summary .nm b::after { content: " ▸"; color: var(--lu-ink4); }
+.lu-auto-det-box[open] > summary .nm b::after { content: " ▾"; }
+.lu-auto-det-box > div, .lu-auto-det-box > p { margin: 8px 4px 4px; }
+.lu-auto-det-box .lu-wa { max-height: 360px; overflow: auto; margin-bottom: 8px; }
+.lu-auto-det { font-size: 12px; }
+.lu-table-click tbody tr { cursor: pointer; }
+.lu-table-click tbody tr.on td { background: var(--lu-accent-soft); }
+.lu-auto-itens { grid-template-columns: minmax(0, 1fr); }
+.lu-auto-det-box { min-width: 0; }
+.lu-auto-scroll { overflow-x: auto; max-width: 100%; }
+.lu-auto .lu-field small, .lu-auto .lu-field .lu-help { text-transform: none; letter-spacing: 0; font-weight: 400; }

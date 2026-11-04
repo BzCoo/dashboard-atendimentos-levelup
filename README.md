@@ -67,6 +67,25 @@ das 8h às 22h (horário de Brasília). Cada carga é incremental (desde a anter
 - **Painel → Conversão**: leads do período que viraram venda, tempo até a venda e clientes que voltaram.
 - Os números do painel ficam guardados no banco até a próxima carga (`dash_atend.cache`), então abrir o painel de novo é imediato.
 
+## Automações (Administração → Automações)
+
+O ADM escolhe a automação, as contas e os filtros. O pedido vai para `dash_atend.auto_execucoes` / `auto_itens` e o fluxo
+**DASH ATENDIMENTOS - Automações do painel** (n8n, a cada minuto, uma execução por vez) roda conta por conta chamando o fluxo
+de cada automação e grava andamento e resultado. A página mostra a barra de progresso, o tempo estimado (média das contas já
+feitas, senão o histórico) e o relatório por conta. Pipeline Inteligente, Aguardando → Atendimento e Anúncio de origem têm
+modo de simulação (não alteram CRM nem banco) e botão "Executar de verdade" depois da simulação.
+
+| Automação | Fluxo do n8n | Entrada adicionada |
+|---|---|---|
+| Recarregar dados do GHL | ATUALIZAÇÃO MANUAL DO BANCO — SUBCONTA E PERÍODO | RECEBER DO PAINEL |
+| Pipeline Inteligente | GERAL - Worker Pipeline Inteligente - Uma Subconta | dry_run, janela_dias, reanalisar |
+| Aguardando → Atendimento | GERAL - Varredura Aguardando -> Atendimento | Receber do painel |
+| Sincronizar etapas | (no próprio fluxo do painel) | — |
+| Gravar anúncio de origem | GERAL - Anúncio de Origem no GHL | RECEBER DO PAINEL (painel, simulacao, conta) |
+| Relatório com IA | Relatório Específico | RECEBER DO PAINEL / ENTRADA DO PAINEL (enviar ou só gerar) |
+
+O código do fluxo está em `n8n/automacoes-do-painel.workflow.js` (fonte) e `n8n/automacoes-do-painel.sdk.js` (gerado).
+
 ## Plano de ação no relatório
 
 Em **Montar relatório**, a opção "Plano de ação" (ligada por padrão) acrescenta até 5 problemas do período, cada um com o número
