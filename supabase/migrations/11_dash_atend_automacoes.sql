@@ -229,3 +229,4 @@ GRANT EXECUTE ON FUNCTION public.atend_service_auto_pegar(text), public.atend_se
 --    isso fazia atend_service_salvar_etapas falhar desde o cache de 29/10).
 CREATE OR REPLACE FUNCTION dash_atend.limpar_cache() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $function$
 BEGIN DELETE FROM dash_atend.cache WHERE true; RETURN NULL; END $function$;
+-- janela_horas agora vai até 720 (30 dias)

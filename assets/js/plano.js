@@ -1,4 +1,4 @@
-import { fmt, isNum } from './core.js?v=202611041619';
+import { fmt, isNum } from './core.js?v=202611041631';
 
 /* Plano de ação do relatório: regras sobre os números do período.
    Cada regra devolve { peso, titulo, fato, acoes[] }; ficam as mais graves (até 5). */

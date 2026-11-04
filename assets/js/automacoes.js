@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, fmt, toast, copiar } from './core.js?v=202611041619';
+import { $, $$, el, clone, rpc, fmt, toast, copiar } from './core.js?v=202611041631';
 
 /* Aba "Automações" (só admins): pede ao n8n, acompanha com barra de progresso e mostra o relatório por conta */
 
@@ -41,10 +41,10 @@ const CAMPOS = {
     return [el('label', { class: 'lu-field' }, 'Início da semana', inp, fim)];
   },
   janela_dias: () => [el('label', { class: 'lu-field' }, 'Conversas dos últimos',
-    el('select', { name: 'janela_dias' }, ...[[1, '1 dia'], [3, '3 dias'], [7, '7 dias'], [15, '15 dias'], [30, '30 dias']].map(([v, t]) => el('option', { value: v, text: t, selected: v === 7 }))),
+    el('select', { name: 'janela_dias' }, ...[[1, '1 dia'], [3, '3 dias'], [7, '7 dias'], [15, '15 dias'], [30, 'Último mês (30 dias)']].map(([v, t]) => el('option', { value: v, text: t, selected: v === 7 }))),
     el('small', { class: 'lu-help', text: 'Só leads com mensagem nessa janela.' }))],
   janela_horas: () => [el('label', { class: 'lu-field' }, 'Conversas das últimas',
-    el('select', { name: 'janela_horas' }, ...[[6, '6 horas'], [24, '24 horas'], [48, '2 dias'], [72, '3 dias'], [168, '7 dias']].map(([v, t]) => el('option', { value: v, text: t, selected: v === 24 }))))],
+    el('select', { name: 'janela_horas' }, ...[[6, '6 horas'], [24, '24 horas'], [48, '2 dias'], [72, '3 dias'], [168, '7 dias'], [336, '14 dias'], [720, 'Último mês (30 dias)']].map(([v, t]) => el('option', { value: v, text: t, selected: v === 24 }))))],
   max_leads: () => [el('label', { class: 'lu-field' }, 'Máx. de leads por conta',
     el('input', { type: 'number', name: 'max_leads', min: 1, max: 300, value: 100, inputmode: 'numeric' }))],
   reanalisar: () => [el('label', { class: 'lu-toggle lu-auto-wide' }, el('input', { class: 'lu-check', type: 'checkbox', name: 'reanalisar' }),
