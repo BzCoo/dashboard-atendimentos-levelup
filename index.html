@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611041607">
-<link rel="stylesheet" href="assets/app.css?v=202611041607">
-<script type="module" src="assets/js/main.js?v=202611041607"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611041619">
+<link rel="stylesheet" href="assets/app.css?v=202611041619">
+<script type="module" src="assets/js/main.js?v=202611041619"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -617,18 +617,18 @@
   </div>
   <div class="lu-auto">
     <div class="lu-shell"><div class="lu-core">
-      <h3>Nova execução</h3>
+      <div class="lu-auto-head"><div class="tt"><h3>Nova execução</h3><p>Escolha a automação, os filtros e as contas.</p></div></div>
       <form class="lu-form f-auto" novalidate>
         <label class="lu-field">Automação
           <select name="tipo" class="f-tipo"></select>
         </label>
         <p class="lu-help slot-desc"></p>
-        <div class="lu-grid-2 slot-campos"></div>
-        <fieldset class="lu-fs">
+        <div class="lu-auto-campos slot-campos"></div>
+        <fieldset class="lu-fs lu-auto-fs">
           <legend>Contas</legend>
-          <div class="lu-lojas-bar">
-            <label class="lu-search lu-search-sm"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
-              <input type="search" class="f-lojas-q" name="busca-contas" autocomplete="off" placeholder="Buscar conta…" aria-label="Buscar conta"></label>
+          <label class="lu-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+            <input type="search" class="f-lojas-q" name="busca-contas" autocomplete="off" placeholder="Buscar conta…" aria-label="Buscar conta"></label>
+          <div class="lu-auto-cbar">
             <span class="lu-count f-contagem" aria-live="polite">Nenhuma selecionada</span>
             <span class="lu-lojas-acts">
               <button class="lu-link act-todas" type="button">Marcar todas</button>
@@ -637,15 +637,17 @@
           </div>
           <div class="lu-checklist lu-auto-contas f-lojas" role="group" aria-label="Contas"></div>
         </fieldset>
-        <label class="lu-toggle f-sim-box"><input class="lu-check f-sim" type="checkbox" checked> <span><b>Simulação</b>: mostra o que seria feito sem alterar o CRM nem o banco</span></label>
-        <p class="lu-auto-est slot-est" aria-live="polite"></p>
+        <label class="lu-auto-sim f-sim-box"><input class="lu-check f-sim" type="checkbox" checked>
+          <span><b>Simulação</b><small>Mostra o que seria feito, sem alterar o CRM nem o banco</small></span></label>
         <div class="lu-msg erro" role="alert" hidden></div>
-        <div class="lu-actions" style="justify-content:flex-start"><button class="lu-primary act-rodar" type="submit">Rodar automação</button></div>
+        <div class="lu-auto-run">
+          <button class="lu-primary act-rodar" type="submit">Rodar automação</button>
+          <p class="lu-auto-est slot-est" aria-live="polite"></p>
+        </div>
       </form>
     </div></div>
     <div class="lu-shell"><div class="lu-core slot-exec">
-      <h3>Execução</h3>
-      <p class="lu-help">Escolha uma automação e rode, ou abra uma do histórico abaixo.</p>
+      <div class="lu-auto-head"><div class="tt"><h3>Execução</h3><p>Rode uma automação ou abra uma do histórico abaixo.</p></div></div>
     </div></div>
   </div>
   <div class="lu-section-head" style="margin:48px 0 18px">

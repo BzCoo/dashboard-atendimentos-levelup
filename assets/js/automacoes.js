@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, fmt, toast, copiar } from './core.js?v=202611041607';
+import { $, $$, el, clone, rpc, fmt, toast, copiar } from './core.js?v=202611041619';
 
 /* Aba "Automações" (só admins): pede ao n8n, acompanha com barra de progresso e mostra o relatório por conta */
 
@@ -45,11 +45,11 @@ const CAMPOS = {
     el('small', { class: 'lu-help', text: 'Só leads com mensagem nessa janela.' }))],
   janela_horas: () => [el('label', { class: 'lu-field' }, 'Conversas das últimas',
     el('select', { name: 'janela_horas' }, ...[[6, '6 horas'], [24, '24 horas'], [48, '2 dias'], [72, '3 dias'], [168, '7 dias']].map(([v, t]) => el('option', { value: v, text: t, selected: v === 24 }))))],
-  max_leads: () => [el('label', { class: 'lu-field' }, 'Máximo de leads por conta',
+  max_leads: () => [el('label', { class: 'lu-field' }, 'Máx. de leads por conta',
     el('input', { type: 'number', name: 'max_leads', min: 1, max: 300, value: 100, inputmode: 'numeric' }))],
-  reanalisar: () => [el('label', { class: 'lu-toggle', style: 'align-self:end' }, el('input', { class: 'lu-check', type: 'checkbox', name: 'reanalisar' }),
+  reanalisar: () => [el('label', { class: 'lu-toggle lu-auto-wide' }, el('input', { class: 'lu-check', type: 'checkbox', name: 'reanalisar' }),
     ' Reanalisar leads já analisados (sem mensagem nova)')],
-  enviar: () => [el('label', { class: 'lu-toggle', style: 'align-self:end' }, el('input', { class: 'lu-check', type: 'checkbox', name: 'enviar' }),
+  enviar: () => [el('label', { class: 'lu-toggle lu-auto-wide' }, el('input', { class: 'lu-check', type: 'checkbox', name: 'enviar' }),
     ' Também enviar no WhatsApp de sempre')],
 };
 
@@ -207,45 +207,52 @@ export const renderAutomacoes = async (main, ctx) => {
   const desenhar = (ex) => {
     const cat = catalogo.find((c) => c.tipo === ex.tipo) || {};
     const itens = ex.itens || [], est = estimativa(ex, catalogo);
-    const head = el('div', { class: 'lu-card-head' },
-      el('div', {}, el('h3', {}, ex.nome || ex.tipo, ' ', ex.simulacao ? el('span', { class: 'lu-pill', text: 'simulação' }) : ''),
-        el('p', { text: '#' + ex.id + ' · pedida por ' + (ex.por || '—') + ' em ' + fmt.dt(ex.criado_em) + (ex.params?.inicio ? ' · ' + fmt.dmy(ex.params.inicio) + (ex.params.fim && ex.params.fim !== ex.params.inicio ? ' a ' + fmt.dmy(ex.params.fim) : '') : '') })),
+    const periodo = ex.params?.inicio ? fmt.dmy(ex.params.inicio) + (ex.params.fim && ex.params.fim !== ex.params.inicio ? ' a ' + fmt.dmy(ex.params.fim) : '') : '';
+    const head = el('div', { class: 'lu-auto-head' },
+      el('div', { class: 'tt' },
+        el('h3', {}, ex.nome || ex.tipo, ex.simulacao ? el('span', { class: 'lu-pill', text: 'simulação' }) : ''),
+        el('p', { text: ['#' + ex.id, 'pedida por ' + (ex.por || '—'), fmt.dt(ex.criado_em), periodo].filter(Boolean).join(' · ') })),
       pill(ex.status));
     const blocos = [head];
     if (ex.status === 'pendente') {
-      blocos.push(el('p', { class: 'lu-help', text: Number(ex.na_fila_antes) ? 'Na fila: ' + ex.na_fila_antes + (Number(ex.na_fila_antes) === 1 ? ' automação antes desta.' : ' automações antes desta.') : 'Aguardando o n8n pegar (até 1 minuto).' }));
+      blocos.push(el('p', { class: 'lu-auto-aviso', text: Number(ex.na_fila_antes) ? 'Na fila: ' + ex.na_fila_antes + (Number(ex.na_fila_antes) === 1 ? ' automação antes desta.' : ' automações antes desta.') : 'Aguardando o n8n pegar (até 1 minuto).' }));
     }
     if (!ehFim(ex.status) || ex.status === 'cancelado' || ex.status === 'falhou') {
       const pct = ehFim(ex.status) ? 100 * est.feitos / est.total : est.pct;
-      blocos.push(el('div', { class: 'lu-progress', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(pct), 'aria-label': 'Progresso' },
-        el('i', { style: 'width:' + pct.toFixed(1) + '%' })));
-      const linha = [fmt.int(est.feitos) + ' de ' + fmt.int(est.total) + (est.total === 1 ? ' conta' : ' contas'), Math.round(pct) + '%'];
-      if (ex.status === 'executando') {
-        linha.push('rodando há ' + dur(segEntre(ex.iniciado_em)));
-        linha.push('faltam cerca de ' + dur(est.resta));
-      }
-      blocos.push(el('p', { class: 'lu-auto-linha', text: linha.join(' · ') }));
-      if (est.atual) blocos.push(el('p', { class: 'lu-help' }, 'Agora: ', el('b', { text: String(est.atual.rotulo).trim() }), ' · há ' + dur(est.atual.decorrido) + ' (previsto ' + dur(est.atual.previsto) + ')'));
+      const lado = [];
+      if (ex.status === 'executando') lado.push('rodando há ' + dur(segEntre(ex.iniciado_em)), 'faltam cerca de ' + dur(est.resta));
+      const prog = el('div', { class: 'lu-auto-prog' },
+        el('div', { class: 'topo' },
+          el('b', { class: 'pct', text: Math.round(pct) + '%' }),
+          el('span', { text: fmt.int(est.feitos) + ' de ' + fmt.int(est.total) + (est.total === 1 ? ' conta' : ' contas') }),
+          lado.length ? el('span', { class: 'eta', text: lado.join(' · ') }) : ''),
+        el('div', { class: 'lu-progress', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(pct), 'aria-label': 'Progresso' },
+          el('i', { style: 'width:' + pct.toFixed(1) + '%' })));
+      const rodape = el('div', { class: 'rod' },
+        est.atual ? el('span', {}, 'Agora: ', el('b', { text: String(est.atual.rotulo).trim() }), ' · há ' + dur(est.atual.decorrido) + ' (previsto ' + dur(est.atual.previsto) + ')') : el('span'),
+        !ehFim(ex.status) ? el('button', { class: 'lu-ghost sm act-cancelar-exec', type: 'button', text: 'Cancelar as que faltam' }) : '');
+      prog.append(rodape);
+      blocos.push(prog);
     }
     if (ex.erro) blocos.push(el('div', { class: 'lu-fail', text: ex.erro }));
     if (ehFim(ex.status)) {
       const t = totais(ex.tipo, itens), nOk = itens.filter((i) => i.status === 'ok').length, nF = itens.filter((i) => i.status === 'falhou').length, nI = itens.filter((i) => i.status === 'ignorado').length;
       blocos.push(el('div', { class: 'lu-auto-tot' },
         ...[['Contas ok', nOk], ...(nF ? [['Com falha', nF]] : []), ...(nI ? [['Puladas', nI]] : []), ...t, ['Duração', null]].map(([k, v]) =>
-          el('div', {}, el('b', { text: v === null ? dur(segEntre(ex.iniciado_em, ex.concluido_em)) : fmt.int(v) }), el('span', { text: k })))));
+          el('div', { class: k === 'Com falha' ? 'bad' : '' }, el('b', { text: v === null ? dur(segEntre(ex.iniciado_em, ex.concluido_em)) : fmt.int(v) }), el('span', { text: k })))));
     }
-    if (!ehFim(ex.status)) blocos.push(el('div', { class: 'lu-actions', style: 'justify-content:flex-start' }, el('button', { class: 'lu-ghost sm act-cancelar-exec', type: 'button', text: 'Cancelar as contas que faltam' })));
     if (ex.status === 'concluido' && ex.simulacao) {
       blocos.push(el('div', { class: 'lu-auto-real' }, el('p', { text: 'Gostou do resultado da simulação? Rode a mesma automação de verdade nas mesmas contas.' }),
         el('button', { class: 'lu-primary act-real', type: 'button', text: 'Executar de verdade' })));
     }
     // Contas
+    blocos.push(el('div', { class: 'lu-auto-sec' }, el('span', { text: 'Contas' }), el('small', { text: fmt.int(itens.length) })));
     blocos.push(el('div', { class: 'lu-auto-itens' }, ...itens.map((i) => {
       const det = i.status === 'ok' ? detalheItem(ex.tipo, i) : null;
-      const linha = el('div', { class: 'lu-auto-item ' + i.status },
+      const linha = el('div', { class: 'lu-auto-item' + (det ? '' : ' ' + i.status) },
         el('div', { class: 'nm' }, el('b', { text: String(i.rotulo).trim() }), el('small', { text: resumoItem(ex.tipo, i) || (i.status === 'executando' ? 'Rodando…' : i.status === 'pendente' ? 'Aguardando a vez' : '') })),
         el('span', { class: 'tm', text: i.iniciado_em ? dur(segEntre(i.iniciado_em, i.concluido_em)) : '' }), pill(i.status));
-      return det ? el('details', { class: 'lu-auto-det-box' }, el('summary', {}, linha), det) : linha;
+      return det ? el('details', { class: 'lu-auto-det-box ' + i.status }, el('summary', {}, linha), el('div', { class: 'corpo' }, det)) : linha;
     })));
     slotExec.replaceChildren(...blocos);
     $('.act-cancelar-exec', slotExec)?.addEventListener('click', async (e) => {
