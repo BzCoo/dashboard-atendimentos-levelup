@@ -56,9 +56,11 @@ nomes das etapas do pipeline principal no CRM uma vez por dia (ou quando o admin
 
 ## Atualização dos dados
 
-O fluxo **GERAL - Atualizacao de todas as contas** (n8n) carrega o CRM para o banco à 01h e de hora em hora
-das 8h às 22h (horário de Brasília). Cada carga é incremental (desde a anterior, com 6h de folga) e usa a trava
-`sync-geral-contas` para nunca rodar duas ao mesmo tempo. Só a carga da madrugada dispara a automação de pipeline.
+O fluxo **GERAL - Atualizacao de todas as contas** (n8n) carrega o CRM para o banco à 01h e a cada 2 horas
+das 8h às 22h (8h, 10h, …, 22h, horário de Brasília). Cada carga é incremental (desde a anterior, com 6h de folga) e usa a
+trava `sync-geral-contas` (1h50) para nunca rodar duas ao mesmo tempo; se der erro, a trava é liberada na hora. Conta ativa
+sem configuração completa (ex.: sem token) é pulada em vez de interromper a carga. Só a carga da madrugada dispara o
+Pipeline Inteligente, que depende de crédito na OpenAI: sem crédito ele marca a conta como falha ("IA não respondeu").
 
 ## Saúde dos dados, conversão e cache
 

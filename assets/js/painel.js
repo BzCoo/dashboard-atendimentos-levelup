@@ -1,6 +1,6 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611041557';
-import { montarFiltros } from './filtros.js?v=202611041557';
-import * as G from './charts.js?v=202611041557';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611041607';
+import { montarFiltros } from './filtros.js?v=202611041607';
+import * as G from './charts.js?v=202611041607';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -235,14 +235,14 @@ export const renderPainel = async (main, ctx) => {
     lojas: rpc('atend_lojas').then((r) => {
       const carga = r?.[0]?.ultima_carga;
       $('.slot-carga', main).textContent = carga ? fmt.dt(carga) : '—';
-      // Carga: 01h e de hora em hora das 8h às 22h. Avisa quando o período chega até dados ainda não carregados.
+      // Carga: 01h e a cada 2 horas das 8h às 22h. Avisa quando o período chega até dados ainda não carregados.
       if (!carga) return;
       const sp = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d);
       const diaCarga = sp(new Date(carga)), hojeSp = sp(new Date());
       const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(new Date(carga));
       if (f.fim >= diaCarga) {
         const av = $('.slot-aviso-carga', main);
-        if (diaCarga === hojeSp) av.replaceChildren(el('b', { text: 'Hoje ainda está em andamento. ' }), 'Os dados vão até ' + hora + '; o painel é atualizado de hora em hora, das 8h às 22h.');
+        if (diaCarga === hojeSp) av.replaceChildren(el('b', { text: 'Hoje ainda está em andamento. ' }), 'Os dados vão até ' + hora + '; o painel é atualizado a cada 2 horas, das 8h às 22h.');
         else av.replaceChildren(el('b', { text: 'Período inclui dias ainda não carregados. ' }), 'Os dados vão até ' + fmt.dm(diaCarga) + ' às ' + hora + '; o restante entra na próxima atualização.');
         av.hidden = false;
       }

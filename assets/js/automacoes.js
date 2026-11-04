@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, fmt, toast, copiar } from './core.js?v=202611041557';
+import { $, $$, el, clone, rpc, fmt, toast, copiar } from './core.js?v=202611041607';
 
 /* Aba "Automações" (só admins): pede ao n8n, acompanha com barra de progresso e mostra o relatório por conta */
 

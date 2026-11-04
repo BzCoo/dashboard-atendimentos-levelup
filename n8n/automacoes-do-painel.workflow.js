@@ -76,6 +76,7 @@ else if(it._tipo==='recarregar'){
 }else if(it._tipo==='pipeline'){
   if(vazio){status='falhou';erro='O Pipeline nao devolveu resultado';}
   else resultado={simulacao:it._sim,analisados:Number(r.analyzed_count)||0,selecionados:Number(r.selected_count)||0,movidos:Number(r.movidos)||0,moveria:Number(r.moveria)||0,revisao_humana:Number(r.revisao_humana)||0,sem_conversa:Number(r.sem_conversa)||0,fora_de_etapa:Number(r.fora_de_etapa)||0,reconciliados:Number(r.reconciliados)||0,detalhes:Array.isArray(r.detalhes)?r.detalhes.slice(0,300):[]};
+  if(r.worker_status==='failed'){status='falhou';erro=r.worker_error||'O Pipeline falhou';}
 }else if(it._tipo==='aguardando'){
   if(vazio){status='ignorado';erro='A automacao de atendimento nao esta ligada nesta conta';}
   else{
