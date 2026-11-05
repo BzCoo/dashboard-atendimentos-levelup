@@ -55,6 +55,15 @@ Deno.serve(async (req) => {
     if (existente) {
       userId = existente as string;
       jaExistia = true; // usuário já tinha login (ex.: outro painel): mantém a senha dele
+      // Login antigo que nunca foi confirmado nem usado: confirma o e-mail e aplica a senha informada agora
+      const { data: u } = await admin.auth.admin.getUserById(userId);
+      if (u?.user && !u.user.email_confirmed_at && !u.user.last_sign_in_at) {
+        const attrs: Record<string, unknown> = { email_confirm: true };
+        if (senha.length >= 8) attrs.password = senha;
+        const { error: uErr } = await admin.auth.admin.updateUserById(userId, attrs);
+        if (uErr) return json({ erro: "Não foi possível ativar o login existente: " + uErr.message }, 400);
+        jaExistia = senha.length < 8;
+      }
     } else {
       if (senha.length < 8) return json({ erro: "A senha precisa ter pelo menos 8 caracteres." }, 400);
       const { data: criado, error: cErr } = await admin.auth.admin.createUser({
@@ -76,7 +85,7 @@ Deno.serve(async (req) => {
     if (senha.length < 8) return json({ erro: "A senha precisa ter pelo menos 8 caracteres." }, 400);
     const { data: alvo } = await admin.rpc("atend_service_membro_user", { p_membro: membro });
     if (!alvo) return json({ erro: "Acesso não encontrado." }, 404);
-    const { error: sErr } = await admin.auth.admin.updateUserById(alvo as string, { password: senha });
+    const { error: sErr } = await admin.auth.admin.updateUserById(alvo as string, { password: senha, email_confirm: true });
     if (sErr) return json({ erro: "Não foi possível trocar a senha: " + sErr.message }, 400);
     await admin.rpc("atend_service_registrar", { p_admin: adminId, p_acao: "redefinir_senha", p_detalhe: { membro } });
     return json({ ok: true });
