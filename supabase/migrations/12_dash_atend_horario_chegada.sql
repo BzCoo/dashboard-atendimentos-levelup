@@ -12,3 +12,6 @@
 --   atend_chegada(..., p_fontes text[] DEFAULT NULL) e dash_atend._atend_chegada(..., p_fontes).
 --   p_fontes = NULL traz todas; '' representa "Sem fonte". A chave do cache inclui as fontes.
 --   A saída traz 'fontes' [{fonte, leads}], contada ANTES do filtro de fonte (alimenta as caixinhas do painel).
+
+-- Modo 'corrido' (migração dash_atend_chegada_periodo_corrido): conta seguido de p_inicio + p_de até p_fim + p_ate
+--   (ex.: 11/11 18:00 até 12/11 10:00), em vez de aplicar a faixa de horário dia a dia.

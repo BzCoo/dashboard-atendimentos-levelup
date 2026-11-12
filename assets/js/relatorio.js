@@ -1,7 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611121207';
-import { diagnosticar, textoPlano } from './plano.js?v=202611121207';
-import { etapasVisiveis } from './charts.js?v=202611121207';
-import { montarFiltros } from './filtros.js?v=202611121207';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611121216';
+import { diagnosticar, textoPlano } from './plano.js?v=202611121216';
+import { etapasVisiveis } from './charts.js?v=202611121216';
+import { montarFiltros } from './filtros.js?v=202611121216';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 

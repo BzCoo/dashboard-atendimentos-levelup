@@ -1,5 +1,5 @@
-import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121207';
-import { chegada as grafico, falha } from './charts.js?v=202611121207';
+import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121216';
+import { chegada as grafico, falha } from './charts.js?v=202611121216';
 
 /* Cartão "Horário de chegada dos leads": faixa de horário com minuto (entre / depois / antes / às) e dias da semana.
    Os números vêm de atend_chegada (banco), para qualquer loja ou todas. */
@@ -49,6 +49,10 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
     if (!datas.de || !datas.ate) return 'Escolha as duas datas.';
     if (datas.de > datas.ate) return 'A data inicial é depois da final.';
     if ((Date.parse(datas.ate) - Date.parse(datas.de)) / 864e5 > 366) return 'Escolha no máximo 1 ano.';
+    if (st.modo === 'corrido') {
+      if (datas.de === datas.ate && st.de && st.ate && st.de >= st.ate) return 'No mesmo dia, o horário final precisa ser depois do inicial.';
+      return null;
+    }
     if (st.modo !== 'entre' && !st.de) return 'Escolha o horário.';
     return null;
   };
@@ -60,6 +64,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   };
   const texto = () => {
     const { modo, de, ate } = st;
+    if (modo === 'corrido') return 'de ' + fmt.dmy(datas.de) + ' às ' + (hm(de) || '0h') + ' até ' + fmt.dmy(datas.ate) + ' às ' + (ate ? hm(ate) : '24h') + NOME_DIAS[st.dias];
     const b = modo === 'depois' ? 'depois das ' + hm(de) : modo === 'antes' ? 'antes das ' + hm(de)
       : modo === 'em' ? 'entre ' + hm(de.slice(0, 2) + ':00') + ' e ' + Number(de.slice(0, 2)) + 'h59'
       : !de && !ate ? 'em qualquer horário' : 'das ' + (hm(de) || '0h') + ' às ' + (ate ? hm(ate) : '24h');
@@ -100,14 +105,19 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   dd.addEventListener('keydown', (e) => { if (e.key === 'Escape') { dd.open = false; $('summary', dd).focus(); } });
   const sincronizar = () => {
     sModo.value = st.modo; iDe.value = st.de; iAte.value = st.ate; sDias.value = st.dias;
-    $('.c-ate-box', card).hidden = st.modo !== 'entre';
-    $('.c-dica', card).hidden = st.modo !== 'entre';
-    $('.c-de-rot', card).textContent = st.modo === 'entre' ? 'De' : 'Horário';
+    const faixa = st.modo === 'entre' || st.modo === 'corrido';
+    $('.c-ate-box', card).hidden = !faixa;
+    $('.c-dica', card).hidden = !faixa;
+    $('.c-de-rot', card).textContent = st.modo === 'corrido' ? 'Começa às' : st.modo === 'entre' ? 'De' : 'Horário';
+    $('.c-ate-rot', card).textContent = st.modo === 'corrido' ? 'Termina às' : 'Até';
+    $('.c-dica', card).textContent = st.modo === 'corrido'
+      ? 'Período corrido: começa na data inicial nesse horário e vai até a data final no horário de término (ex.: ontem 18h até hoje 10h).'
+      : 'Deixe em branco para pegar desde 0h ou até a meia-noite.';
     resumoFontes();
   };
 
   const desenhar = () => {
-    $('.slot-cheg-desc', card).textContent = 'De ' + fmt.dmy(datas.de) + ' a ' + fmt.dmy(datas.ate) + ': leads que chegaram ' + texto() + textoFontes() + '. Pelo horário da 1ª mensagem do cliente (horário de Brasília).';
+    $('.slot-cheg-desc', card).textContent = (st.modo === 'corrido' ? '' : 'De ' + fmt.dmy(datas.de) + ' a ' + fmt.dmy(datas.ate) + ': ') + (st.modo === 'corrido' ? 'Leads' : 'leads') + ' que chegaram ' + texto() + textoFontes() + '. Pelo horário da 1ª mensagem do cliente (horário de Brasília).';
     if (!dados) return;
     montarFontes();
     const r = dados.resumo || {}, n = Number(r.leads) || 0, tot = Number(dados.total) || 0;
@@ -132,7 +142,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
     try {
       const d = await rpc('atend_chegada', {
         p_inicio: datas.de, p_fim: datas.ate, p_conta: filtros.conta || null, p_modo: st.modo,
-        p_de: st.de || '00:00', p_ate: st.modo === 'entre' ? (st.ate || '24:00') : '24:00', p_dias: st.dias,
+        p_de: st.de || '00:00', p_ate: (st.modo === 'entre' || st.modo === 'corrido') ? (st.ate || '24:00') : '24:00', p_dias: st.dias,
         p_fontes: st.fontes.length ? st.fontes : null,
       });
       if (meu !== pedido) return;
@@ -150,7 +160,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   };
   [sModo, sDias].forEach((s) => s.addEventListener('change', mudou));
   [iDe, iAte].forEach((i) => i.addEventListener('change', mudou));
-  const mudouDatas = () => { datas = { de: iD1.value, ate: iD2.value }; marcarAtalho(); clearTimeout(timer); timer = setTimeout(carregar, 350); };
+  const mudouDatas = () => { datas = { de: iD1.value, ate: iD2.value }; marcarAtalho(); if (dados) desenhar(); clearTimeout(timer); timer = setTimeout(carregar, 350); };
   [iD1, iD2].forEach((i) => i.addEventListener('change', mudouDatas));
   $('.lu-cheg-atalhos', card).addEventListener('click', (e) => {
     const b = e.target.closest('button[data-p]'); if (!b) return;
