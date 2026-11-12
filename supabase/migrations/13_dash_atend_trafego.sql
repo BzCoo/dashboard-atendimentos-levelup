@@ -1,0 +1,9 @@
+-- Leads do tráfego (opção do relatório): tudo que veio do Instagram ou do Facebook, qualquer variação de fonte.
+-- Aplicada como migração "dash_atend_trafego".
+--   public.atend_trafego(p_inicio, p_fim, p_conta, p_comparar) -> cache em dash_atend.cache -> dash_atend._atend_trafego(...)
+--   Fonte = opportunity_source do GHL ou, na falta, a rede do anúncio (ghl_lead_ad_attribution).
+--   Rede: fonte ~* 'insta' -> instagram; fonte ~* '(face|fb|meta)' -> facebook
+--   (ex.: "Instagram", "Instagram (anúncio)", "Trafego Instagram", "DM Instagram", "Facebook", "Facebook (anúncio)").
+--   Saída: atual/anterior {leads, leads_total, instagram, facebook, respondidos, dentro_sla, sem_resposta, tempo_medio_min, vendas},
+--          fontes [{fonte, rede, leads}] e por_loja [...] do período atual.
+-- Só authenticated executa o wrapper; a função interna não é exposta.

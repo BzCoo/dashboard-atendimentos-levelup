@@ -1,7 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611121216';
-import { diagnosticar, textoPlano } from './plano.js?v=202611121216';
-import { etapasVisiveis } from './charts.js?v=202611121216';
-import { montarFiltros } from './filtros.js?v=202611121216';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611121229';
+import { diagnosticar, textoPlano } from './plano.js?v=202611121229';
+import { etapasVisiveis } from './charts.js?v=202611121229';
+import { montarFiltros } from './filtros.js?v=202611121229';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
@@ -28,6 +28,26 @@ const montarTexto = (d, o, escopo) => {
     L.push(`Custo por atendimento: *${fmt.brl(t.custo_atend)}*` + (o.comp && isNum(t.custo_atend_ant) ? ` (antes ${fmt.brl(t.custo_atend_ant)})` : ''));
     if (isNum(t.custo_venda)) L.push(`Custo por venda: ${fmt.brl(t.custo_venda)}`);
     if (Number(t.empresas_sem_dados)) L.push(`_Sem dados do Meta no período: ${(t.nomes_sem_dados || []).join(', ')}_`);
+  }
+  if (o.traf && d.traf?.atual) {
+    const a = d.traf.atual, b = d.traf.anterior || {}, n = Number(a.leads) || 0, tot = Number(a.leads_total) || 0;
+    const varPct = Number(b.leads) ? (100 * (n - Number(b.leads))) / Number(b.leads) : null;
+    L.push('', '📣 *LEADS DO TRÁFEGO (INSTAGRAM + FACEBOOK)*');
+    L.push(`Leads do tráfego: *${fmt.int(n)}*` + comp(varPct, 'pct') + (tot ? ` — ${fmt.pct((100 * n) / tot)} de todos os leads` : ''));
+    if (n) {
+      L.push(`Instagram: ${fmt.int(a.instagram)} | Facebook: ${fmt.int(a.facebook)}` + (o.comp && (Number(b.instagram) || Number(b.facebook)) ? ` (antes ${fmt.int(b.instagram)} e ${fmt.int(b.facebook)})` : ''));
+      const tr = (100 * Number(a.respondidos)) / n, trA = Number(b.leads) ? (100 * Number(b.respondidos)) / Number(b.leads) : null;
+      const ts = Number(a.respondidos) ? (100 * Number(a.dentro_sla)) / Number(a.respondidos) : null, tsA = Number(b.respondidos) ? (100 * Number(b.dentro_sla)) / Number(b.respondidos) : null;
+      L.push(`Respondidos: ${fmt.pct(tr)}` + comp(isNum(trA) ? tr - trA : null, 'pp') + (isNum(ts) ? ` | No SLA: ${fmt.pct(ts)}` + comp(isNum(tsA) ? ts - tsA : null, 'pp') : '') + (isNum(a.tempo_medio_min) ? ` | 1ª resposta média: ${fmt.min(a.tempo_medio_min)}` : ''));
+      L.push(`Sem resposta: ${fmt.int(a.sem_resposta)}` + comp(Number(a.sem_resposta) - Number(b.sem_resposta || 0), 'abs') + (Number(a.vendas) || Number(b.vendas) ? ` | Vendas: ${fmt.int(a.vendas)}` + comp(Number(a.vendas) - Number(b.vendas || 0), 'abs') : ''));
+      const fs = (d.traf.fontes || []).filter((x) => Number(x.leads) > 0);
+      if (fs.length > 1) L.push('_Fontes somadas: ' + fs.map((x) => `${x.fonte} ${fmt.int(x.leads)}`).join(', ') + '_');
+      const lj = (d.traf.por_loja || []).filter((x) => Number(x.leads) > 0);
+      if (escopo.multi && lj.length > 1) {
+        L.push('Por loja:');
+        lj.slice(0, 10).forEach((x, i) => L.push(`${i + 1}. ${x.loja} — ${fmt.int(x.leads)} (IG ${fmt.int(x.instagram)} · FB ${fmt.int(x.facebook)})`));
+      }
+    }
   }
   if (o.ads && d.ads?.veiculos?.length) {
     L.push('', '🚗 *VEÍCULOS QUE MAIS TROUXERAM LEADS*');
@@ -95,7 +115,7 @@ export const renderRelatorio = async (main, ctx) => {
   const escopo = Object.assign(new String(nomeLoja || 'Loja'), { multi });
 
   const texto = $('.o-texto', main), prev = $('.o-preview', main), wa = $('.act-wa', main);
-  const opts = { comp: $('.o-comp', main), funil: $('.o-funil', main), vend: $('.o-vend', main), lojas: $('.o-lojas', main), horas: $('.o-horas', main), inv: $('.o-inv', main), ads: $('.o-ads', main), plano: $('.o-plano', main), obs: $('.o-obs', main) };
+  const opts = { comp: $('.o-comp', main), funil: $('.o-funil', main), vend: $('.o-vend', main), lojas: $('.o-lojas', main), horas: $('.o-horas', main), inv: $('.o-inv', main), ads: $('.o-ads', main), traf: $('.o-traf', main), plano: $('.o-plano', main), obs: $('.o-obs', main) };
   if (!multi) opts.lojas.closest('label').hidden = true;
   $('.o-hora', main).textContent = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date());
 
@@ -112,12 +132,14 @@ export const renderRelatorio = async (main, ctx) => {
   const argsC = { ...args, p_comparar: f.comparar || 'anterior' };
   let dados;
   try {
-    const [kpis, etapas, vendedores, horarios, porLoja, inv, ads] = await Promise.all([
+    const [kpis, etapas, vendedores, horarios, porLoja, inv, ads, traf] = await Promise.all([
       rpc('atend_kpis', argsC), rpc('atend_etapas', argsC), rpc('atend_vendedores', argsC), rpc('atend_horarios', args),
       multi ? rpc('atend_por_loja', { p_inicio: f.inicio, p_fim: f.fim, p_comparar: argsC.p_comparar }) : Promise.resolve([]),
       rpc('atend_investimento', argsC).catch(() => null), rpc('atend_anuncios', args).catch(() => null),
+      rpc('atend_trafego', argsC).catch(() => null),
     ]);
-    dados = { kpis: kpis?.[0], etapas, vendedores, horarios, porLoja, inv, ads };
+    dados = { kpis: kpis?.[0], etapas, vendedores, horarios, porLoja, inv, ads, traf };
+    if (!traf?.atual || !Number(traf.atual.leads_total)) opts.traf.closest('label').hidden = true;
     if (!inv?.total || !Number(inv.total.empresas)) opts.inv.closest('label').hidden = true;
     if (!ads?.veiculos?.length) opts.ads.closest('label').hidden = true;
     if (!dados.kpis) throw new Error('Sem dados para o período.');
@@ -130,7 +152,7 @@ export const renderRelatorio = async (main, ctx) => {
   texto.addEventListener('input', () => { editado = true; }, { once: true });
   const gerar = (forcar) => {
     if (editado && !forcar) return;
-    texto.value = montarTexto(dados, { comp: opts.comp.checked, funil: opts.funil.checked, vend: opts.vend.checked, lojas: opts.lojas.checked, horas: opts.horas.checked, inv: opts.inv.checked, ads: opts.ads.checked, plano: opts.plano.checked, meta: metaPara(ctx.metas, f.conta), obs: opts.obs.value.trim() }, escopo);
+    texto.value = montarTexto(dados, { comp: opts.comp.checked, funil: opts.funil.checked, vend: opts.vend.checked, lojas: opts.lojas.checked, horas: opts.horas.checked, inv: opts.inv.checked, ads: opts.ads.checked, traf: opts.traf.checked, plano: opts.plano.checked, meta: metaPara(ctx.metas, f.conta), obs: opts.obs.value.trim() }, escopo);
     texto.disabled = false; editado = false;
     texto.addEventListener('input', () => { editado = true; }, { once: true });
     atualizarSaida();
@@ -139,7 +161,7 @@ export const renderRelatorio = async (main, ctx) => {
     if (editado) { toast('Você editou o texto. Use “Gerar de novo” para aplicar as opções (suas edições serão substituídas).'); return; }
     gerar(true);
   };
-  for (const k of ['comp', 'funil', 'vend', 'lojas', 'horas', 'inv', 'ads', 'plano']) opts[k].addEventListener('change', aoMudarOpcao);
+  for (const k of ['comp', 'funil', 'vend', 'lojas', 'horas', 'inv', 'ads', 'traf', 'plano']) opts[k].addEventListener('change', aoMudarOpcao);
   opts.obs.addEventListener('input', aoMudarOpcao);
   $('.act-gerar', main).addEventListener('click', () => gerar(true));
   $('.act-copiar', main).addEventListener('click', () => copiar(texto.value));
