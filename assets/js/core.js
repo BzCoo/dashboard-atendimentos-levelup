@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611121139';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611121148';
 
 /* Volta do link de "Esqueci minha senha": lido antes do Supabase limpar o endereço */
 export const RETORNO_AUTH = (() => {
@@ -95,6 +95,7 @@ const traduzErro = (e) => {
   if (/nao autorizado/i.test(m)) return 'Seu login não tem acesso a este painel.';
   if (/Somente administradores/i.test(m)) return 'Somente administradores podem fazer isso.';
   if (/JWT|token/i.test(m)) return 'Sua sessão expirou. Entre novamente.';
+  if (/statement timeout|canceling statement/i.test(m)) return 'O banco demorou para responder (acabou de receber dados novos). Atualize a página em alguns segundos.';
   return m || 'Não foi possível carregar os dados.';
 };
 /* Se o token de acesso venceu (ex.: PC voltou da suspensão antes da renovação automática),
@@ -106,6 +107,11 @@ export const rpc = async (nome, args = {}) => {
   if (error && /JWT|token/i.test(String(error.message || ''))) {
     const r = await renovar();
     if (!r.error && r.data?.session) ({ data, error } = await sb.rpc(nome, args));
+  }
+  // Banco ocupado (ex.: logo depois de uma carga, com o cache vazio): espera um pouco e tenta de novo, até 2 vezes
+  for (let i = 0; error && /statement timeout|canceling statement/i.test(String(error.message || '')) && i < 2; i++) {
+    await new Promise((r) => setTimeout(r, 1500 + 1500 * i + Math.random() * 1000));
+    ({ data, error } = await sb.rpc(nome, args));
   }
   if (error) throw new Error(traduzErro(error));
   return data;

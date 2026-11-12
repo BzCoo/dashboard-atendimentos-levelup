@@ -1,12 +1,12 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611121139';
-import { renderPainel } from './painel.js?v=202611121139';
-import { renderAcessos } from './acessos.js?v=202611121139';
-import { renderRelatorio } from './relatorio.js?v=202611121139';
-import { renderMetas } from './metas.js?v=202611121139';
-import { renderEtapas } from './etapas.js?v=202611121139';
-import { renderVendedor } from './vendedor.js?v=202611121139';
-import { renderSaude } from './saude.js?v=202611121139';
-import { renderAutomacoes } from './automacoes.js?v=202611121139';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611121148';
+import { renderPainel } from './painel.js?v=202611121148';
+import { renderAcessos } from './acessos.js?v=202611121148';
+import { renderRelatorio } from './relatorio.js?v=202611121148';
+import { renderMetas } from './metas.js?v=202611121148';
+import { renderEtapas } from './etapas.js?v=202611121148';
+import { renderVendedor } from './vendedor.js?v=202611121148';
+import { renderSaude } from './saude.js?v=202611121148';
+import { renderAutomacoes } from './automacoes.js?v=202611121148';
 
 const PAGINAS_ADM = { acessos: ['Acessos', renderAcessos], relatorio: ['Montar relatório', renderRelatorio], metas: ['Metas', renderMetas], etapas: ['Etapas do funil', renderEtapas], saude: ['Saúde dos dados', renderSaude], automacoes: ['Automações', renderAutomacoes] };
 

@@ -1,5 +1,5 @@
-import { $, el, fmt, rpc } from './core.js?v=202611121139';
-import { chegada as grafico, falha } from './charts.js?v=202611121139';
+import { $, el, fmt, rpc } from './core.js?v=202611121148';
+import { chegada as grafico, falha } from './charts.js?v=202611121148';
 
 /* Cartão "Horário de chegada dos leads": faixa de horário com minuto (entre / depois / antes / às) e dias da semana.
    Os números vêm de atend_chegada (banco), para qualquer loja ou todas. */

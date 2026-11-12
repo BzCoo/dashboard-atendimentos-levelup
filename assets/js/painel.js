@@ -1,7 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611121139';
-import { montarFiltros } from './filtros.js?v=202611121139';
-import * as G from './charts.js?v=202611121139';
-import { montarChegada } from './chegada.js?v=202611121139';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611121148';
+import { montarFiltros } from './filtros.js?v=202611121148';
+import * as G from './charts.js?v=202611121148';
+import { montarChegada } from './chegada.js?v=202611121148';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -232,7 +232,6 @@ export const renderPainel = async (main, ctx) => {
   const pronto = (b) => b.classList.remove('sk');
   const desenhar = { spark: null, volume: null, sla: null, etapas: null, horarios: null };
   const cheg = montarChegada(main, { tabela, celulasLead, filtros: f, multi: !(f.conta || (me.lojas || []).length === 1) });
-  cheg.carregar();
 
   const tarefas = {
     lojas: rpc('atend_lojas').then((r) => {
@@ -302,6 +301,7 @@ export const renderPainel = async (main, ctx) => {
 
   const falhas = { serie: ['ch-spark', 'ch-volume', 'ch-sla'], etapas: ['ch-etapas'], horarios: ['ch-horarios'], anuncios: ['ch-veiculos'] };
   const resultados = await Promise.allSettled(Object.values(tarefas));
+  cheg.carregar(); // depois do resto, para não somar mais uma consulta pesada no mesmo instante
   Object.keys(tarefas).forEach((k, i) => {
     if (resultados[i].status !== 'rejected') return;
     const m = resultados[i].reason?.message;

@@ -4,3 +4,5 @@
 --   p_dias 'todos' | 'uteis' | 'sab' | 'dom'
 -- Devolve: total (dias filtrados), resumo da faixa, por_hora (24 horas com a parte na faixa), por_loja e leads (até 2000).
 -- Aplicada pela migration dash_atend_horario_chegada; respeita dash_atend.contas_permitidas(p_conta).
+-- Depois: atend_chegada virou embrulho com cache (dash_atend._atend_chegada faz o cálculo) e
+-- public.atend_service_aquecer(p_fn) monta o cache da visão padrão dos admins; o n8n chama no fim de cada carga.
