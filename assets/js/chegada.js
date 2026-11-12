@@ -1,5 +1,5 @@
-import { $, el, fmt, rpc } from './core.js?v=202611121148';
-import { chegada as grafico, falha } from './charts.js?v=202611121148';
+import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121153';
+import { chegada as grafico, falha } from './charts.js?v=202611121153';
 
 /* Cartão "Horário de chegada dos leads": faixa de horário com minuto (entre / depois / antes / às) e dias da semana.
    Os números vêm de atend_chegada (banco), para qualquer loja ou todas. */
@@ -13,6 +13,11 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   if (!card) return { carregar() {} };
   const sModo = $('.c-modo', card), iDe = $('.c-de', card), iAte = $('.c-ate', card), sDias = $('.c-dias', card);
   const box = $('#ch-chegada', card), boxLojas = $('.lu-cheg-lojas', card);
+  const iD1 = $('.c-d1', card), iD2 = $('.c-d2', card), erro = $('.lu-cheg-erro', card);
+  const hojeSP = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  iD1.max = hojeSP; iD2.max = hojeSP;
+  // Datas do cartão: começam no período do painel e podem ser trocadas só aqui
+  let datas = { de: filtros.inicio, ate: filtros.fim };
 
   let st = { ...PADRAO };
   try { st = { ...PADRAO, ...JSON.parse(localStorage.getItem('lu-chegada2') || '{}') }; } catch { /* sem storage */ }
@@ -32,7 +37,19 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   }) : null;
   boxLojas.hidden = !multi;
 
-  const faixaValida = () => (st.modo === 'entre' ? true : !!st.de);
+  const validar = () => {
+    if (!datas.de || !datas.ate) return 'Escolha as duas datas.';
+    if (datas.de > datas.ate) return 'A data inicial é depois da final.';
+    if ((Date.parse(datas.ate) - Date.parse(datas.de)) / 864e5 > 366) return 'Escolha no máximo 1 ano.';
+    if (st.modo !== 'entre' && !st.de) return 'Escolha o horário.';
+    return null;
+  };
+  const marcarAtalho = () => {
+    $$('.lu-cheg-atalhos button', card).forEach((b) => {
+      const r = b.dataset.p === 'painel' ? [filtros.inicio, filtros.fim] : intervalo(b.dataset.p);
+      b.classList.toggle('on', !!r && r[0] === datas.de && r[1] === datas.ate);
+    });
+  };
   const texto = () => {
     const { modo, de, ate } = st;
     const b = modo === 'depois' ? 'depois das ' + hm(de) : modo === 'antes' ? 'antes das ' + hm(de)
@@ -46,11 +63,12 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   const sincronizar = () => {
     sModo.value = st.modo; iDe.value = st.de; iAte.value = st.ate; sDias.value = st.dias;
     $('.c-ate-box', card).hidden = st.modo !== 'entre';
+    $('.c-dica', card).hidden = st.modo !== 'entre';
     $('.c-de-rot', card).textContent = st.modo === 'entre' ? 'De' : 'Horário';
   };
 
   const desenhar = () => {
-    $('.slot-cheg-desc', card).textContent = 'Leads que chegaram ' + texto() + '. Pelo horário da 1ª mensagem do cliente (horário de Brasília).';
+    $('.slot-cheg-desc', card).textContent = 'De ' + fmt.dmy(datas.de) + ' a ' + fmt.dmy(datas.ate) + ': leads que chegaram ' + texto() + '. Pelo horário da 1ª mensagem do cliente (horário de Brasília).';
     if (!dados) return;
     const r = dados.resumo || {}, n = Number(r.leads) || 0, tot = Number(dados.total) || 0;
     put('c-leads', fmt.int(n));
@@ -67,12 +85,13 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
     if (tbLojas) tbLojas.dados(dados.por_loja || []);
   };
   const carregar = async () => {
-    if (!faixaValida()) { $('.slot-cheg-desc', card).textContent = 'Escolha o horário.'; return; }
+    const msg = validar(); erro.hidden = !msg; erro.textContent = msg || '';
+    if (msg) return;
     const meu = ++pedido;
     box.classList.add('sk'); tb.carregando(); tbLojas?.carregando();
     try {
       const d = await rpc('atend_chegada', {
-        p_inicio: filtros.inicio, p_fim: filtros.fim, p_conta: filtros.conta || null, p_modo: st.modo,
+        p_inicio: datas.de, p_fim: datas.ate, p_conta: filtros.conta || null, p_modo: st.modo,
         p_de: st.de || '00:00', p_ate: st.modo === 'entre' ? (st.ate || '24:00') : '24:00', p_dias: st.dias,
       });
       if (meu !== pedido) return;
@@ -90,7 +109,19 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   };
   [sModo, sDias].forEach((s) => s.addEventListener('change', mudou));
   [iDe, iAte].forEach((i) => i.addEventListener('change', mudou));
-  $('.act-cheg-limpar', card).addEventListener('click', () => { st = { ...PADRAO }; sincronizar(); salvar(); carregar(); });
+  const mudouDatas = () => { datas = { de: iD1.value, ate: iD2.value }; marcarAtalho(); clearTimeout(timer); timer = setTimeout(carregar, 350); };
+  [iD1, iD2].forEach((i) => i.addEventListener('change', mudouDatas));
+  $('.lu-cheg-atalhos', card).addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-p]'); if (!b) return;
+    const r = b.dataset.p === 'painel' ? [filtros.inicio, filtros.fim] : intervalo(b.dataset.p);
+    if (!r) return;
+    iD1.value = r[0]; iD2.value = r[1]; mudouDatas();
+  });
+  $('.act-cheg-limpar', card).addEventListener('click', () => {
+    st = { ...PADRAO }; datas = { de: filtros.inicio, ate: filtros.fim }; iD1.value = datas.de; iD2.value = datas.ate;
+    sincronizar(); salvar(); marcarAtalho(); carregar();
+  });
+  iD1.value = datas.de; iD2.value = datas.ate; marcarAtalho();
   sincronizar();
 
   return { carregar, redesenhar() { if (dados) grafico(box, dados.por_hora || [], naFaixaHora); } };

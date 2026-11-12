@@ -412,21 +412,37 @@ body { margin: 0; touch-action: manipulation; }
 .lu-cheg .lu-core { display: grid; gap: 20px; }
 .lu-cheg .lu-card-head { margin-bottom: 0; align-items: flex-start; }
 .lu-cheg .lu-card-head .act-cheg-limpar { flex: none; }
-.lu-cheg-filtros { display: flex; flex-wrap: wrap; gap: 14px 14px; align-items: end; }
-.lu-cheg-filtros .lu-field { flex: 0 1 190px; min-width: 130px; }
-.lu-cheg-filtros .lu-field[hidden] { display: none; }
-.lu-cheg-filtros select { width: 100%; }
 .lu-cheg-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .lu-cheg-kpis > div { display: grid; gap: 4px; align-content: start; padding: 14px 16px; border-radius: 12px; background: rgba(var(--lu-ov), .04); border: 1px solid var(--lu-line); min-width: 0; }
 .lu-cheg-kpis b { font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .lu-cheg-kpis b.sk { color: transparent; }
 .lu-cheg-kpis span { font-size: 12px; line-height: 1.4; color: var(--lu-ink3); }
 @media (max-width: 760px) { .lu-cheg-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .lu-cheg-filtros .lu-field { flex: 1 1 calc(50% - 7px); min-width: 0; } }
 .lu-cheg-lista { display: grid; gap: 12px; }
 .lu-cheg-lista[hidden] { display: none; }
-.lu-cheg-filtros input[type="time"] { width: 100%; }
-.lu-cheg-filtros .lu-field small { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px; color: var(--lu-ink4); }
 .lu-cheg-sub { margin: 0 0 10px; font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--lu-ink4); }
 .lu-cheg-lojas[hidden] { display: none; }
 .lu-cheg-lista .lu-tablebar { margin-bottom: 12px; }
+
+/* filtro do horário de chegada */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.lu-cheg-filtros { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.5fr) minmax(0, .7fr); gap: 14px; }
+@media (max-width: 1180px) { .lu-cheg-filtros { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .lu-cheg-grupo.g-dias { grid-column: 1 / -1; } }
+@media (max-width: 760px) { .lu-cheg-filtros { grid-template-columns: minmax(0, 1fr); } }
+.lu-cheg-grupo { margin: 0; min-width: 0; display: grid; gap: 12px; align-content: start; padding: 16px; border-radius: 14px; border: 1px solid var(--lu-line); background: rgba(var(--lu-ov), .03); }
+.lu-cheg-grupo legend { float: left; width: 100%; padding: 0; margin: 0 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lu-ink3); }
+.lu-cheg-grupo .campos { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; align-items: end; clear: both; }
+.lu-cheg-grupo .campos .lu-field[hidden] { display: none; }
+.lu-cheg-grupo .lu-field { min-width: 0; }
+.lu-cheg-grupo input, .lu-cheg-grupo select { width: 100%; min-width: 0; }
+@media (max-width: 520px) { .g-hora .campos { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .g-hora .campos > .lu-field:first-child { grid-column: 1 / -1; } }
+.lu-cheg-dica { margin: 0; font-size: 12px; line-height: 1.4; color: var(--lu-ink4); }
+.lu-cheg-dica[hidden] { display: none; }
+.lu-cheg-atalhos { display: flex; flex-wrap: wrap; gap: 6px; }
+.lu-cheg-atalhos button { padding: 6px 11px; border-radius: 999px; border: 1px solid var(--lu-line); background: transparent; color: var(--lu-ink2); font: inherit; font-size: 12px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.lu-cheg-atalhos button:hover { color: var(--lu-ink); background: rgba(var(--lu-ov), .06); }
+.lu-cheg-atalhos button.on { color: var(--lu-ink); border-color: rgba(128, 255, 0, .45); background: var(--lu-accent-soft); }
+.lu-cheg-atalhos button:focus-visible { outline: 2px solid var(--lu-accent); outline-offset: 2px; }
+.lu-cheg-erro { margin: -6px 0 0; font-size: 13px; color: var(--lu-bad); }
+.lu-cheg-erro[hidden] { display: none; }
+.lu-cheg .lu-card-head p { max-width: 70ch; }
