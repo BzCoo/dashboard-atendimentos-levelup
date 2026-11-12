@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611041631">
-<link rel="stylesheet" href="assets/app.css?v=202611041631">
-<script type="module" src="assets/js/main.js?v=202611041631"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611121114">
+<link rel="stylesheet" href="assets/app.css?v=202611121114">
+<script type="module" src="assets/js/main.js?v=202611121114"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -342,6 +342,49 @@
         <div class="lu-chart sk" id="ch-horarios"></div>
       </div></div>
     </div>
+    <div class="lu-shell lu-reveal lu-cheg"><div class="lu-core">
+      <div class="lu-card-head">
+        <div><h3>Horário de chegada dos leads</h3><p class="slot-cheg-desc">Pelo horário da 1ª mensagem do cliente (horário de Brasília).</p></div>
+        <button class="lu-ghost sm act-cheg-limpar" type="button">Ver o dia todo</button>
+      </div>
+      <div class="lu-cheg-filtros">
+        <label class="lu-field">Leads que chegaram
+          <select class="c-modo" name="cheg-modo">
+            <option value="entre">entre</option><option value="depois">depois das</option><option value="antes">antes das</option><option value="em">às (na hora cheia)</option>
+          </select></label>
+        <label class="lu-field c-h1-box"><span class="c-h1-rot">De</span><select class="c-h1" name="cheg-h1"></select></label>
+        <label class="lu-field c-h2-box">Até<select class="c-h2" name="cheg-h2"></select></label>
+        <label class="lu-field">Dias
+          <select class="c-dias" name="cheg-dias">
+            <option value="todos">Todos os dias</option><option value="uteis">Segunda a sexta</option><option value="sab">Sábado</option><option value="dom">Domingo</option>
+          </select></label>
+      </div>
+      <div class="lu-cheg-kpis">
+        <div><b class="c-leads sk">—</b><span class="c-leads-sub">leads na faixa</span></div>
+        <div><b class="c-resp sk">—</b><span>respondidos</span></div>
+        <div><b class="c-sla sk">—</b><span>respondidos no SLA</span></div>
+        <div><b class="c-pico sk">—</b><span class="c-pico-sub">hora com mais leads na faixa</span></div>
+      </div>
+      <div class="lu-chart sk" id="ch-chegada"></div>
+      <div class="lu-cheg-lista" hidden>
+        <div class="lu-tablebar">
+          <p class="lu-sub slot-cheg-nota" style="margin:0;flex:1 1 16rem"></p>
+          <button class="lu-ghost sm act-csv" type="button" data-tabela="tb-cheg" data-nome="leads-por-horario">Baixar planilha</button>
+        </div>
+        <div class="lu-tablewrap" style="max-height:440px">
+          <table class="lu-table" id="tb-cheg">
+            <thead><tr>
+              <th class="txt"><button type="button" data-sort="nome">Lead</button></th>
+              <th class="txt"><button type="button" data-sort="primeira_msg">Chegou em</button></th>
+              <th class="txt hide-sm"><button type="button" data-sort="vendedor">Vendedor</button></th>
+              <th><button type="button" data-sort="resposta_min">1ª resposta</button></th>
+              <th class="txt"><button type="button" data-sort="etapa">Etapa</button></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div></div>
   </section>
 
   <section class="lu-section" id="anuncios" aria-labelledby="h-anuncios">

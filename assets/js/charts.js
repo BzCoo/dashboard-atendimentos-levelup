@@ -1,5 +1,5 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202611041631';
+import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202611121114';
 
 export { d3 };
 
@@ -280,4 +280,37 @@ export const veiculos = (box, rows) => {
       ...(isNum(d.preco) && Number(d.preco) > 0 ? [[null, 'Preço anunciado', fmt.brl0(d.preco)]] : []),
     ]))
     .on('mouseleave', () => hideTip(tip));
+};
+
+/* Chegada: leads por hora do dia; as horas da faixa escolhida ficam em destaque */
+export const chegada = (box, horas, naFaixa) => {
+  box.replaceChildren();
+  if (!horas.some((h) => Number(h.atendimentos))) return vazio(box, 'Sem atendimentos nesses dias.');
+  const W = Math.max(280, box.clientWidth), Hc = 230;
+  const svg = svgIn(box, W, Hc);
+  const y = d3.scaleLinear([0, d3.max(horas, (h) => Number(h.atendimentos)) || 1], [Hc - M.b, M.t]).nice();
+  const f = (v) => nf0.format(v);
+  const left = leftFor(svg, f(y.ticks(4).slice(-1)[0]));
+  const x = d3.scaleBand(horas.map((h) => h.h), [left, W - M.r]).paddingInner(0.22).paddingOuter(0.05);
+  svg.append('g').attr('transform', `translate(${left},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickFormat(f).tickSize(-(W - left - M.r)).tickPadding(10)).call(axis);
+  const every = x.bandwidth() < 14 ? 3 : x.bandwidth() < 22 ? 2 : 1;
+  svg.append('g').attr('transform', `translate(0,${Hc - M.b + 6})`)
+    .call(d3.axisBottom(x).tickValues(horas.map((h) => h.h).filter((h) => h % every === 0)).tickFormat((h) => h + 'h').tickSize(0).tickPadding(6)).call(axis);
+  const bars = svg.append('g').selectAll('rect').data(horas).join('rect')
+    .attr('x', (d) => x(d.h)).attr('width', x.bandwidth())
+    .attr('y', (d) => y(Number(d.atendimentos))).attr('height', (d) => Math.max(0, y(0) - y(Number(d.atendimentos))))
+    .attr('rx', Math.min(5, x.bandwidth() / 3))
+    .style('fill', (d) => (naFaixa(d.h) ? ACC : MUTED)).style('fill-opacity', (d) => (naFaixa(d.h) ? 0.9 : 0.28));
+  const tip = tipOf(box);
+  svg.append('g').selectAll('rect').data(horas).join('rect')
+    .attr('x', (d) => x(d.h) - (x.step() * x.paddingInner()) / 2).attr('width', x.step()).attr('y', M.t).attr('height', Hc - M.t - M.b)
+    .style('fill', 'transparent')
+    .on('mousemove', (event, d) => {
+      bars.style('stroke', (b) => (b === d ? 'var(--lu-ink)' : 'none')).attr('stroke-width', 1);
+      const s = Number(d.respondidos) ? fmt.pct((100 * Number(d.dentro_sla)) / Number(d.respondidos)) : '—';
+      showTip(box, tip, event, d.h + 'h às ' + (d.h + 1) + 'h' + (naFaixa(d.h) ? ' · na faixa' : ''), [
+        [naFaixa(d.h) ? ACC : MUTED, 'Leads', fmt.int(d.atendimentos)], [null, 'Respondidos', fmt.int(d.respondidos)], [null, 'No SLA', s]]);
+    })
+    .on('mouseleave', () => { bars.style('stroke', 'none'); hideTip(tip); });
 };

@@ -406,3 +406,22 @@ body { margin: 0; touch-action: manipulation; }
 .lu-table-click tbody tr { cursor: pointer; }
 .lu-table-click tbody tr.on td { background: var(--lu-accent-soft); }
 @media (max-width: 640px) { .lu-auto-itens { max-height: none; overflow: visible; } .lu-auto-prog .eta { white-space: normal; } }
+
+/* ---------- Horário de chegada ---------- */
+.lu-cheg { margin-top: 14px; }
+.lu-cheg .lu-core { display: grid; gap: 20px; }
+.lu-cheg .lu-card-head { margin-bottom: 0; align-items: flex-start; }
+.lu-cheg .lu-card-head .act-cheg-limpar { flex: none; }
+.lu-cheg-filtros { display: flex; flex-wrap: wrap; gap: 14px 14px; align-items: end; }
+.lu-cheg-filtros .lu-field { flex: 0 1 190px; min-width: 130px; }
+.lu-cheg-filtros .lu-field[hidden] { display: none; }
+.lu-cheg-filtros select { width: 100%; }
+.lu-cheg-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.lu-cheg-kpis > div { display: grid; gap: 4px; align-content: start; padding: 14px 16px; border-radius: 12px; background: rgba(var(--lu-ov), .04); border: 1px solid var(--lu-line); min-width: 0; }
+.lu-cheg-kpis b { font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.lu-cheg-kpis b.sk { color: transparent; }
+.lu-cheg-kpis span { font-size: 12px; line-height: 1.4; color: var(--lu-ink3); }
+@media (max-width: 760px) { .lu-cheg-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .lu-cheg-filtros .lu-field { flex: 1 1 calc(50% - 7px); min-width: 0; } }
+.lu-cheg-lista { display: grid; gap: 12px; }
+.lu-cheg-lista[hidden] { display: none; }
