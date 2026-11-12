@@ -7,3 +7,8 @@
 -- Depois: atend_chegada virou embrulho com cache (dash_atend._atend_chegada faz o cálculo) e
 -- public.atend_service_aquecer(p_fn) monta o cache da visão padrão dos admins; o n8n chama no fim de cada carga.
 -- Depois: _atend_chegada devolve 'fonte' (opportunity_source do GHL; se vazia, rede do anúncio em ghl_lead_ad_attribution).
+
+-- Filtro de fontes (aplicado direto no banco):
+--   atend_chegada(..., p_fontes text[] DEFAULT NULL) e dash_atend._atend_chegada(..., p_fontes).
+--   p_fontes = NULL traz todas; '' representa "Sem fonte". A chave do cache inclui as fontes.
+--   A saída traz 'fontes' [{fonte, leads}], contada ANTES do filtro de fonte (alimenta as caixinhas do painel).

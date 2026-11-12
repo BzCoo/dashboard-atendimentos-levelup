@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611121157">
-<link rel="stylesheet" href="assets/app.css?v=202611121157">
-<script type="module" src="assets/js/main.js?v=202611121157"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611121207">
+<link rel="stylesheet" href="assets/app.css?v=202611121207">
+<script type="module" src="assets/js/main.js?v=202611121207"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -375,12 +375,25 @@
           <p class="lu-cheg-dica c-dica">Deixe em branco para pegar desde 0h ou até a meia-noite.</p>
         </fieldset>
         <fieldset class="lu-cheg-grupo g-dias">
-          <legend>Dias da semana</legend>
-          <div class="campos">
-            <label class="lu-field"><span class="sr-only">Dias</span>
+          <legend>Dias e fontes</legend>
+          <div class="campos campos-col">
+            <label class="lu-field">Dias da semana
               <select class="c-dias" name="cheg-dias">
                 <option value="todos">Todos os dias</option><option value="uteis">Segunda a sexta</option><option value="sab">Sábado</option><option value="dom">Domingo</option>
               </select></label>
+            <div class="lu-field">
+              <span id="cheg-fontes-rot">Fontes</span>
+              <details class="lu-fontes-dd">
+                <summary aria-labelledby="cheg-fontes-rot"><span class="c-fontes-txt">Todas as fontes</span></summary>
+                <div class="painel" role="group" aria-label="Fontes">
+                  <div class="topo">
+                    <button type="button" class="lu-link act-fontes-todas">Marcar todas</button>
+                    <button type="button" class="lu-link act-fontes-limpar">Limpar</button>
+                  </div>
+                  <div class="lista c-fontes"><p class="vazio">Carregando…</p></div>
+                </div>
+              </details>
+            </div>
           </div>
         </fieldset>
       </div>

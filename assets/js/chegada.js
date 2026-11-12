@@ -1,11 +1,13 @@
-import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121157';
-import { chegada as grafico, falha } from './charts.js?v=202611121157';
+import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121207';
+import { chegada as grafico, falha } from './charts.js?v=202611121207';
 
 /* Cartão "Horário de chegada dos leads": faixa de horário com minuto (entre / depois / antes / às) e dias da semana.
    Os números vêm de atend_chegada (banco), para qualquer loja ou todas. */
 
 const NOME_DIAS = { todos: '', uteis: ', de segunda a sexta', sab: ', aos sábados', dom: ', aos domingos' };
-const PADRAO = { modo: 'entre', de: '', ate: '', dias: 'todos' };
+const PADRAO = { modo: 'entre', de: '', ate: '', dias: 'todos', fontes: [] };
+const nomeFonte = (f) => f || 'Sem fonte';
+const rede = (f) => (/insta/i.test(f) ? 'ig' : /face|fb/i.test(f) ? 'fb' : '');
 const hm = (t) => { if (!t) return ''; const [h, m] = t.split(':'); return Number(h) + 'h' + (m && m !== '00' ? m : ''); };
 
 export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => {
@@ -21,6 +23,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
 
   let st = { ...PADRAO };
   try { st = { ...PADRAO, ...JSON.parse(localStorage.getItem('lu-chegada2') || '{}') }; } catch { /* sem storage */ }
+  if (!Array.isArray(st.fontes)) st.fontes = [];
   let dados = null, pedido = 0, timer = null;
 
   // Lista: no "Todas as lojas" entra a coluna da loja
@@ -29,8 +32,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   // Fonte do lead (origem no GHL, ou a rede do anúncio); só aparece quando existe
   cols.splice(multi ? 3 : 2, 0, ['txt', (td, r) => {
     if (!r.fonte) { td.textContent = '—'; td.classList.add('muted'); td.dataset.csv = ''; return; }
-    const rede = /insta/i.test(r.fonte) ? 'ig' : /face|fb/i.test(r.fonte) ? 'fb' : '';
-    td.append(el('span', { class: 'lu-fonte ' + rede, text: r.fonte })); td.dataset.csv = r.fonte;
+    td.append(el('span', { class: 'lu-fonte ' + rede(r.fonte), text: r.fonte })); td.dataset.csv = r.fonte;
   }]);
   $('.c-th-loja', card).hidden = !multi;
   const tb = tabela($('#tb-cheg', card), { chave: 'chave_lead', sort: 'primeira_msg', busca: $('.q-cheg', card), texto: (r) => [r.nome, r.vendedor, r.loja, r.etapa, r.fonte].join(' '), cols });
@@ -63,19 +65,51 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
       : !de && !ate ? 'em qualquer horário' : 'das ' + (hm(de) || '0h') + ' às ' + (ate ? hm(ate) : '24h');
     return b + NOME_DIAS[st.dias];
   };
+  const textoFontes = () => (st.fontes.length ? ', vindos de ' + st.fontes.map(nomeFonte).join(' ou ') : '');
   const naFaixaHora = (h) => !!dados && Number(dados.por_hora?.[h]?.na_faixa) > 0;
   const put = (cls, v) => { const n = $('.' + cls, card); n.classList.remove('sk'); n.textContent = v; };
   const salvar = () => { try { localStorage.setItem('lu-chegada2', JSON.stringify(st)); } catch { /* sem storage */ } };
+  // Fontes: caixinhas montadas com a lista que o banco devolve (contada antes do filtro de fonte)
+  const dd = $('.lu-fontes-dd', card), listaF = $('.c-fontes', card);
+  const resumoFontes = () => {
+    const n = st.fontes.length;
+    $('.c-fontes-txt', card).textContent = !n ? 'Todas as fontes' : n === 1 ? nomeFonte(st.fontes[0]) : n + ' fontes';
+    dd.classList.toggle('on', n > 0);
+  };
+  const montarFontes = () => {
+    const lista = [...(dados?.fontes || [])];
+    st.fontes.forEach((f) => { if (!lista.some((x) => x.fonte === f)) lista.push({ fonte: f, leads: 0 }); });
+    listaF.replaceChildren();
+    if (!lista.length) { listaF.append(el('p', { class: 'vazio', text: 'Nenhuma fonte no período.' })); return; }
+    lista.forEach(({ fonte, leads }) => {
+      const cb = el('input', { type: 'checkbox', value: fonte }); cb.checked = st.fontes.includes(fonte);
+      const lb = el('label', { class: 'op' });
+      lb.append(cb, el('span', { class: 'lu-fonte ' + rede(fonte) + (fonte ? '' : ' sem'), text: nomeFonte(fonte) }), el('small', { text: fmt.int(leads) }));
+      listaF.append(lb);
+    });
+  };
+  const mudouFontes = (fontes) => {
+    st = { ...st, fontes }; salvar(); resumoFontes();
+    $$('input', listaF).forEach((c) => { c.checked = fontes.includes(c.value); });
+    clearTimeout(timer); timer = setTimeout(carregar, 450);
+  };
+  listaF.addEventListener('change', () => mudouFontes($$('input:checked', listaF).map((c) => c.value)));
+  $('.act-fontes-todas', card).addEventListener('click', () => mudouFontes($$('input', listaF).map((c) => c.value)));
+  $('.act-fontes-limpar', card).addEventListener('click', () => mudouFontes([]));
+  document.addEventListener('click', (e) => { if (dd.open && !dd.contains(e.target)) dd.open = false; });
+  dd.addEventListener('keydown', (e) => { if (e.key === 'Escape') { dd.open = false; $('summary', dd).focus(); } });
   const sincronizar = () => {
     sModo.value = st.modo; iDe.value = st.de; iAte.value = st.ate; sDias.value = st.dias;
     $('.c-ate-box', card).hidden = st.modo !== 'entre';
     $('.c-dica', card).hidden = st.modo !== 'entre';
     $('.c-de-rot', card).textContent = st.modo === 'entre' ? 'De' : 'Horário';
+    resumoFontes();
   };
 
   const desenhar = () => {
-    $('.slot-cheg-desc', card).textContent = 'De ' + fmt.dmy(datas.de) + ' a ' + fmt.dmy(datas.ate) + ': leads que chegaram ' + texto() + '. Pelo horário da 1ª mensagem do cliente (horário de Brasília).';
+    $('.slot-cheg-desc', card).textContent = 'De ' + fmt.dmy(datas.de) + ' a ' + fmt.dmy(datas.ate) + ': leads que chegaram ' + texto() + textoFontes() + '. Pelo horário da 1ª mensagem do cliente (horário de Brasília).';
     if (!dados) return;
+    montarFontes();
     const r = dados.resumo || {}, n = Number(r.leads) || 0, tot = Number(dados.total) || 0;
     put('c-leads', fmt.int(n));
     $('.c-leads-sub', card).textContent = 'leads na faixa' + (tot ? ' · ' + fmt.pct((100 * n) / tot) + ' do total' : '');
@@ -85,7 +119,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
     box.classList.remove('sk');
     grafico(box, dados.por_hora || [], naFaixaHora);
     const ls = (dados.leads || []).map((l, i) => ({ ...l, chave_lead: String(i) }));
-    $('.slot-cheg-nota', card).textContent = fmt.int(n) + (n === 1 ? ' lead chegou ' : ' leads chegaram ') + texto()
+    $('.slot-cheg-nota', card).textContent = fmt.int(n) + (n === 1 ? ' lead chegou ' : ' leads chegaram ') + texto() + textoFontes()
       + (n > ls.length ? '. Mostrando os ' + fmt.int(ls.length) + ' mais recentes.' : '.');
     tb.dados(ls);
     if (tbLojas) tbLojas.dados(dados.por_loja || []);
@@ -99,6 +133,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
       const d = await rpc('atend_chegada', {
         p_inicio: datas.de, p_fim: datas.ate, p_conta: filtros.conta || null, p_modo: st.modo,
         p_de: st.de || '00:00', p_ate: st.modo === 'entre' ? (st.ate || '24:00') : '24:00', p_dias: st.dias,
+        p_fontes: st.fontes.length ? st.fontes : null,
       });
       if (meu !== pedido) return;
       dados = d; desenhar();
@@ -109,7 +144,7 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
     }
   };
   const mudou = () => {
-    st = { modo: sModo.value, de: iDe.value, ate: iAte.value, dias: sDias.value };
+    st = { ...st, modo: sModo.value, de: iDe.value, ate: iAte.value, dias: sDias.value };
     sincronizar(); salvar();
     clearTimeout(timer); timer = setTimeout(carregar, 350);
   };

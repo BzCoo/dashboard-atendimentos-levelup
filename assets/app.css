@@ -451,3 +451,30 @@ body { margin: 0; touch-action: manipulation; }
 .lu-fonte.fb { color: #60a5fa; border-color: rgba(96, 165, 250, .35); background: rgba(96, 165, 250, .08); }
 :root[data-theme="light"] .lu-fonte.ig { color: #be185d; }
 :root[data-theme="light"] .lu-fonte.fb { color: #1d4ed8; }
+/* Filtro de fontes (caixinhas) no cartão de horário de chegada */
+.lu-cheg-grupo .campos.campos-col { grid-auto-flow: row; grid-auto-columns: auto; }
+.lu-fontes-dd { position: relative; margin-top: 6px; }
+.lu-fontes-dd summary { text-transform: none; letter-spacing: normal; font-weight: 400; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--lu-line); background: rgba(var(--lu-ov), .04); color: var(--lu-ink); font-size: 14px; cursor: pointer; user-select: none; }
+.lu-fontes-dd summary::-webkit-details-marker { display: none; }
+.lu-fontes-dd summary::after { content: ''; flex: none; width: 7px; height: 7px; border-right: 1.5px solid var(--lu-ink3); border-bottom: 1.5px solid var(--lu-ink3); transform: translateY(-2px) rotate(45deg); transition: transform .15s; }
+.lu-fontes-dd[open] summary::after { transform: translateY(2px) rotate(-135deg); }
+.lu-fontes-dd summary:focus-visible { outline: 2px solid var(--lu-accent); outline-offset: 2px; }
+.lu-fontes-dd.on summary { border-color: rgba(128, 255, 0, .45); background: var(--lu-accent-soft); }
+.lu-fontes-dd .c-fontes-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lu-fontes-dd .painel { position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; width: max(100%, 280px); max-width: calc(100vw - 32px); padding: 10px; border-radius: 12px; border: 1px solid var(--lu-line); background: var(--lu-s2); box-shadow: 0 18px 40px rgba(0, 0, 0, .35); }
+.lu-fontes-dd .topo { display: flex; justify-content: space-between; gap: 8px; padding: 2px 4px 8px; margin-bottom: 4px; border-bottom: 1px solid var(--lu-line); }
+.lu-fontes-dd .lista { display: grid; gap: 2px; max-height: 280px; overflow-y: auto; }
+.lu-fontes-dd .op { display: flex; align-items: center; gap: 10px; padding: 7px 6px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.lu-fontes-dd .op:hover { background: rgba(var(--lu-ov), .06); }
+.lu-fontes-dd .op input { -webkit-appearance: none; appearance: none; flex: none; width: 18px !important; height: 18px; min-width: 0; min-height: 0; margin: 0; padding: 0; border-radius: 5px; border: 1.5px solid var(--lu-ink4); background: transparent; box-shadow: none; display: grid; place-content: center; cursor: pointer; transition: background .15s, border-color .15s; }
+.lu-fontes-dd .op input::after { content: ''; width: 9px; height: 5px; border-left: 2px solid #0b0d0b; border-bottom: 2px solid #0b0d0b; transform: translateY(-1px) rotate(-45deg); opacity: 0; }
+.lu-fontes-dd .op input:checked { background: var(--lu-accent); border-color: var(--lu-accent); }
+.lu-fontes-dd .op input:checked::after { opacity: 1; }
+.lu-fontes-dd .op input:focus-visible { outline: 2px solid var(--lu-accent); outline-offset: 2px; }
+.lu-fontes-dd .op .lu-fonte { max-width: none; flex: 0 1 auto; min-width: 0; }
+.lu-fontes-dd .op .lu-fonte.sem { font-style: italic; }
+.lu-fontes-dd .op small { margin-left: auto; padding-left: 8px; color: var(--lu-ink4); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lu-fontes-dd .vazio { margin: 6px 4px; font-size: 13px; color: var(--lu-ink4); }
+@media (max-width: 760px) { .lu-fontes-dd .painel { left: 0; right: auto; width: 100%; } }
+:root[data-theme="light"] .lu-fontes-dd .painel { background: var(--lu-s1); box-shadow: 0 14px 34px rgba(16, 28, 8, .14); }
+.lu-fontes-dd .painel, .lu-fontes-dd .painel * { text-transform: none; letter-spacing: normal; }
