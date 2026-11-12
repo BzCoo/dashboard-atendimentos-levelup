@@ -1,5 +1,5 @@
-import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121153';
-import { chegada as grafico, falha } from './charts.js?v=202611121153';
+import { $, $$, el, fmt, rpc, intervalo } from './core.js?v=202611121157';
+import { chegada as grafico, falha } from './charts.js?v=202611121157';
 
 /* Cartão "Horário de chegada dos leads": faixa de horário com minuto (entre / depois / antes / às) e dias da semana.
    Os números vêm de atend_chegada (banco), para qualquer loja ou todas. */
@@ -26,8 +26,14 @@ export const montarChegada = (main, { tabela, celulasLead, filtros, multi }) => 
   // Lista: no "Todas as lojas" entra a coluna da loja
   const cols = celulasLead(true);
   if (multi) cols.splice(2, 0, ['txt muted', (td, r) => { td.textContent = r.loja || '—'; }]);
+  // Fonte do lead (origem no GHL, ou a rede do anúncio); só aparece quando existe
+  cols.splice(multi ? 3 : 2, 0, ['txt', (td, r) => {
+    if (!r.fonte) { td.textContent = '—'; td.classList.add('muted'); td.dataset.csv = ''; return; }
+    const rede = /insta/i.test(r.fonte) ? 'ig' : /face|fb/i.test(r.fonte) ? 'fb' : '';
+    td.append(el('span', { class: 'lu-fonte ' + rede, text: r.fonte })); td.dataset.csv = r.fonte;
+  }]);
   $('.c-th-loja', card).hidden = !multi;
-  const tb = tabela($('#tb-cheg', card), { chave: 'chave_lead', sort: 'primeira_msg', busca: $('.q-cheg', card), texto: (r) => [r.nome, r.vendedor, r.loja, r.etapa].join(' '), cols });
+  const tb = tabela($('#tb-cheg', card), { chave: 'chave_lead', sort: 'primeira_msg', busca: $('.q-cheg', card), texto: (r) => [r.nome, r.vendedor, r.loja, r.etapa, r.fonte].join(' '), cols });
   const tbLojas = multi ? tabela($('#tb-cheg-lojas', card), {
     chave: 'loja_id', sort: 'leads',
     cols: [['txt name', (td, r) => { td.textContent = r.loja; }],

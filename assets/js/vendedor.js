@@ -1,7 +1,7 @@
-import { $, $$, clone, rpc, fmt, delta, isNum, irPara, rotuloComp } from './core.js?v=202611121153';
-import { montarFiltros } from './filtros.js?v=202611121153';
-import { tabela, celulasLead } from './painel.js?v=202611121153';
-import * as G from './charts.js?v=202611121153';
+import { $, $$, clone, rpc, fmt, delta, isNum, irPara, rotuloComp } from './core.js?v=202611121157';
+import { montarFiltros } from './filtros.js?v=202611121157';
+import { tabela, celulasLead } from './painel.js?v=202611121157';
+import * as G from './charts.js?v=202611121157';
 
 /* Página de detalhe de um vendedor: #/vendedor?v=<loja:usuario>&de=&ate= */
 export const renderVendedor = async (main, ctx, chave) => {
