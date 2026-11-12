@@ -88,6 +88,12 @@ modo de simulação (não alteram CRM nem banco) e botão "Executar de verdade" 
 
 O código do fluxo está em `n8n/automacoes-do-painel.workflow.js` (fonte) e `n8n/automacoes-do-painel.sdk.js` (gerado).
 
+## Horário de chegada dos leads (Painel → Funil e demanda)
+
+Filtra os leads pelo horário da 1ª mensagem do cliente, com minuto: entre (pode passar da meia-noite), depois das, antes
+das ou às (hora cheia), e por dias da semana. Mostra leads na faixa, respondidos, SLA, sem resposta, gráfico por hora
+(parte na faixa em verde), resumo por loja e a lista de leads com planilha. Dados de `public.atend_chegada`.
+
 ## Plano de ação no relatório
 
 Em **Montar relatório**, a opção "Plano de ação" (ligada por padrão) acrescenta até 5 problemas do período, cada um com o número

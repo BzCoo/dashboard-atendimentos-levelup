@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611121114">
-<link rel="stylesheet" href="assets/app.css?v=202611121114">
-<script type="module" src="assets/js/main.js?v=202611121114"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611121139">
+<link rel="stylesheet" href="assets/app.css?v=202611121139">
+<script type="module" src="assets/js/main.js?v=202611121139"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -352,8 +352,8 @@
           <select class="c-modo" name="cheg-modo">
             <option value="entre">entre</option><option value="depois">depois das</option><option value="antes">antes das</option><option value="em">às (na hora cheia)</option>
           </select></label>
-        <label class="lu-field c-h1-box"><span class="c-h1-rot">De</span><select class="c-h1" name="cheg-h1"></select></label>
-        <label class="lu-field c-h2-box">Até<select class="c-h2" name="cheg-h2"></select></label>
+        <label class="lu-field"><span class="c-de-rot">De</span><input type="time" class="c-de" name="cheg-de" step="60"></label>
+        <label class="lu-field c-ate-box">Até<input type="time" class="c-ate" name="cheg-ate" step="60"><small>vazio = meia-noite</small></label>
         <label class="lu-field">Dias
           <select class="c-dias" name="cheg-dias">
             <option value="todos">Todos os dias</option><option value="uteis">Segunda a sexta</option><option value="sab">Sábado</option><option value="dom">Domingo</option>
@@ -363,12 +363,29 @@
         <div><b class="c-leads sk">—</b><span class="c-leads-sub">leads na faixa</span></div>
         <div><b class="c-resp sk">—</b><span>respondidos</span></div>
         <div><b class="c-sla sk">—</b><span>respondidos no SLA</span></div>
-        <div><b class="c-pico sk">—</b><span class="c-pico-sub">hora com mais leads na faixa</span></div>
+        <div><b class="c-sem sk">—</b><span>sem nenhuma resposta</span></div>
       </div>
       <div class="lu-chart sk" id="ch-chegada"></div>
-      <div class="lu-cheg-lista" hidden>
+      <div class="lu-cheg-lojas" hidden>
+        <h4 class="lu-cheg-sub">Por loja, na faixa</h4>
+        <div class="lu-tablewrap" style="max-height:320px">
+          <table class="lu-table" id="tb-cheg-lojas">
+            <thead><tr>
+              <th class="txt"><button type="button" data-sort="loja">Loja</button></th>
+              <th><button type="button" data-sort="leads">Leads</button></th>
+              <th><button type="button" data-sort="respondidos">Respondidos</button></th>
+              <th><button type="button" data-sort="dentro_sla">No SLA</button></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="lu-cheg-lista">
+        <h4 class="lu-cheg-sub">Leads da faixa</h4>
         <div class="lu-tablebar">
-          <p class="lu-sub slot-cheg-nota" style="margin:0;flex:1 1 16rem"></p>
+          <label class="lu-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+            <input type="search" class="q-cheg" name="busca-cheg" autocomplete="off" placeholder="Buscar lead, loja ou vendedor…" aria-label="Buscar lead"></label>
+          <p class="lu-sub slot-cheg-nota" style="margin:0;flex:1 1 14rem;font-size:13px"></p>
           <button class="lu-ghost sm act-csv" type="button" data-tabela="tb-cheg" data-nome="leads-por-horario">Baixar planilha</button>
         </div>
         <div class="lu-tablewrap" style="max-height:440px">
@@ -376,6 +393,7 @@
             <thead><tr>
               <th class="txt"><button type="button" data-sort="nome">Lead</button></th>
               <th class="txt"><button type="button" data-sort="primeira_msg">Chegou em</button></th>
+              <th class="txt c-th-loja"><button type="button" data-sort="loja">Loja</button></th>
               <th class="txt hide-sm"><button type="button" data-sort="vendedor">Vendedor</button></th>
               <th><button type="button" data-sort="resposta_min">1ª resposta</button></th>
               <th class="txt"><button type="button" data-sort="etapa">Etapa</button></th>

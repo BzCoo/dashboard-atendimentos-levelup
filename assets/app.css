@@ -425,3 +425,8 @@ body { margin: 0; touch-action: manipulation; }
 @media (max-width: 520px) { .lu-cheg-filtros .lu-field { flex: 1 1 calc(50% - 7px); min-width: 0; } }
 .lu-cheg-lista { display: grid; gap: 12px; }
 .lu-cheg-lista[hidden] { display: none; }
+.lu-cheg-filtros input[type="time"] { width: 100%; }
+.lu-cheg-filtros .lu-field small { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px; color: var(--lu-ink4); }
+.lu-cheg-sub { margin: 0 0 10px; font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--lu-ink4); }
+.lu-cheg-lojas[hidden] { display: none; }
+.lu-cheg-lista .lu-tablebar { margin-bottom: 12px; }

@@ -1,7 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611121114';
-import { montarFiltros } from './filtros.js?v=202611121114';
-import * as G from './charts.js?v=202611121114';
-import { montarChegada } from './chegada.js?v=202611121114';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611121139';
+import { montarFiltros } from './filtros.js?v=202611121139';
+import * as G from './charts.js?v=202611121139';
+import { montarChegada } from './chegada.js?v=202611121139';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -231,7 +231,8 @@ export const renderPainel = async (main, ctx) => {
   const box = (id) => $('#' + id, main);
   const pronto = (b) => b.classList.remove('sk');
   const desenhar = { spark: null, volume: null, sla: null, etapas: null, horarios: null };
-  const cheg = montarChegada(main, { tabela, celulasLead });
+  const cheg = montarChegada(main, { tabela, celulasLead, filtros: f, multi: !(f.conta || (me.lojas || []).length === 1) });
+  cheg.carregar();
 
   const tarefas = {
     lojas: rpc('atend_lojas').then((r) => {
@@ -275,7 +276,7 @@ export const renderPainel = async (main, ctx) => {
       desenhar.spark(); desenhar.volume(); desenhar.sla();
     }),
     etapas: rpc('atend_etapas', argsC).then((r) => { pronto(box('ch-etapas')); desenhar.etapas = () => G.etapas(box('ch-etapas'), r); desenhar.etapas(); }),
-    horarios: rpc('atend_horarios', args).then((r) => { pronto(box('ch-horarios')); desenhar.horarios = () => { G.horarios(box('ch-horarios'), r); cheg.redesenhar(); }; G.horarios(box('ch-horarios'), r); cheg.horarios(r); }),
+    horarios: rpc('atend_horarios', args).then((r) => { pronto(box('ch-horarios')); desenhar.horarios = () => { G.horarios(box('ch-horarios'), r); cheg.redesenhar(); }; desenhar.horarios(); }),
     vendedores: rpc('atend_vendedores', argsC).then((r) => tbVend.dados((r || []).map(comVendas))),
   };
   if (multi) tarefas.por_loja = rpc('atend_por_loja', per).then((r) => tbLojas.dados((r || []).map(comVendas)));
@@ -296,7 +297,6 @@ export const renderPainel = async (main, ctx) => {
     const sem = ls.filter((l) => !l.respondido).length;
     $('.slot-leads-nota', main).textContent = fmt.int(d?.total) + ' leads novos no período' + (sem ? ', ' + fmt.int(sem) + ' ainda sem resposta' : '') + (Number(d?.total) > ls.length ? '. Mostrando os ' + ls.length + ' mais recentes.' : '.');
     tbLeads.dados(ls);
-    cheg.leads(ls, d?.total);
   });
   if (admin) tarefas.automacao = rpc('atend_automacao').then((r) => tbAuto.dados(r));
 
@@ -306,7 +306,7 @@ export const renderPainel = async (main, ctx) => {
     if (resultados[i].status !== 'rejected') return;
     const m = resultados[i].reason?.message;
     if (falhas[k]) falhas[k].forEach((id) => { pronto(box(id)); G.falha(box(id)); });
-    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m); if (k === 'leads') tbLeads.falha(m); if (k === 'horarios') cheg.falhou(m); if (k === 'conversao') { tbConv.falha(m); tbRet.falha(m); }
+    if (k === 'vendedores') tbVend.falha(m); if (k === 'por_loja') tbLojas.falha(m); if (k === 'automacao') tbAuto.falha(m); if (k === 'investimento') tbInv.falha(m); if (k === 'anuncios') tbAds.falha(m); if (k === 'leads') tbLeads.falha(m); if (k === 'conversao') { tbConv.falha(m); tbRet.falha(m); }
     if (k === 'kpis') { $('#resumo', main).textContent = m || 'Não foi possível carregar os indicadores.'; }
   });
   const erro = resultados.find((r) => r.status === 'rejected');

@@ -1,5 +1,5 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202611121114';
+import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202611121139';
 
 export { d3 };
 
@@ -282,7 +282,7 @@ export const veiculos = (box, rows) => {
     .on('mouseleave', () => hideTip(tip));
 };
 
-/* Chegada: leads por hora do dia; as horas da faixa escolhida ficam em destaque */
+/* Chegada: leads por hora do dia; a parte de cada hora que cai na faixa escolhida fica em destaque */
 export const chegada = (box, horas, naFaixa) => {
   box.replaceChildren();
   if (!horas.some((h) => Number(h.atendimentos))) return vazio(box, 'Sem atendimentos nesses dias.');
@@ -297,11 +297,16 @@ export const chegada = (box, horas, naFaixa) => {
   const every = x.bandwidth() < 14 ? 3 : x.bandwidth() < 22 ? 2 : 1;
   svg.append('g').attr('transform', `translate(0,${Hc - M.b + 6})`)
     .call(d3.axisBottom(x).tickValues(horas.map((h) => h.h).filter((h) => h % every === 0)).tickFormat((h) => h + 'h').tickSize(0).tickPadding(6)).call(axis);
+  const rx = Math.min(5, x.bandwidth() / 3);
   const bars = svg.append('g').selectAll('rect').data(horas).join('rect')
     .attr('x', (d) => x(d.h)).attr('width', x.bandwidth())
     .attr('y', (d) => y(Number(d.atendimentos))).attr('height', (d) => Math.max(0, y(0) - y(Number(d.atendimentos))))
-    .attr('rx', Math.min(5, x.bandwidth() / 3))
-    .style('fill', (d) => (naFaixa(d.h) ? ACC : MUTED)).style('fill-opacity', (d) => (naFaixa(d.h) ? 0.9 : 0.28));
+    .attr('rx', rx).style('fill', MUTED).style('fill-opacity', 0.28);
+  const nf = (d) => (d.na_faixa === undefined ? (naFaixa(d.h) ? Number(d.atendimentos) : 0) : Number(d.na_faixa));
+  svg.append('g').selectAll('rect').data(horas.filter((d) => nf(d) > 0)).join('rect')
+    .attr('x', (d) => x(d.h)).attr('width', x.bandwidth())
+    .attr('y', (d) => y(nf(d))).attr('height', (d) => Math.max(0, y(0) - y(nf(d))))
+    .attr('rx', rx).style('fill', ACC).style('fill-opacity', 0.9).style('pointer-events', 'none');
   const tip = tipOf(box);
   svg.append('g').selectAll('rect').data(horas).join('rect')
     .attr('x', (d) => x(d.h) - (x.step() * x.paddingInner()) / 2).attr('width', x.step()).attr('y', M.t).attr('height', Hc - M.t - M.b)
@@ -309,8 +314,9 @@ export const chegada = (box, horas, naFaixa) => {
     .on('mousemove', (event, d) => {
       bars.style('stroke', (b) => (b === d ? 'var(--lu-ink)' : 'none')).attr('stroke-width', 1);
       const s = Number(d.respondidos) ? fmt.pct((100 * Number(d.dentro_sla)) / Number(d.respondidos)) : '—';
-      showTip(box, tip, event, d.h + 'h às ' + (d.h + 1) + 'h' + (naFaixa(d.h) ? ' · na faixa' : ''), [
-        [naFaixa(d.h) ? ACC : MUTED, 'Leads', fmt.int(d.atendimentos)], [null, 'Respondidos', fmt.int(d.respondidos)], [null, 'No SLA', s]]);
+      showTip(box, tip, event, d.h + 'h às ' + (d.h + 1) + 'h', [
+        [MUTED, 'Leads na hora', fmt.int(d.atendimentos)], [ACC, 'Na faixa escolhida', fmt.int(nf(d))],
+        [null, 'Respondidos (hora toda)', fmt.int(d.respondidos)], [null, 'No SLA (hora toda)', s]]);
     })
     .on('mouseleave', () => { bars.style('stroke', 'none'); hideTip(tip); });
 };

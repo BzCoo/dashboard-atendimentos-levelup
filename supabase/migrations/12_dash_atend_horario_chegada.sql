@@ -1,0 +1,6 @@
+-- public.atend_chegada(p_inicio, p_fim, p_conta, p_modo, p_de, p_ate, p_dias)
+-- Leads pelo horário da 1ª mensagem do cliente (dash_atend.resp, horário local da loja), com faixa de minuto:
+--   p_modo 'entre' (p_de..p_ate, pode passar da meia-noite; 00:00..24:00 = dia todo), 'depois' (>= p_de), 'antes' (< p_de), 'em' (hora de p_de)
+--   p_dias 'todos' | 'uteis' | 'sab' | 'dom'
+-- Devolve: total (dias filtrados), resumo da faixa, por_hora (24 horas com a parte na faixa), por_loja e leads (até 2000).
+-- Aplicada pela migration dash_atend_horario_chegada; respeita dash_atend.contas_permitidas(p_conta).
