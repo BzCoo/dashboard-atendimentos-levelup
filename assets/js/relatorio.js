@@ -1,80 +1,64 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611121229';
-import { diagnosticar, textoPlano } from './plano.js?v=202611121229';
-import { etapasVisiveis } from './charts.js?v=202611121229';
-import { montarFiltros } from './filtros.js?v=202611121229';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611131422';
+import { diagnosticar, textoPlano } from './plano.js?v=202611131422';
+import { etapasVisiveis } from './charts.js?v=202611131422';
+import { montarFiltros } from './filtros.js?v=202611131422';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
-/* Monta o texto no formato do relatório semanal do WhatsApp */
+/* Monta o texto no formato do relatório semanal do WhatsApp (enxuto: uma linha por assunto) */
 const montarTexto = (d, o, escopo) => {
   const k = d.kpis;
   const L = [];
   const comp = (v, kind) => (o.comp && isNum(v) ? ` (${fmt.sinal(v, kind)})` : '');
-  L.push(`📊 *RELATÓRIO DE ATENDIMENTOS — ${escopo.toUpperCase()}*`);
-  L.push(`📅 ${fmt.dmy(k.de)} a ${fmt.dmy(k.ate)}` + (o.comp ? `\n↔️ Comparado com ${fmt.dmy(k.de_ant)} a ${fmt.dmy(k.ate_ant)}` : ''));
+  const vendas = (x) => Math.max(Number(x.vendas) || 0, Number(x.vendas_etapa) || 0);
+  L.push(`📊 *RELATÓRIO — ${escopo.toUpperCase()}*`);
+  L.push(`📅 ${fmt.dmy(k.de)} a ${fmt.dmy(k.ate)}` + (o.comp ? ` (comparado com ${fmt.dmy(k.de_ant)} a ${fmt.dmy(k.ate_ant)})` : ''));
   L.push('');
-  L.push('📈 *INDICADORES*');
-  L.push(`Novos atendimentos: *${fmt.int(k.atendimentos)}*` + comp(k.var_atendimentos, 'pct'));
-  L.push(`Taxa de resposta: ${fmt.pct(k.taxa_resposta)}` + comp(k.var_taxa_resposta, 'pp'));
-  L.push(`Respondidos no SLA de ${fmt.int(k.sla_min)} min: ${fmt.pct(k.taxa_sla)}` + comp(k.var_taxa_sla, 'pp'));
-  L.push(`Primeira resposta média: ${fmt.min(k.tempo_medio_min)}` + (isNum(k.tempo_mediano_min) ? ` (mediana ${fmt.min(k.tempo_mediano_min)})` : ''));
-  L.push(`Sem resposta: ${fmt.int(k.sem_resposta)}` + comp(k.var_sem_resposta, 'abs'));
-  const vt = Math.max(Number(k.vendas) || 0, Number(k.vendas_etapa) || 0), vta = Math.max(Number(k.vendas_ant) || 0, Number(k.vendas_etapa_ant) || 0);
-  L.push(`Vendas: *${fmt.int(vt)}*` + comp(vt - vta, 'abs') + (Number(k.vendas) !== Number(k.vendas_etapa) ? ` — ${fmt.int(k.vendas)} ganhas no CRM, ${fmt.int(k.vendas_etapa)} em etapa de venda` : ''));
+  const vt = vendas(k), vta = Math.max(Number(k.vendas_ant) || 0, Number(k.vendas_etapa_ant) || 0);
+  L.push(`Leads: *${fmt.int(k.atendimentos)}*` + comp(k.var_atendimentos, 'pct') + ` · Vendas: *${fmt.int(vt)}*` + comp(vt - vta, 'abs'));
+  L.push(`Respondidos: ${fmt.pct(k.taxa_resposta)}` + comp(k.var_taxa_resposta, 'pp') + ` · No SLA (${fmt.int(k.sla_min)} min): ${fmt.pct(k.taxa_sla)}` + comp(k.var_taxa_sla, 'pp'));
+  L.push(`1ª resposta média: ${fmt.min(k.tempo_medio_min)} · Sem resposta: ${fmt.int(k.sem_resposta)}` + comp(k.var_sem_resposta, 'abs'));
+
+  if (o.traf && d.traf?.atual && Number(d.traf.atual.leads)) {
+    const a = d.traf.atual, b = d.traf.anterior || {}, n = Number(a.leads), tot = Number(a.leads_total) || 0;
+    const varPct = Number(b.leads) ? (100 * (n - Number(b.leads))) / Number(b.leads) : null;
+    const ts = Number(a.respondidos) ? (100 * Number(a.dentro_sla)) / Number(a.respondidos) : null;
+    L.push('', '📣 *TRÁFEGO (INSTAGRAM + FACEBOOK)*');
+    L.push(`*${fmt.int(n)}* leads` + comp(varPct, 'pct') + (tot ? `, ${fmt.pct((100 * n) / tot)} do total` : '') + ` · IG ${fmt.int(a.instagram)} · FB ${fmt.int(a.facebook)}`);
+    L.push(`Respondidos: ${fmt.pct((100 * Number(a.respondidos)) / n)}` + (isNum(ts) ? ` · No SLA: ${fmt.pct(ts)}` : '') + ` · Sem resposta: ${fmt.int(a.sem_resposta)}` + (Number(a.vendas) ? ` · Vendas: ${fmt.int(a.vendas)}` : ''));
+    const lj = (d.traf.por_loja || []).filter((x) => Number(x.leads) > 0);
+    if (escopo.multi && lj.length > 1) L.push('Mais tráfego: ' + lj.slice(0, 5).map((x) => `${x.loja} ${fmt.int(x.leads)}`).join(' · '));
+  }
   if (o.inv && d.inv?.total && Number(d.inv.total.empresas)) {
     const t = d.inv.total;
     L.push('', '💰 *INVESTIMENTO*');
-    L.push(`Investido em anúncios: *${fmt.brl(t.investimento)}*` + comp(t.var_investimento, 'pct'));
-    L.push(`Custo por atendimento: *${fmt.brl(t.custo_atend)}*` + (o.comp && isNum(t.custo_atend_ant) ? ` (antes ${fmt.brl(t.custo_atend_ant)})` : ''));
-    if (isNum(t.custo_venda)) L.push(`Custo por venda: ${fmt.brl(t.custo_venda)}`);
-    if (Number(t.empresas_sem_dados)) L.push(`_Sem dados do Meta no período: ${(t.nomes_sem_dados || []).join(', ')}_`);
-  }
-  if (o.traf && d.traf?.atual) {
-    const a = d.traf.atual, b = d.traf.anterior || {}, n = Number(a.leads) || 0, tot = Number(a.leads_total) || 0;
-    const varPct = Number(b.leads) ? (100 * (n - Number(b.leads))) / Number(b.leads) : null;
-    L.push('', '📣 *LEADS DO TRÁFEGO (INSTAGRAM + FACEBOOK)*');
-    L.push(`Leads do tráfego: *${fmt.int(n)}*` + comp(varPct, 'pct') + (tot ? ` — ${fmt.pct((100 * n) / tot)} de todos os leads` : ''));
-    if (n) {
-      L.push(`Instagram: ${fmt.int(a.instagram)} | Facebook: ${fmt.int(a.facebook)}` + (o.comp && (Number(b.instagram) || Number(b.facebook)) ? ` (antes ${fmt.int(b.instagram)} e ${fmt.int(b.facebook)})` : ''));
-      const tr = (100 * Number(a.respondidos)) / n, trA = Number(b.leads) ? (100 * Number(b.respondidos)) / Number(b.leads) : null;
-      const ts = Number(a.respondidos) ? (100 * Number(a.dentro_sla)) / Number(a.respondidos) : null, tsA = Number(b.respondidos) ? (100 * Number(b.dentro_sla)) / Number(b.respondidos) : null;
-      L.push(`Respondidos: ${fmt.pct(tr)}` + comp(isNum(trA) ? tr - trA : null, 'pp') + (isNum(ts) ? ` | No SLA: ${fmt.pct(ts)}` + comp(isNum(tsA) ? ts - tsA : null, 'pp') : '') + (isNum(a.tempo_medio_min) ? ` | 1ª resposta média: ${fmt.min(a.tempo_medio_min)}` : ''));
-      L.push(`Sem resposta: ${fmt.int(a.sem_resposta)}` + comp(Number(a.sem_resposta) - Number(b.sem_resposta || 0), 'abs') + (Number(a.vendas) || Number(b.vendas) ? ` | Vendas: ${fmt.int(a.vendas)}` + comp(Number(a.vendas) - Number(b.vendas || 0), 'abs') : ''));
-      const fs = (d.traf.fontes || []).filter((x) => Number(x.leads) > 0);
-      if (fs.length > 1) L.push('_Fontes somadas: ' + fs.map((x) => `${x.fonte} ${fmt.int(x.leads)}`).join(', ') + '_');
-      const lj = (d.traf.por_loja || []).filter((x) => Number(x.leads) > 0);
-      if (escopo.multi && lj.length > 1) {
-        L.push('Por loja:');
-        lj.slice(0, 10).forEach((x, i) => L.push(`${i + 1}. ${x.loja} — ${fmt.int(x.leads)} (IG ${fmt.int(x.instagram)} · FB ${fmt.int(x.facebook)})`));
-      }
-    }
+    L.push(`*${fmt.brl(t.investimento)}*` + comp(t.var_investimento, 'pct') + ` · ${fmt.brl(t.custo_atend)} por lead` + (isNum(t.custo_venda) ? ` · ${fmt.brl(t.custo_venda)} por venda` : ''));
   }
   if (o.ads && d.ads?.veiculos?.length) {
     L.push('', '🚗 *VEÍCULOS QUE MAIS TROUXERAM LEADS*');
-    for (const v of d.ads.veiculos.slice(0, 5)) L.push(`• ${v.veiculo}: ${fmt.int(v.leads)} leads` + (Number(v.avancaram) ? ` (${fmt.int(v.avancaram)} avançaram)` : '') + (Number(v.vendas) ? ` · ${fmt.int(v.vendas)} vendas` : ''));
+    L.push(d.ads.veiculos.slice(0, 3).map((v) => `${v.veiculo} (${fmt.int(v.leads)})`).join(' · '));
   }
-
   if (o.funil && d.etapas?.length) {
-    const et = etapasVisiveis(d.etapas, 12).filter((e) => Number(e.leads) > 0);
+    const et = etapasVisiveis(d.etapas, 12).filter((e) => Number(e.leads) > 0).slice(0, 6);
     if (et.length) {
-      L.push('', '🔄 *MOVIMENTO NO FUNIL*', 'Leads que entraram em cada etapa, na ordem do funil');
-      for (const e of et) L.push(`• ${e.etapa}: ${fmt.int(e.leads)}` + (o.comp ? ` (antes ${fmt.int(e.leads_ant)})` : ''));
+      L.push('', '🔄 *FUNIL* (leads que entraram em cada etapa)');
+      L.push(et.map((e) => `${e.etapa} ${fmt.int(e.leads)}`).join(' → '));
     }
   }
   if (o.lojas && d.porLoja?.length > 1) {
     L.push('', '🏪 *LOJAS*');
-    d.porLoja.filter((l) => Number(l.atendimentos) > 0).slice(0, 15).forEach((l, i) => {
-      const lv = Math.max(Number(l.vendas) || 0, Number(l.vendas_etapa) || 0);
-      L.push(`${i + 1}. *${l.loja}* — ${fmt.int(l.atendimentos)} atendimentos | SLA ${fmt.pct(l.taxa_sla)} | 1ª resp. ${fmt.min(l.tempo_medio_min)}` + (lv ? ` | ${fmt.int(lv)} ${lv === 1 ? 'venda' : 'vendas'}` : ''));
+    d.porLoja.filter((l) => Number(l.atendimentos) > 0).slice(0, 8).forEach((l, i) => {
+      const lv = vendas(l);
+      L.push(`${i + 1}. ${l.loja}: ${fmt.int(l.atendimentos)} leads · SLA ${fmt.pct(l.taxa_sla)}` + (lv ? ` · ${fmt.int(lv)} ${lv === 1 ? 'venda' : 'vendas'}` : ''));
     });
   }
   if (o.vend && d.vendedores?.length) {
-    const v = d.vendedores.filter((x) => Number(x.atendimentos) > 0).slice(0, escopo.multi ? 15 : 30);
+    const v = d.vendedores.filter((x) => Number(x.atendimentos) > 0).slice(0, 8);
     if (v.length) {
-      L.push('', d.vendedores.length === 1 ? '👤 *VENDEDOR*' : '👥 *VENDEDORES*');
+      L.push('', v.length === 1 ? '👤 *VENDEDOR*' : '👥 *VENDEDORES*');
       for (const x of v) {
-        L.push(`*${x.vendedor}*` + (escopo.multi ? ` (${x.loja})` : '') + ` — ${fmt.int(x.atendimentos)} atendimentos` + (o.comp && isNum(x.var_atendimentos) ? ` (${fmt.sinal(x.var_atendimentos, 'pct')})` : ''));
-        L.push(`Resposta ${fmt.pct(x.taxa_resposta)} | SLA ${fmt.pct(x.taxa_sla)} | 1ª resposta ${fmt.min(x.tempo_medio_min)}` + (Math.max(Number(x.vendas) || 0, Number(x.vendas_etapa) || 0) ? ` | ${fmt.int(Math.max(Number(x.vendas) || 0, Number(x.vendas_etapa) || 0))} ${Math.max(Number(x.vendas) || 0, Number(x.vendas_etapa) || 0) === 1 ? 'venda' : 'vendas'}` : ''));
+        const xv = vendas(x);
+        L.push(`${x.vendedor}` + (escopo.multi ? ` (${x.loja})` : '') + `: ${fmt.int(x.atendimentos)} leads · SLA ${fmt.pct(x.taxa_sla)} · ${fmt.min(x.tempo_medio_min)}` + (xv ? ` · ${fmt.int(xv)} ${xv === 1 ? 'venda' : 'vendas'}` : ''));
       }
     }
   }
@@ -83,13 +67,10 @@ const montarTexto = (d, o, escopo) => {
     const porDia = {};
     for (const h of d.horarios) porDia[h.dia_semana] = (porDia[h.dia_semana] || 0) + Number(h.atendimentos);
     const diaTop = Object.entries(porDia).sort((a, b) => b[1] - a[1])[0];
-    L.push('', '⏰ *HORÁRIO DE PICO*');
-    L.push(`Faixa com mais leads: ${DIAS[top.dia_semana]}, ${top.hora}h–${Number(top.hora) + 1}h (${fmt.int(top.atendimentos)})`);
-    if (diaTop) L.push(`Dia com mais leads: ${DIAS[diaTop[0]]} (${fmt.int(diaTop[1])})`);
+    L.push('', `⏰ *Pico:* ${DIAS[top.dia_semana]}, ${top.hora}h–${Number(top.hora) + 1}h` + (diaTop ? ` · dia com mais leads: ${DIAS[diaTop[0]]}` : ''));
   }
   if (o.plano) L.push(...textoPlano(diagnosticar(d, escopo, o.meta)));
   if (o.obs) L.push('', '📝 ' + o.obs);
-  L.push('', '_Dashboard de Atendimentos · Level Up_');
   return L.join('\n');
 };
 
