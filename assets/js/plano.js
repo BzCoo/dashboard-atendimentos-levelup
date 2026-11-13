@@ -1,4 +1,4 @@
-import { fmt, isNum } from './core.js?v=202611131457';
+import { fmt, isNum } from './core.js?v=202611131735';
 
 /* Plano de ação do relatório: regras sobre os números do período.
    Cada regra devolve { peso, titulo, acoes[], meta }: o título já traz o número do problema,
@@ -7,6 +7,13 @@ import { fmt, isNum } from './core.js?v=202611131457';
 
 const DIA = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 const DIA_PL = ['', 'segundas', 'terças', 'quartas', 'quintas', 'sextas', 'sábados', 'domingos'];
+// Período de até 7 dias tem um dia de cada: "na segunda" / "no sábado". Mais longo: "às segundas" / "aos sábados".
+const DIA_SG = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+const comArtigo = (dias, em, umaVez) => lista(dias.map((d) => {
+  const m = d >= 6;
+  if (umaVez) return (em ? (m ? 'no ' : 'na ') : (m ? 'o ' : 'a ')) + DIA_SG[d];
+  return (em ? (m ? 'aos ' : 'às ') : (m ? 'os ' : 'as ')) + DIA_PL[d];
+}));
 const n = (v) => Number(v) || 0;
 const vendasDe = (x) => Math.max(n(x.vendas), n(x.vendas_etapa));
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
@@ -42,7 +49,7 @@ export const diagnosticar = (d, escopo, metaLoja) => {
   // 2. Leads sem resposta nenhuma
   const semResp = n(k.sem_resposta), pSem = 100 * semResp / total;
   if (semResp >= 3 && pSem >= 10) {
-    out.push({ peso: 50 + pSem, titulo: `${fmt.int(semResp)} leads sem nenhuma resposta (${fmt.pct(pSem)})`, acoes: [`Hoje: chamar os ${fmt.int(semResp)} de volta (painel → lista de leads → "Só sem resposta")`, 'Todo dia, antes de fechar: conferir a lista e não deixar ninguém sem resposta'], meta: 'menos de 5% sem resposta' });
+    out.push({ peso: 50 + pSem, titulo: `${fmt.int(semResp)} ${semResp === 1 ? 'lead' : 'leads'} sem nenhuma resposta (${fmt.pct(pSem)})`, acoes: [`Hoje: chamar os ${fmt.int(semResp)} de volta (painel → lista de leads → "Só sem resposta")`, 'Todo dia, antes de fechar: conferir a lista e não deixar ninguém sem resposta'], meta: 'menos de 5% sem resposta' });
   }
 
   // 3. Dias sem cobertura
@@ -56,10 +63,11 @@ export const diagnosticar = (d, escopo, metaLoja) => {
   const bons = Object.values(porDia).filter((x) => x.a >= 4 && x.r / x.a >= 0.7).length;
   if (temResp && fracos.length && bons) {
     const qtd = fracos.reduce((s, [, x]) => s + x.a - x.r, 0);
-    const dias = lista(fracos.map(([dia]) => DIA_PL[dia]));
-    out.push({ peso: 40 + qtd, titulo: `${fmt.int(qtd)} leads sem resposta aos ${dias}`,
-      acoes: [`Esta semana: definir quem cobre os ${dias} (plantão de algumas horas já resolve)`, 'Ligar resposta automática fora do expediente avisando o horário de retorno'],
-      meta: `responder pelo menos 70% aos ${dias}` });
+    const nums = fracos.map(([dia]) => Number(dia));
+    const umaVez = k.de && k.ate && (Date.parse(k.ate) - Date.parse(k.de)) / 864e5 < 7;
+    out.push({ peso: 40 + qtd, titulo: `${fmt.int(qtd)} ${qtd === 1 ? 'lead' : 'leads'} sem resposta ${comArtigo(nums, true, umaVez)}`,
+      acoes: [`Esta semana: definir quem cobre ${comArtigo(nums, false, false)} (plantão de algumas horas já resolve)`, 'Ligar resposta automática fora do expediente avisando o horário de retorno'],
+      meta: `responder pelo menos 70% dos leads que chegam ${comArtigo(nums, true, false)}` });
   }
 
   // 4. Funil parado
