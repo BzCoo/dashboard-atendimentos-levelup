@@ -478,3 +478,5 @@ body { margin: 0; touch-action: manipulation; }
 @media (max-width: 760px) { .lu-fontes-dd .painel { left: 0; right: auto; width: 100%; } }
 :root[data-theme="light"] .lu-fontes-dd .painel { background: var(--lu-s1); box-shadow: 0 14px 34px rgba(16, 28, 8, .14); }
 .lu-fontes-dd .painel, .lu-fontes-dd .painel * { text-transform: none; letter-spacing: normal; }
+.lu-grupos-info { margin: -4px 0 12px; font-size: 12.5px; color: var(--lu-ink4); }
+.lu-envio-form .act-grupos { min-height: 46px; }

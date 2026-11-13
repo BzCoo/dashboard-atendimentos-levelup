@@ -1,7 +1,8 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara } from './core.js?v=202611131422';
-import { diagnosticar, textoPlano } from './plano.js?v=202611131422';
-import { etapasVisiveis } from './charts.js?v=202611131422';
-import { montarFiltros } from './filtros.js?v=202611131422';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara, sb } from './core.js?v=202611131457';
+import { diagnosticar, textoPlano } from './plano.js?v=202611131457';
+import { etapasVisiveis } from './charts.js?v=202611131457';
+import { N8N_GRUPOS } from './config.js?v=202611131457';
+import { montarFiltros } from './filtros.js?v=202611131457';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
@@ -213,18 +214,46 @@ const envio = async (main, ctx, texto) => {
     passo();
   };
 
-  try {
-    destinos = await rpc('atend_admin_destinos');
-    const grupos = destinos?.grupos || [];
-    if (!grupos.length) {
-      sel.replaceChildren(el('option', { value: '', text: 'Nenhum grupo de CRM encontrado ainda' })); btn.disabled = true;
-    } else {
-      sel.replaceChildren(el('option', { value: '', text: 'Escolha o grupo de CRM…' }),
-        ...grupos.map((g) => el('option', { value: g.jid, text: String(g.nome).replace(/^[^A-Za-z0-9À-ú]+/, '').trim() })));
-      const daLoja = grupos.filter((g) => ctx.filtros.conta && (g.lojas || []).map(Number).includes(Number(ctx.filtros.conta)));
-      if (daLoja.length === 1) sel.value = daLoja[0].jid;
-    }
-  } catch (e) { sel.replaceChildren(el('option', { value: '', text: 'Não foi possível carregar os grupos' })); btn.disabled = true; }
+  const infoG = $('.slot-grupos', main), btnG = $('.act-grupos', main);
+  const quando = (iso) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+  const carregarGrupos = async (manter) => {
+    const antes = manter ? sel.value : '';
+    try {
+      destinos = await rpc('atend_admin_destinos');
+      const grupos = destinos?.grupos || [];
+      if (!grupos.length) {
+        sel.replaceChildren(el('option', { value: '', text: 'Nenhum grupo de CRM encontrado ainda' })); btn.disabled = true;
+      } else {
+        btn.disabled = false;
+        sel.replaceChildren(el('option', { value: '', text: 'Escolha o grupo de CRM…' }),
+          ...grupos.map((g) => el('option', { value: g.jid, text: String(g.nome).replace(/^[^A-Za-z0-9À-ú]+/, '').trim() })));
+        const daLoja = grupos.filter((g) => ctx.filtros.conta && (g.lojas || []).map(Number).includes(Number(ctx.filtros.conta)));
+        if (antes && grupos.some((g) => g.jid === antes)) sel.value = antes;
+        else if (daLoja.length === 1) sel.value = daLoja[0].jid;
+      }
+      infoG.textContent = grupos.length + ' grupos de CRM' + (destinos?.atualizado_em ? ' · lista atualizada em ' + quando(destinos.atualizado_em) : '');
+      return grupos;
+    } catch (e) { sel.replaceChildren(el('option', { value: '', text: 'Não foi possível carregar os grupos' })); btn.disabled = true; return []; }
+  };
+  await carregarGrupos();
+
+  btnG.addEventListener('click', async () => {
+    const antes = new Set((destinos?.grupos || []).map((g) => g.jid));
+    btnG.disabled = true; btnG.textContent = 'Buscando no WhatsApp…';
+    try {
+      const { data } = await sb.auth.getSession();
+      const token = data?.session?.access_token;
+      if (!token) throw new Error('Faça login de novo.');
+      // text/plain evita a checagem prévia de CORS; o fluxo lê o token do corpo e confere se é ADM
+      const r = await fetch(N8N_GRUPOS, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ token }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error(j.message || 'O WhatsApp não respondeu. Tente de novo em alguns minutos.');
+      const grupos = await carregarGrupos(true);
+      const novos = grupos.filter((g) => !antes.has(g.jid)).map((g) => String(g.nome).replace(/^[^A-Za-z0-9À-ú]+/, '').trim());
+      toast(novos.length ? `Grupos atualizados. Novos: ${novos.join(', ')}` : `Grupos atualizados (${grupos.length} de CRM, nenhum novo).`);
+    } catch (e) { toast('Não foi possível atualizar os grupos: ' + e.message, true); }
+    btnG.disabled = false; btnG.textContent = 'Atualizar grupos';
+  });
 
   const dlg = $('#dlg-enviar');
   btn.addEventListener('click', () => {

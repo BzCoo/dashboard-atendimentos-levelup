@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611131422">
-<link rel="stylesheet" href="assets/app.css?v=202611131422">
-<script type="module" src="assets/js/main.js?v=202611131422"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611131457">
+<link rel="stylesheet" href="assets/app.css?v=202611131457">
+<script type="module" src="assets/js/main.js?v=202611131457"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -935,11 +935,13 @@
     </div></div>
   </div>
   <div class="lu-shell" style="margin-top:14px"><div class="lu-core lu-envio">
-    <div class="lu-card-head"><div><h3>Enviar para o grupo de CRM</h3><p>Sai pelo WhatsApp da Level Up em até 1 minuto, com o texto como está na caixa “Mensagem”. Aparecem só os grupos com “CRM” no nome.</p></div></div>
+    <div class="lu-card-head"><div><h3>Enviar para o grupo de CRM</h3><p>Sai pelo WhatsApp da Level Up em até 1 minuto, com o texto como está na caixa “Mensagem”. Aparecem só os grupos com “CRM” no nome. Criou um grupo novo? Clique em “Atualizar grupos”.</p></div></div>
     <div class="lu-envio-form">
       <label class="lu-field">Grupo de CRM<select class="o-destino" name="destino"></select></label>
+      <button class="lu-ghost act-grupos" type="button" title="Busca no WhatsApp os grupos novos ou renomeados">Atualizar grupos</button>
       <button class="lu-primary act-enviar" type="button">Enviar mensagem</button>
     </div>
+    <p class="lu-grupos-info slot-grupos"></p>
     <div class="lu-msg info slot-envio" hidden></div>
     <div class="lu-tablewrap" style="margin-top:6px">
       <table class="lu-table" id="tb-envios">
