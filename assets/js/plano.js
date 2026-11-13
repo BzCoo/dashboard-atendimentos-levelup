@@ -1,4 +1,4 @@
-import { fmt, isNum } from './core.js?v=202611131735';
+import { fmt, isNum } from './core.js?v=202611131752';
 
 /* Plano de ação do relatório: regras sobre os números do período.
    Cada regra devolve { peso, titulo, acoes[], meta }: o título já traz o número do problema,
@@ -6,14 +6,6 @@ import { fmt, isNum } from './core.js?v=202611131735';
    Ficam as 3 mais graves. */
 
 const DIA = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
-const DIA_PL = ['', 'segundas', 'terças', 'quartas', 'quintas', 'sextas', 'sábados', 'domingos'];
-// Período de até 7 dias tem um dia de cada: "na segunda" / "no sábado". Mais longo: "às segundas" / "aos sábados".
-const DIA_SG = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
-const comArtigo = (dias, em, umaVez) => lista(dias.map((d) => {
-  const m = d >= 6;
-  if (umaVez) return (em ? (m ? 'no ' : 'na ') : (m ? 'o ' : 'a ')) + DIA_SG[d];
-  return (em ? (m ? 'aos ' : 'às ') : (m ? 'os ' : 'as ')) + DIA_PL[d];
-}));
 const n = (v) => Number(v) || 0;
 const vendasDe = (x) => Math.max(n(x.vendas), n(x.vendas_etapa));
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
@@ -38,36 +30,16 @@ export const diagnosticar = (d, escopo, metaLoja) => {
 
   // 1. Tempo de resposta (SLA)
   if (isNum(k.taxa_sla) && k.taxa_sla < meta.meta_sla) {
-    const piores = relev.filter((x) => isNum(x.taxa_sla) && x.taxa_sla < meta.meta_sla - 10).sort((a, b) => a.taxa_sla - b.taxa_sla).slice(0, 2);
-    const acoes = ['Hoje: ligar a notificação de lead novo no app do CRM de ' + (relev.length && relev.length <= 4 && !escopo.multi ? lista(relev.map((x) => x.vendedor)) : 'todos os vendedores') + ` e responder com uma mensagem pronta em até ${sla} min`];
-    if (piores.length && relev.length > 1) acoes.push(`Esta semana: ${lista(piores.map((x) => `${x.vendedor} (${fmt.pct(x.taxa_sla)})`))} passa${piores.length > 1 ? 'm' : ''} o lead para outro vendedor quando não puder responder em ${sla} min`);
+    const acoes = ['Hoje: ligar a notificação de lead novo no app do CRM de ' + (relev.length && relev.length <= 4 && !escopo.multi ? lista(relev.map((x) => x.vendedor)) : 'quem atende os leads') + ` e responder com uma mensagem pronta em até ${sla} min`];
     out.push({ peso: 60 + (meta.meta_sla - k.taxa_sla), titulo: `Só ${fmt.pct(k.taxa_sla)} respondidos em até ${sla} min (meta ${fmt.pct(meta.meta_sla)})`, acoes, meta: `${fmt.pct(proxMeta(k.taxa_sla, meta.meta_sla))} no SLA` });
   } else if (isNum(k.var_taxa_sla) && k.var_taxa_sla <= -10) {
-    out.push({ peso: 45 - k.var_taxa_sla, titulo: `SLA caiu ${fmt.sinal(k.var_taxa_sla, 'pp')} (agora ${fmt.pct(k.taxa_sla)})`, acoes: ['Esta semana: revisar a escala (folgas, horário de pico) e deixar um responsável por lead novo em cada turno'], meta: `voltar a ${fmt.pct(n(k.taxa_sla_ant))} no SLA` });
+    out.push({ peso: 45 - k.var_taxa_sla, titulo: `SLA caiu ${fmt.sinal(k.var_taxa_sla, 'pp')} (agora ${fmt.pct(k.taxa_sla)})`, acoes: ['Esta semana: ver no painel (Horários) em que dias e horas a resposta atrasou e deixar a notificação do CRM ligada nesses horários'], meta: `voltar a ${fmt.pct(n(k.taxa_sla_ant))} no SLA` });
   }
 
   // 2. Leads sem resposta nenhuma
   const semResp = n(k.sem_resposta), pSem = 100 * semResp / total;
   if (semResp >= 3 && pSem >= 10) {
     out.push({ peso: 50 + pSem, titulo: `${fmt.int(semResp)} ${semResp === 1 ? 'lead' : 'leads'} sem nenhuma resposta (${fmt.pct(pSem)})`, acoes: [`Hoje: chamar os ${fmt.int(semResp)} de volta (painel → lista de leads → "Só sem resposta")`, 'Todo dia, antes de fechar: conferir a lista e não deixar ninguém sem resposta'], meta: 'menos de 5% sem resposta' });
-  }
-
-  // 3. Dias sem cobertura
-  const porDia = {};
-  for (const h of d.horarios || []) {
-    const x = (porDia[h.dia_semana] ||= { a: 0, r: 0 });
-    x.a += n(h.atendimentos); x.r += n(h.respondidos);
-  }
-  const temResp = (d.horarios || []).some((h) => h.respondidos !== undefined && h.respondidos !== null);
-  const fracos = Object.entries(porDia).filter(([, x]) => x.a >= 4 && x.r / x.a < 0.5).sort((a, b) => b[1].a - a[1].a);
-  const bons = Object.values(porDia).filter((x) => x.a >= 4 && x.r / x.a >= 0.7).length;
-  if (temResp && fracos.length && bons) {
-    const qtd = fracos.reduce((s, [, x]) => s + x.a - x.r, 0);
-    const nums = fracos.map(([dia]) => Number(dia));
-    const umaVez = k.de && k.ate && (Date.parse(k.ate) - Date.parse(k.de)) / 864e5 < 7;
-    out.push({ peso: 40 + qtd, titulo: `${fmt.int(qtd)} ${qtd === 1 ? 'lead' : 'leads'} sem resposta ${comArtigo(nums, true, umaVez)}`,
-      acoes: [`Esta semana: definir quem cobre ${comArtigo(nums, false, false)} (plantão de algumas horas já resolve)`, 'Ligar resposta automática fora do expediente avisando o horário de retorno'],
-      meta: `responder pelo menos 70% dos leads que chegam ${comArtigo(nums, true, false)}` });
   }
 
   // 4. Funil parado
@@ -109,11 +81,6 @@ export const diagnosticar = (d, escopo, metaLoja) => {
   if (t && n(t.empresas_sem_dados)) out.push({ peso: 20, titulo: `Sem dados do Meta: ${lista(t.nomes_sem_dados || [])}`, acoes: ['Conferir a conexão da conta de anúncios com o painel'], meta: null });
 
   // 8. Vendedores
-  if (relev.length >= 2) {
-    const top = [...relev].sort((a, b) => n(b.atendimentos) - n(a.atendimentos))[0];
-    const share = 100 * n(top.atendimentos) / total;
-    if (share >= 70 && isNum(top.taxa_sla) && top.taxa_sla < meta.meta_sla) out.push({ peso: 35, titulo: `${top.vendedor} recebe ${fmt.pct(share)} dos leads e responde ${fmt.pct(top.taxa_sla)} no SLA`, acoes: ['Esta semana: distribuir os leads em rodízio ou ter um segundo responsável no horário de pico'], meta: `nenhum vendedor com mais de 60% dos leads` });
-  }
   const baixos = vend.length < 2 ? [] : vend.filter((x) => n(x.atendimentos) >= 8 && isNum(x.taxa_resposta) && x.taxa_resposta < 60);
   if (baixos.length) out.push({ peso: 38, titulo: `${lista(baixos.slice(0, 3).map((x) => `${x.vendedor} respondeu só ${fmt.pct(x.taxa_resposta)}`))}`, acoes: [`Hoje: ${lista(baixos.slice(0, 3).map((x) => x.vendedor))} retoma${baixos.length > 1 ? 'm' : ''} os leads sem resposta e confere se o WhatsApp está conectado`], meta: 'todos acima de 80% de resposta' });
 
