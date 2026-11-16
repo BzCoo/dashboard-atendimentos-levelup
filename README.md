@@ -136,3 +136,9 @@ V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.j
 - n8n **DASH ATENDIMENTOS - Monitor de automacoes** (`comqGucemvPdQvpx`, a cada 5 min, credencial "n8n account"): lê execuções pela API do n8n,
   grava a saúde, aplica os pedidos e manda alertas/resumo das 8h30 para o grupo **BackLog Automações** (via fila do painel).
   Fonte em `n8n/monitor/*.js` (gerar com `python3 gen.py`). Catálogo editável em `dash_atend.automacoes`.
+
+## Disparos, Bom dia e Relatório agendado (Etapas 3 a 5)
+- **Disparos** (`#/disparos`, equipe): mensagem agora/agendada/recorrente para vários grupos de CRM, modelos com variáveis, histórico com reenvio, pausa por grupo.
+- **Bom dia** (`#/bomdia`, equipe): textos de seg a sex, liga/desliga e quem recebe. O fluxo n8n "WhatsApp - Bom dia grupos etiqueta CRM" (9h15) lê isso no banco.
+- **Relatório agendado** (Relatórios › Envio automático por loja): a função `relatorio-auto` monta o texto com o mesmo código do site
+  (`assets/js/relatorio-texto.js`, `plano.js`, `fmt.js`). Ao mudar esses arquivos, copie para `supabase/functions/relatorio-auto/` (sem `?v=`) e republique.

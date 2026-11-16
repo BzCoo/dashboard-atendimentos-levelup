@@ -1,5 +1,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202611161820';
+import { ACC, PREV, GRID, DEEP, MUTED, fmt, nf0, isNum } from './core.js?v=202611161827';
+import { etapasVisiveis } from './relatorio-texto.js?v=202611161827';
+export { etapasVisiveis };
 
 export { d3 };
 
@@ -174,14 +176,6 @@ export const sla = (box, serie) => {
 
 /* Barras horizontais: entradas por etapa */
 /* Mantém a ordem do pipeline (vinda do banco); se houver etapas demais, fica com as de maior volume e as de venda */
-export const etapasVisiveis = (rows, max) => {
-  const com = (rows || []).filter((d) => Number(d.leads) > 0 || Number(d.leads_ant) > 0);
-  if (com.length <= max) return com;
-  const vol = (d) => Math.max(Number(d.leads) || 0, Number(d.leads_ant) || 0);
-  const fica = new Set([...com].sort((a, b) => vol(b) - vol(a)).slice(0, max));
-  com.filter((d) => d.venda).forEach((d) => fica.add(d));
-  return com.filter((d) => fica.has(d));
-};
 export const etapas = (box, rows) => {
   box.replaceChildren();
   const data = etapasVisiveis(rows, 14);

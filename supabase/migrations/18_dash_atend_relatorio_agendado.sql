@@ -1,0 +1,7 @@
+-- Etapa 5: relatório agendado por loja (aplicada como dash_atend_relatorio_agendado)
+-- dash_atend.relatorio_agendas (loja_id, ativo, dia_semana, hora, dias_periodo, opcoes, grupo_jid, proximo, último envio/status).
+-- Tela (equipe): atend_relatorio_agendas(), atend_relatorio_agenda_salvar(...). Fica em Relatórios › Envio automático por loja.
+-- Serviço: atend_service_relatorios_devidos(), atend_service_relatorio_dados(loja, ini, fim, comparar), atend_service_relatorio_enfileirar(loja, texto, ok, erro).
+-- Edge function relatorio-auto (verify_jwt off, sem parâmetros): chamada pela fila a cada minuto; monta o texto com
+--   assets/js/relatorio-texto.js + plano.js + fmt.js (copiados em supabase/functions/relatorio-auto sem o ?v=). Ao mudar o texto do
+--   relatório no site, copie os 3 arquivos de novo e republique a função.

@@ -628,3 +628,15 @@ a.lu-ctl-sinal:hover { border-color: var(--lu-ink4); }
 .f-bd .f-bd-texto { min-height: 170px; resize: vertical; font: 14px/1.5 var(--lu-sans); }
 .f-bd .lu-dialog-foot { align-items: center; }
 .slot-bd-info:empty { display: none; }
+/* ===== Relatórios › Envio automático ===== */
+.lu-ag-barra { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.lu-ag-quando { display: flex; gap: 6px; }
+#tb-ag select, #tb-ag input[type=time] { min-height: 34px; padding: 4px 8px; font-size: 13px; max-width: 200px; }
+.lu-ag-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.lu-ag-chips label { cursor: pointer; }
+.lu-ag-chips input { position: absolute; opacity: 0; pointer-events: none; }
+.lu-ag-chips span { display: inline-block; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--lu-line); font-size: 11.5px; color: var(--lu-ink3); }
+.lu-ag-chips input:checked + span { background: var(--lu-accent-soft); border-color: rgba(128, 255, 0, .45); color: var(--lu-ink); }
+.lu-ag-chips input:focus-visible + span { outline: 2px solid var(--lu-accent); outline-offset: 1px; }
+.lu-ag-chips { min-width: 230px; }
+#tb-ag .ag-grupo { max-width: 180px; }
