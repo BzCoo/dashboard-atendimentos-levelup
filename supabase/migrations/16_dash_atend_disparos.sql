@@ -1,0 +1,8 @@
+-- Etapa 3: Disparos (aplicada como dash_atend_disparos)
+-- Tabelas: dash_atend.disparos (texto, grupos, quando, recorrencia {"dias":[1..7],"hora":"HH:MM"}, status), dash_atend.disparo_modelos.
+-- grupos_crm.pausado (grupo pausado não recebe disparos); envios.disparo_id.
+-- Variáveis (dash_atend.render_disparo): {loja} {data} {ontem} {leads_ontem} {respondidos_ontem} {sem_resposta_ontem} {sla_ontem}.
+-- Tela (Dev e Gestor): atend_disparos(), atend_disparo_previa, atend_disparo_criar, atend_disparo_acao (pausar/retomar/cancelar),
+--   atend_disparo_reenviar, atend_disparo_modelo_salvar/_remover, atend_grupo_pausar.
+-- Regras: só entre 7h e 21h (Brasília); até 60 grupos por disparo; 200 mensagens/hora por pessoa; a fila envia 5 por minuto.
+-- A fila do n8n (cRcjCrqVRXVrk9oV) chama atend_service_disparos_processar() a cada minuto antes de pegar os envios.

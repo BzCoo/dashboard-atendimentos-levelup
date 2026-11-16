@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611161812">
-<link rel="stylesheet" href="assets/app.css?v=202611161812">
-<script type="module" src="assets/js/main.js?v=202611161812"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611161817">
+<link rel="stylesheet" href="assets/app.css?v=202611161817">
+<script type="module" src="assets/js/main.js?v=202611161817"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -98,7 +98,7 @@
       <a href="#/painel" data-rota="painel"><i aria-hidden="true">◧</i><span>Painel</span></a>
       <p class="grp">Comunicação</p>
       <a href="#/relatorio" data-rota="relatorio"><i aria-hidden="true">✉</i><span>Relatórios</span></a>
-      <span class="soon" title="Etapa 3 do plano"><i aria-hidden="true">➤</i><span>Disparos</span><em>em breve</em></span>
+      <a href="#/disparos" data-rota="disparos"><i aria-hidden="true">➤</i><span>Disparos</span></a>
       <span class="soon" title="Etapa 4 do plano"><i aria-hidden="true">☀</i><span>Bom dia</span><em>em breve</em></span>
       <p class="grp" data-dev>Operação</p>
       <a href="#/automacoes" data-rota="automacoes" data-dev><i aria-hidden="true">⚙</i><span>Automações</span><em class="slot-side-alerta" hidden></em></a>
@@ -719,6 +719,83 @@
 </template>
 
 <!-- ================= AUTOMAÇÕES ================= -->
+<template id="tpl-disparos">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>EQUIPE</b> Comunicação</span>
+      <h1 class="lu-h2">Disparos</h1>
+      <p class="lu-sub">Mande mensagens para os grupos de CRM: agora, num horário marcado ou toda semana. As mensagens saem entre 7h e 21h, no máximo 5 por minuto, pelo WhatsApp do painel.</p>
+    </div>
+  </div>
+  <div class="lu-dsp">
+    <div class="lu-shell"><div class="lu-core">
+      <form class="lu-form f-dsp" novalidate>
+        <div class="lu-dsp-cols">
+          <div class="lu-dsp-esq">
+            <div class="lu-dsp-linha">
+              <label class="lu-field">Modelo<select class="f-modelo"><option value="">Começar do zero</option></select></label>
+              <button type="button" class="lu-ghost sm act-salvar-modelo">Salvar como modelo</button>
+              <button type="button" class="lu-ghost sm danger act-apagar-modelo" hidden>Apagar modelo</button>
+            </div>
+            <label class="lu-field">Mensagem
+              <textarea name="texto" class="f-texto" rows="9" maxlength="4000" placeholder="Bom dia, equipe {loja}! Ontem chegaram {leads_ontem} leads…"></textarea></label>
+            <div class="lu-dsp-vars" aria-label="Inserir variável">
+              <span class="muted">Inserir:</span>
+              <button type="button" data-var="{loja}">Loja</button>
+              <button type="button" data-var="{data}">Data de hoje</button>
+              <button type="button" data-var="{ontem}">Data de ontem</button>
+              <button type="button" data-var="{leads_ontem}">Leads de ontem</button>
+              <button type="button" data-var="{respondidos_ontem}">Respondidos ontem</button>
+              <button type="button" data-var="{sem_resposta_ontem}">Sem resposta ontem</button>
+              <button type="button" data-var="{sla_ontem}">SLA de ontem</button>
+            </div>
+            <fieldset class="lu-dsp-quando">
+              <legend>Quando</legend>
+              <label class="lu-role"><input type="radio" name="quando" value="agora" checked><span class="dot" aria-hidden="true"></span><span><b>Agora</b><small>Sai no próximo minuto</small></span></label>
+              <label class="lu-role"><input type="radio" name="quando" value="agendar"><span class="dot" aria-hidden="true"></span><span><b>Agendar</b><small>Uma vez, no dia e hora escolhidos</small></span></label>
+              <label class="lu-role"><input type="radio" name="quando" value="repetir"><span class="dot" aria-hidden="true"></span><span><b>Repetir</b><small>Nos dias da semana escolhidos</small></span></label>
+              <div class="f-agendar-box" hidden><label class="lu-field">Dia e hora<input type="datetime-local" class="f-data"></label></div>
+              <div class="f-repetir-box" hidden>
+                <div class="lu-dsp-dias" role="group" aria-label="Dias da semana">
+                  <label><input type="checkbox" value="1" checked><span>Seg</span></label><label><input type="checkbox" value="2" checked><span>Ter</span></label>
+                  <label><input type="checkbox" value="3" checked><span>Qua</span></label><label><input type="checkbox" value="4" checked><span>Qui</span></label>
+                  <label><input type="checkbox" value="5" checked><span>Sex</span></label><label><input type="checkbox" value="6"><span>Sáb</span></label>
+                  <label><input type="checkbox" value="7"><span>Dom</span></label>
+                </div>
+                <label class="lu-field">Hora<input type="time" class="f-hora" value="08:00" min="07:00" max="20:59"></label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="lu-dsp-dir">
+            <div class="lu-dsp-gtopo"><b>Grupos</b><span class="muted slot-gcont"></span>
+              <span class="lu-dsp-gacoes"><button type="button" class="lu-link act-gtodos">Todos</button> · <button type="button" class="lu-link act-gnenhum">Nenhum</button></span></div>
+            <label class="lu-field lu-search"><span class="lu-sr">Buscar grupo</span><input class="q-grupos" placeholder="Buscar grupo…"></label>
+            <div class="lu-dsp-grupos slot-grupos"></div>
+            <div class="lu-dsp-previa">
+              <div class="lu-dsp-ptopo"><b>Prévia</b><select class="f-previa" aria-label="Ver prévia para o grupo"></select></div>
+              <div class="lu-wa slot-previa"><p class="muted">Escreva a mensagem e escolha um grupo.</p></div>
+            </div>
+          </div>
+        </div>
+        <p class="lu-msg erro" hidden></p>
+        <div class="lu-dialog-foot"><button class="lu-primary act-disparar" type="submit">Enviar agora</button></div>
+      </form>
+    </div></div>
+  </div>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Agendados</h2><p class="lu-sub">Disparos que ainda vão sair. Pausar não apaga; cancelar encerra.</p></div></div>
+    <div class="slot-agendados"></div>
+  </section>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Histórico de envios</h2><p class="lu-sub">Últimas mensagens para os grupos de CRM (disparos e relatórios). Dá para reenviar o que falhou.</p></div></div>
+    <div class="lu-shell"><div class="lu-core"><div class="lu-table-wrap"><table class="lu-table" id="tb-dsp-hist"><thead><tr><th class="txt">Quando</th><th class="txt">Grupo</th><th class="txt hide-sm">Mensagem</th><th class="txt">Situação</th><th class="txt hide-sm">Quem</th><th></th></tr></thead><tbody></tbody></table></div></div></div>
+  </section>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Pausar grupos</h2><p class="lu-sub">Grupo pausado não recebe disparos (nem os agendados) até ser liberado.</p></div></div>
+    <div class="lu-shell"><div class="lu-core"><div class="lu-dsp-pausa slot-pausa"></div></div></div>
+  </section>
+</template>
+
 <template id="tpl-controle">
   <div class="lu-page-head">
     <div>

@@ -1,8 +1,8 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara, sb } from './core.js?v=202611161812';
-import { diagnosticar, textoPlano } from './plano.js?v=202611161812';
-import { etapasVisiveis } from './charts.js?v=202611161812';
-import { N8N_GRUPOS } from './config.js?v=202611161812';
-import { montarFiltros } from './filtros.js?v=202611161812';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara, sb } from './core.js?v=202611161817';
+import { diagnosticar, textoPlano } from './plano.js?v=202611161817';
+import { etapasVisiveis } from './charts.js?v=202611161817';
+import { N8N_GRUPOS } from './config.js?v=202611161817';
+import { montarFiltros } from './filtros.js?v=202611161817';
 
 const DIAS = ['', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
 
