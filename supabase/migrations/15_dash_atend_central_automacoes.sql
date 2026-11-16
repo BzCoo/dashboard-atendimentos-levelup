@@ -1,0 +1,9 @@
+-- Etapa 2: Central › Automações (aplicada como dash_atend_central_automacoes, dash_atend_automacoes_versao, dash_atend_monitor_ajustes)
+-- Tabelas: dash_atend.config (grupo_alertas = BackLog Automações, monitor, resumo_dia), dash_atend.automacoes (catálogo + saúde),
+--          dash_atend.automacao_pedidos (ligar/desligar pedidos na tela; o Monitor aplica).
+-- Tela (só Dev): atend_dev_automacoes(), atend_dev_automacao_pedir(id, acao, motivo, confirmacao), atend_dev_automacao_conta(loja, campo, valor, motivo)
+--   campos por conta: pipeline_automation_enabled, attendance_automation_enabled, weekly_report_enabled (metrics_dev.ghl_accounts).
+-- Monitor (service_role): atend_service_monitor_pegar(), atend_service_monitor_salvar(estado), atend_service_pedido_fim(id, ok, resultado),
+--   atend_service_alerta(texto) (entra na fila de envios com destino 'levelup'), atend_service_resumo_marcar(dia).
+-- Regras: desligar pede motivo; automação crítica pede "DESLIGAR"; o Monitor (protegida) não desliga pela tela.
+-- Ligar usa a versão publicada guardada (versao_publicada), para não publicar um rascunho por engano.

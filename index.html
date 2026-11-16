@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611161757">
-<link rel="stylesheet" href="assets/app.css?v=202611161757">
-<script type="module" src="assets/js/main.js?v=202611161757"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611161812">
+<link rel="stylesheet" href="assets/app.css?v=202611161812">
+<script type="module" src="assets/js/main.js?v=202611161812"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -101,7 +101,8 @@
       <span class="soon" title="Etapa 3 do plano"><i aria-hidden="true">➤</i><span>Disparos</span><em>em breve</em></span>
       <span class="soon" title="Etapa 4 do plano"><i aria-hidden="true">☀</i><span>Bom dia</span><em>em breve</em></span>
       <p class="grp" data-dev>Operação</p>
-      <a href="#/automacoes" data-rota="automacoes" data-dev><i aria-hidden="true">⚙</i><span>Automações</span></a>
+      <a href="#/automacoes" data-rota="automacoes" data-dev><i aria-hidden="true">⚙</i><span>Automações</span><em class="slot-side-alerta" hidden></em></a>
+      <a href="#/rodar" data-rota="rodar" data-dev><i aria-hidden="true">▶</i><span>Rodar automações</span></a>
       <a href="#/saude" data-rota="saude" data-dev><i aria-hidden="true">✚</i><span>Saúde dos dados</span></a>
       <a href="#/etapas" data-rota="etapas" data-dev><i aria-hidden="true">≡</i><span>Etapas do funil</span></a>
       <p class="grp">Gestão</p>
@@ -718,11 +719,63 @@
 </template>
 
 <!-- ================= AUTOMAÇÕES ================= -->
+<template id="tpl-controle">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>DEV</b> Operação</span>
+      <h1 class="lu-h2">Automações</h1>
+      <p class="lu-sub">Saúde e liga/desliga das automações do n8n. O Monitor confere tudo a cada 5 minutos e avisa no grupo <b class="slot-grupo">BackLog Automações</b> quando algo falha, atrasa ou volta ao normal.</p>
+    </div>
+    <div class="lu-ctl-topo">
+      <span class="lu-ctl-ver slot-ver"></span>
+      <button class="lu-ghost act-atualizar" type="button">Atualizar</button>
+    </div>
+  </div>
+  <div class="lu-ctl-resumo slot-resumo" aria-live="polite"></div>
+  <div class="lu-ctl-sinais slot-sinais"></div>
+  <div class="slot-grupos"></div>
+  <section class="lu-section lu-ctl-hist">
+    <div class="lu-head"><div><h2 class="lu-h3">Histórico de liga/desliga</h2><p class="lu-sub">Quem pediu, o motivo e o que o Monitor fez.</p></div></div>
+    <div class="lu-shell"><div class="lu-core">
+      <div class="lu-table-wrap"><table class="lu-table" id="tb-ctl-hist"><thead><tr><th class="txt">Quando</th><th class="txt">Automação</th><th class="txt">Pedido</th><th class="txt">Quem</th><th class="txt hide-sm">Motivo</th><th class="txt">Resultado</th></tr></thead><tbody></tbody></table></div>
+    </div></div>
+  </section>
+</template>
+
+<dialog class="lu-dialog" id="dlg-ctl" aria-labelledby="dlg-ctl-t">
+  <div class="lu-shell"><div class="lu-core">
+    <form class="lu-form f-ctl" novalidate>
+      <div class="lu-dlg-head"><div><h3 id="dlg-ctl-t">Desligar automação</h3><p class="sub slot-sub"></p></div>
+        <button class="lu-x act-cancelar" type="button" aria-label="Fechar">×</button></div>
+      <p class="lu-help slot-aviso"></p>
+      <label class="lu-field f-motivo-box">Motivo (fica no histórico)
+        <textarea name="motivo" rows="3" maxlength="300" placeholder="Ex.: OpenAI sem crédito, pausar até recarregar"></textarea></label>
+      <label class="lu-field f-conf-box" hidden>Automação crítica: digite <b>DESLIGAR</b> para confirmar
+        <input name="conf" autocomplete="off" spellcheck="false"></label>
+      <p class="lu-msg erro" hidden></p>
+      <div class="lu-dialog-foot">
+        <button class="lu-ghost act-cancelar" type="button">Cancelar</button>
+        <button class="lu-primary act-confirmar" type="submit">Confirmar</button>
+      </div>
+    </form>
+  </div></div>
+</dialog>
+
+<dialog class="lu-dialog lu-dialog-lg" id="dlg-ctl-contas" aria-labelledby="dlg-ctl-contas-t">
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-dlg-head"><div><h3 id="dlg-ctl-contas-t">Por conta</h3><p class="sub slot-sub">Ligue ou desligue esta automação só para algumas contas. Vale na próxima rodada dela.</p></div>
+      <button class="lu-x act-cancelar" type="button" aria-label="Fechar">×</button></div>
+    <label class="lu-field lu-search"><span class="lu-sr">Buscar conta</span><input class="q-ctl-contas" placeholder="Buscar conta…"></label>
+    <div class="lu-ctl-contas slot-contas"></div>
+    <div class="lu-dialog-foot"><button class="lu-primary act-cancelar" type="button">Pronto</button></div>
+  </div></div>
+</dialog>
+
 <template id="tpl-automacoes">
   <div class="lu-page-head">
     <div>
-      <span class="lu-eyebrow"><b>ADM</b> Administração</span>
-      <h1 class="lu-h2">Automações</h1>
+      <span class="lu-eyebrow"><b>DEV</b> Operação</span>
+      <h1 class="lu-h2">Rodar automações</h1>
       <p class="lu-sub">Rode as automações do n8n nas contas que escolher. O andamento aparece aqui em tempo real e, no fim, o relatório do que foi feito em cada conta.</p>
     </div>
   </div>

@@ -1,17 +1,19 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161757';
-import { renderPainel } from './painel.js?v=202611161757';
-import { renderAcessos } from './acessos.js?v=202611161757';
-import { renderRelatorio } from './relatorio.js?v=202611161757';
-import { renderMetas } from './metas.js?v=202611161757';
-import { renderEtapas } from './etapas.js?v=202611161757';
-import { renderVendedor } from './vendedor.js?v=202611161757';
-import { renderSaude } from './saude.js?v=202611161757';
-import { renderAutomacoes } from './automacoes.js?v=202611161757';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161812';
+import { renderPainel } from './painel.js?v=202611161812';
+import { renderAcessos } from './acessos.js?v=202611161812';
+import { renderRelatorio } from './relatorio.js?v=202611161812';
+import { renderMetas } from './metas.js?v=202611161812';
+import { renderEtapas } from './etapas.js?v=202611161812';
+import { renderVendedor } from './vendedor.js?v=202611161812';
+import { renderSaude } from './saude.js?v=202611161812';
+import { renderControle } from './controle.js?v=202611161812';
+import { renderAutomacoes } from './automacoes.js?v=202611161812';
 
 // [título, função, quem pode abrir] — 'equipe' = Dev ou Gestor; 'dev' = só Dev (o banco confere de novo)
 const PAGINAS_ADM = {
   acessos: ['Acessos', renderAcessos, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'],
-  etapas: ['Etapas do funil', renderEtapas, 'dev'], saude: ['Saúde dos dados', renderSaude, 'dev'], automacoes: ['Automações', renderAutomacoes, 'dev'],
+  etapas: ['Etapas do funil', renderEtapas, 'dev'], saude: ['Saúde dos dados', renderSaude, 'dev'],
+  automacoes: ['Automações', renderControle, 'dev'], rodar: ['Rodar automações', renderAutomacoes, 'dev'],
 };
 const NOME_PERFIL = { admin: 'Dev', gestor: 'Gestor', loja: 'Cliente' };
 const pode = (rota) => !!PAGINAS_ADM[rota] && (PAGINAS_ADM[rota][2] === 'dev' ? ctx.dev : ctx.equipe);

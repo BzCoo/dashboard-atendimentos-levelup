@@ -128,3 +128,11 @@ V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.j
 - Dev e Gestor veem o menu lateral "Central LevelUp" (no celular abre pelo botão ☰). Cliente continua só com o dashboard.
 - Telas só de Dev: Automações, Saúde dos dados, Etapas do funil e a seção Operação do painel. O banco confere de novo (`dash_atend.exigir_dev()`).
 - Itens "em breve" no menu: Disparos, Bom dia, Contas (próximas etapas).
+
+## Central › Automações (Etapa 2)
+- Tela `#/automacoes` (só Dev): situação de cada automação do n8n (saudável, atrasada, falhando, desligada), último erro, ritmo, falhas em 24h,
+  sinais extras (carga falhando, token do GHL, OpenAI sem crédito, fila parada, falhas do WhatsApp), liga/desliga geral e por conta, histórico.
+- O antigo "Automações" (rodar por conta) virou `#/rodar` ("Rodar automações").
+- n8n **DASH ATENDIMENTOS - Monitor de automacoes** (`comqGucemvPdQvpx`, a cada 5 min, credencial "n8n account"): lê execuções pela API do n8n,
+  grava a saúde, aplica os pedidos e manda alertas/resumo das 8h30 para o grupo **BackLog Automações** (via fila do painel).
+  Fonte em `n8n/monitor/*.js` (gerar com `python3 gen.py`). Catálogo editável em `dash_atend.automacoes`.
