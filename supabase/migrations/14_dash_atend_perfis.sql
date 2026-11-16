@@ -1,0 +1,10 @@
+-- Perfis da plataforma (migração "dash_atend_perfis_dev_gestor", aplicada em 16/11/2026)
+--   'admin'  = Dev: tudo, inclusive telas técnicas (Automações, Saúde, Etapas, Operação, vendedor padrão)
+--   'gestor' = Equipe: dashboard de todas as lojas, Relatório/envio, Metas, Acessos (só de clientes)
+--   'loja'   = Cliente: só o dashboard das lojas dele
+-- dash_atend.exigir_admin() agora aceita Dev ou Gestor; dash_atend.exigir_dev() aceita só Dev.
+-- Passaram a usar exigir_dev(): atend_admin_auto_* (catalogo, criar, status, lista, cancelar), atend_admin_saude,
+--   atend_admin_etapas, atend_admin_salvar_etapa, atend_admin_pedir_sync, atend_automacao, atend_admin_salvar_vendedor_padrao.
+-- contas_permitidas / clientes_visiveis: Dev e Gestor veem todas as lojas.
+-- atend_admin_salvar_membro / atend_admin_remover_membro: Gestor só mexe em acessos de cliente.
+-- atend_service_vincular aceita 'gestor'; novo atend_service_papel(uuid) (service_role) para a edge function atend-admin.

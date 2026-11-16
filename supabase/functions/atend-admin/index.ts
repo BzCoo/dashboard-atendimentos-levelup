@@ -1,6 +1,7 @@
 // Edge Function: atend-admin
 // Cria acessos (login com e-mail e senha) e redefine senhas para o site
-// "Dashboard de Atendimentos - Level Up". Só administradores ativos podem chamar.
+// "Dashboard de Atendimentos - Level Up". Só a equipe (Dev ou Gestor) pode chamar;
+// Gestor só cria e redefine senha de acessos de cliente (perfil "loja").
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
@@ -28,7 +29,8 @@ Deno.serve(async (req) => {
   const asUser = createClient(URL, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
   const { data: me, error: meErr } = await asUser.rpc("atend_me");
   if (meErr) return json({ erro: "Não foi possível verificar seu acesso." }, 401);
-  if (!me || me.papel !== "admin") return json({ erro: "Somente administradores podem fazer isso." }, 403);
+  if (!me || (me.papel !== "admin" && me.papel !== "gestor")) return json({ erro: "Somente a equipe LevelUp pode fazer isso." }, 403);
+  const souDev = me.papel === "admin";
   const { data: userData } = await asUser.auth.getUser();
   const adminId = userData?.user?.id ?? null;
 
@@ -46,7 +48,8 @@ Deno.serve(async (req) => {
     const lojas = Array.isArray(body.lojas) ? body.lojas.map(Number).filter((n) => Number.isInteger(n) && n > 0) : [];
     if (!EMAIL.test(email)) return json({ erro: "E-mail inválido." }, 400);
     if (!nome) return json({ erro: "Informe o nome." }, 400);
-    if (papel !== "admin" && papel !== "loja") return json({ erro: "Perfil inválido." }, 400);
+    if (papel !== "admin" && papel !== "gestor" && papel !== "loja") return json({ erro: "Perfil inválido." }, 400);
+    if (!souDev && papel !== "loja") return json({ erro: "Somente devs podem criar acessos da equipe." }, 403);
     if (papel === "loja" && lojas.length === 0) return json({ erro: "Escolha ao menos uma loja." }, 400);
 
     let userId: string | null = null;
@@ -54,6 +57,10 @@ Deno.serve(async (req) => {
     const { data: existente } = await admin.rpc("atend_service_user_id", { p_email: email });
     if (existente) {
       userId = existente as string;
+      if (!souDev) {
+        const { data: papelAtual } = await admin.rpc("atend_service_papel", { p_user: userId });
+        if (papelAtual === "admin" || papelAtual === "gestor") return json({ erro: "Este e-mail é de alguém da equipe. Só um dev pode mudar." }, 403);
+      }
       jaExistia = true; // usuário já tinha login (ex.: outro painel): mantém a senha dele
       // Login antigo que nunca foi confirmado nem usado: confirma o e-mail e aplica a senha informada agora
       const { data: u } = await admin.auth.admin.getUserById(userId);
@@ -85,6 +92,10 @@ Deno.serve(async (req) => {
     if (senha.length < 8) return json({ erro: "A senha precisa ter pelo menos 8 caracteres." }, 400);
     const { data: alvo } = await admin.rpc("atend_service_membro_user", { p_membro: membro });
     if (!alvo) return json({ erro: "Acesso não encontrado." }, 404);
+    if (!souDev) {
+      const { data: papelAlvo } = await admin.rpc("atend_service_papel", { p_user: alvo as string });
+      if (papelAlvo !== "loja") return json({ erro: "Somente devs podem trocar a senha de alguém da equipe." }, 403);
+    }
     const { error: sErr } = await admin.auth.admin.updateUserById(alvo as string, { password: senha, email_confirm: true });
     if (sErr) return json({ erro: "Não foi possível trocar a senha: " + sErr.message }, 400);
     await admin.rpc("atend_service_registrar", { p_admin: adminId, p_acao: "redefinir_senha", p_detalhe: { membro } });
