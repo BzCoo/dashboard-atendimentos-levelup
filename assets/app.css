@@ -619,3 +619,12 @@ a.lu-ctl-sinal:hover { border-color: var(--lu-ink4); }
 .lu-badge.warn { background: rgba(255, 176, 32, .14); color: var(--lu-warn); }
 .lu-dsp-dir .lu-search { flex: none; max-width: none; width: 100%; }
 .lu-dsp-dir .lu-search input { width: 100%; }
+/* ===== Central › Bom dia ===== */
+.lu-bd-liga { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--lu-line); font-size: 14px; font-weight: 600; cursor: pointer; align-self: flex-end; }
+.lu-bd-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; border-radius: 12px; background: rgba(var(--lu-ov), .04); border: 1px solid var(--lu-line); }
+.lu-bd-tabs button { all: unset; cursor: pointer; flex: 1 1 auto; text-align: center; padding: 8px 12px; border-radius: 9px; font-size: 13.5px; color: var(--lu-ink3); }
+.lu-bd-tabs button[aria-selected="true"] { background: var(--lu-accent-soft); color: var(--lu-ink); font-weight: 600; }
+.lu-bd-tabs button:focus-visible { outline: 2px solid var(--lu-accent); outline-offset: 1px; }
+.f-bd .f-bd-texto { min-height: 170px; resize: vertical; font: 14px/1.5 var(--lu-sans); }
+.f-bd .lu-dialog-foot { align-items: center; }
+.slot-bd-info:empty { display: none; }

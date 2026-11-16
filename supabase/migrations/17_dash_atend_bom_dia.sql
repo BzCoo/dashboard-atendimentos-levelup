@@ -1,0 +1,5 @@
+-- Etapa 4: Bom dia controlado pelo painel (aplicada como dash_atend_bom_dia)
+-- dash_atend.config 'bom_dia' = {ativo, textos:{segunda..sexta}, excluidos:[jid], ultimo_envio, ultimo_total}; dash_atend.bomdia_grupos (grupos vistos pelo fluxo).
+-- Fluxo n8n "WhatsApp - Bom dia grupos etiqueta CRM" (OjYTYkCYWus8MlW5, seg-sex 9h15, instância Gabriel) chama
+--   atend_service_bomdia_preparar(grupos, enviar) e recebe a mensagem de cada grupo (com {loja}/{leads_ontem}...); se o banco falhar, usa o nó EDITAR.
+-- Tela (Dev e Gestor): atend_bomdia(), atend_bomdia_salvar(ativo, textos, excluidos), atend_bomdia_previa(texto, jid).

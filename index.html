@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611161817">
-<link rel="stylesheet" href="assets/app.css?v=202611161817">
-<script type="module" src="assets/js/main.js?v=202611161817"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611161820">
+<link rel="stylesheet" href="assets/app.css?v=202611161820">
+<script type="module" src="assets/js/main.js?v=202611161820"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -99,7 +99,7 @@
       <p class="grp">Comunicação</p>
       <a href="#/relatorio" data-rota="relatorio"><i aria-hidden="true">✉</i><span>Relatórios</span></a>
       <a href="#/disparos" data-rota="disparos"><i aria-hidden="true">➤</i><span>Disparos</span></a>
-      <span class="soon" title="Etapa 4 do plano"><i aria-hidden="true">☀</i><span>Bom dia</span><em>em breve</em></span>
+      <a href="#/bomdia" data-rota="bomdia"><i aria-hidden="true">☀</i><span>Bom dia</span></a>
       <p class="grp" data-dev>Operação</p>
       <a href="#/automacoes" data-rota="automacoes" data-dev><i aria-hidden="true">⚙</i><span>Automações</span><em class="slot-side-alerta" hidden></em></a>
       <a href="#/rodar" data-rota="rodar" data-dev><i aria-hidden="true">▶</i><span>Rodar automações</span></a>
@@ -719,6 +719,53 @@
 </template>
 
 <!-- ================= AUTOMAÇÕES ================= -->
+<template id="tpl-bomdia">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>EQUIPE</b> Comunicação</span>
+      <h1 class="lu-h2">Bom dia</h1>
+      <p class="lu-sub">Mensagem de segunda a sexta às 9h15 nos grupos com a etiqueta CRM no WhatsApp (não sai em feriados nacionais). Edite o texto de cada dia, escolha quem recebe e veja como fica.</p>
+    </div>
+    <label class="lu-bd-liga"><input type="checkbox" class="lu-switch f-bd-ativo" role="switch"><span class="slot-bd-estado">Ligado</span></label>
+  </div>
+  <p class="lu-help slot-bd-info"></p>
+  <div class="lu-shell"><div class="lu-core">
+    <form class="lu-form f-bd" novalidate>
+      <div class="lu-dsp-cols">
+        <div class="lu-dsp-esq">
+          <div class="lu-bd-tabs" role="tablist" aria-label="Dia da semana">
+            <button type="button" role="tab" data-dia="segunda">Segunda</button><button type="button" role="tab" data-dia="terca">Terça</button>
+            <button type="button" role="tab" data-dia="quarta">Quarta</button><button type="button" role="tab" data-dia="quinta">Quinta</button>
+            <button type="button" role="tab" data-dia="sexta">Sexta</button>
+          </div>
+          <label class="lu-field"><span class="slot-bd-rot">Mensagem de segunda</span>
+            <textarea class="f-bd-texto" rows="8" maxlength="2000"></textarea></label>
+          <div class="lu-dsp-vars" aria-label="Inserir variável">
+            <span class="muted">Inserir:</span>
+            <button type="button" data-var="{loja}">Loja</button>
+            <button type="button" data-var="{leads_ontem}">Leads de ontem</button>
+            <button type="button" data-var="{respondidos_ontem}">Respondidos ontem</button>
+            <button type="button" data-var="{sem_resposta_ontem}">Sem resposta ontem</button>
+            <button type="button" data-var="{sla_ontem}">SLA de ontem</button>
+          </div>
+          <p class="lu-help">Os números são do dia anterior e só aparecem nos grupos ligados a uma loja no painel; nos outros, a variável some do texto. Na segunda, "ontem" é domingo.</p>
+        </div>
+        <div class="lu-dsp-dir">
+          <div class="lu-dsp-gtopo"><b>Quem recebe</b><span class="muted slot-gcont"></span>
+            <span class="lu-dsp-gacoes"><button type="button" class="lu-link act-gtodos">Todos</button> · <button type="button" class="lu-link act-gnenhum">Nenhum</button></span></div>
+          <div class="lu-dsp-grupos slot-grupos"></div>
+          <div class="lu-dsp-previa">
+            <div class="lu-dsp-ptopo"><b>Prévia</b><select class="f-previa" aria-label="Ver prévia para o grupo"></select></div>
+            <div class="lu-wa slot-previa"></div>
+          </div>
+        </div>
+      </div>
+      <p class="lu-msg erro" hidden></p>
+      <div class="lu-dialog-foot"><span class="muted slot-bd-sujo"></span><button class="lu-primary act-bd-salvar" type="submit">Salvar</button></div>
+    </form>
+  </div></div>
+</template>
+
 <template id="tpl-disparos">
   <div class="lu-page-head">
     <div>

@@ -1,7 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611161817';
-import { montarFiltros } from './filtros.js?v=202611161817';
-import * as G from './charts.js?v=202611161817';
-import { montarChegada } from './chegada.js?v=202611161817';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611161820';
+import { montarFiltros } from './filtros.js?v=202611161820';
+import * as G from './charts.js?v=202611161820';
+import { montarChegada } from './chegada.js?v=202611161820';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],

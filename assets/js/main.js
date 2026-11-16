@@ -1,18 +1,19 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161817';
-import { renderPainel } from './painel.js?v=202611161817';
-import { renderAcessos } from './acessos.js?v=202611161817';
-import { renderRelatorio } from './relatorio.js?v=202611161817';
-import { renderMetas } from './metas.js?v=202611161817';
-import { renderEtapas } from './etapas.js?v=202611161817';
-import { renderVendedor } from './vendedor.js?v=202611161817';
-import { renderSaude } from './saude.js?v=202611161817';
-import { renderDisparos } from './disparos.js?v=202611161817';
-import { renderControle } from './controle.js?v=202611161817';
-import { renderAutomacoes } from './automacoes.js?v=202611161817';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161820';
+import { renderPainel } from './painel.js?v=202611161820';
+import { renderAcessos } from './acessos.js?v=202611161820';
+import { renderRelatorio } from './relatorio.js?v=202611161820';
+import { renderMetas } from './metas.js?v=202611161820';
+import { renderEtapas } from './etapas.js?v=202611161820';
+import { renderVendedor } from './vendedor.js?v=202611161820';
+import { renderSaude } from './saude.js?v=202611161820';
+import { renderBomDia } from './bomdia.js?v=202611161820';
+import { renderDisparos } from './disparos.js?v=202611161820';
+import { renderControle } from './controle.js?v=202611161820';
+import { renderAutomacoes } from './automacoes.js?v=202611161820';
 
 // [título, função, quem pode abrir] — 'equipe' = Dev ou Gestor; 'dev' = só Dev (o banco confere de novo)
 const PAGINAS_ADM = {
-  acessos: ['Acessos', renderAcessos, 'equipe'], disparos: ['Disparos', renderDisparos, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'],
+  acessos: ['Acessos', renderAcessos, 'equipe'], disparos: ['Disparos', renderDisparos, 'equipe'], bomdia: ['Bom dia', renderBomDia, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'],
   etapas: ['Etapas do funil', renderEtapas, 'dev'], saude: ['Saúde dos dados', renderSaude, 'dev'],
   automacoes: ['Automações', renderControle, 'dev'], rodar: ['Rodar automações', renderAutomacoes, 'dev'],
 };
