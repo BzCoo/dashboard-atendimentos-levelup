@@ -8,12 +8,10 @@ const wfs = {};
 for (const i of $('Listar workflows').all()) { const w = i.json || {}; if (w.id) wfs[w.id] = w; }
 const execs = $('Execucoes recentes').all().map((i) => i.json).filter((e) => e && e.id && e.mode !== 'manual');
 const erros = {};
-for (const i of $('Detalhe da ultima falha').all()) {
+// O detalhe do erro NÃO é lido pela API (a execução completa pode ter vários MB e derrubar o n8n): guarda só o número da execução
+for (const i of $('Ultima falha de cada um').all()) {
   const j = i.json || {};
-  if (!j.id || !j.workflowId) continue;
-  const er = j.data?.resultData?.error;
-  const no = j.data?.resultData?.lastNodeExecuted;
-  if (er) erros[j.workflowId] = (String(er.message || er.description || 'erro').slice(0, 300) + (no ? ' (nó: ' + no + ')' : ''));
+  if (j.wf && j.exec_id) erros[j.wf] = 'Falhou na execução #' + j.exec_id + ' (abra no n8n para ver o erro)';
 }
 const agora = Date.now();
 const H24 = 24 * 3600e3;
