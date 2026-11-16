@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611131752';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611161757';
 
 /* Volta do link de "Esqueci minha senha": lido antes do Supabase limpar o endereço */
 export const RETORNO_AUTH = (() => {
@@ -93,7 +93,8 @@ const traduzErro = (e) => {
   const m = String(e?.message || e || '');
   if (/nao permitida/i.test(m)) return 'Você não tem acesso a esta loja.';
   if (/nao autorizado/i.test(m)) return 'Seu login não tem acesso a este painel.';
-  if (/Somente administradores/i.test(m)) return 'Somente administradores podem fazer isso.';
+  if (/Somente administradores|Somente a equipe/i.test(m)) return 'Somente a equipe LevelUp pode fazer isso.';
+  if (/Somente devs/i.test(m)) return 'Somente devs podem fazer isso.';
   if (/JWT|token/i.test(m)) return 'Sua sessão expirou. Entre novamente.';
   if (/statement timeout|canceling statement/i.test(m)) return 'O banco demorou para responder (acabou de receber dados novos). Atualize a página em alguns segundos.';
   return m || 'Não foi possível carregar os dados.';

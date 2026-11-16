@@ -1,7 +1,7 @@
-import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611131752';
-import { montarFiltros } from './filtros.js?v=202611131752';
-import * as G from './charts.js?v=202611131752';
-import { montarChegada } from './chegada.js?v=202611131752';
+import { $, $$, el, clone, rpc, fmt, delta, isNum, toast, metaPara, frenteMeta, addDias, irPara, rotuloComp } from './core.js?v=202611161757';
+import { montarFiltros } from './filtros.js?v=202611161757';
+import * as G from './charts.js?v=202611161757';
+import { montarChegada } from './chegada.js?v=202611161757';
 
 const KPIS = [
   ['atendimentos', fmt.int, 'var_atendimentos', 'pct', null],
@@ -123,9 +123,10 @@ const DIAS = ['', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
 export { tabela, txt, num, dlt, barra, comVendas };
 export const renderPainel = async (main, ctx) => {
   main.replaceChildren(clone('tpl-painel'));
-  const { filtros: f, me, admin } = ctx;
+  const { filtros: f, me, admin, dev } = ctx;
   const multi = (me.lojas || []).length > 1;
   $$('[data-admin]', main).forEach((n) => { n.hidden = !admin; });
+  $$('[data-dev]', main).forEach((n) => { n.hidden = !dev; });
   $$('[data-multi]', main).forEach((n) => { n.hidden = !multi; });
   montarFiltros($('.slot-filtros', main), ctx, 'painel');
   const nomeLoja = f.conta ? (me.lojas.find((l) => Number(l.loja_id) === Number(f.conta)) || {}).loja : (me.lojas.length === 1 ? me.lojas[0].loja : null);
@@ -297,7 +298,7 @@ export const renderPainel = async (main, ctx) => {
     $('.slot-leads-nota', main).textContent = fmt.int(d?.total) + ' leads novos no período' + (sem ? ', ' + fmt.int(sem) + ' ainda sem resposta' : '') + (Number(d?.total) > ls.length ? '. Mostrando os ' + ls.length + ' mais recentes.' : '.');
     tbLeads.dados(ls);
   });
-  if (admin) tarefas.automacao = rpc('atend_automacao').then((r) => tbAuto.dados(r));
+  if (dev) tarefas.automacao = rpc('atend_automacao').then((r) => tbAuto.dados(r));
 
   const falhas = { serie: ['ch-spark', 'ch-volume', 'ch-sla'], etapas: ['ch-etapas'], horarios: ['ch-horarios'], anuncios: ['ch-veiculos'] };
   const resultados = await Promise.allSettled(Object.values(tarefas));

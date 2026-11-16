@@ -1,4 +1,4 @@
-import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611131752';
+import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611161757';
 
 const DIA = 24 * 3600e3;
 const ACOES = {

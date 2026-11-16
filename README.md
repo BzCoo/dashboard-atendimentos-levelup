@@ -122,3 +122,9 @@ Ao mudar CSS ou JS, troque a versão em todos os pontos de uma vez:
 ```bash
 V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.js
 ```
+
+## Perfis e Central LevelUp (Etapa 1 da plataforma)
+- **Dev** (`papel = 'admin'`): tudo. **Gestor** (`'gestor'`): todas as lojas, Relatórios, Metas e Acessos de clientes. **Cliente** (`'loja'`): só o dashboard das lojas dele.
+- Dev e Gestor veem o menu lateral "Central LevelUp" (no celular abre pelo botão ☰). Cliente continua só com o dashboard.
+- Telas só de Dev: Automações, Saúde dos dados, Etapas do funil e a seção Operação do painel. O banco confere de novo (`dash_atend.exigir_dev()`).
+- Itens "em breve" no menu: Disparos, Bom dia, Contas (próximas etapas).

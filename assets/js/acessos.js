@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha } from './core.js?v=202611131752';
+import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha } from './core.js?v=202611161757';
 
 const SITE = () => location.origin + location.pathname;
 
@@ -24,20 +24,25 @@ export const renderAcessos = async (main, ctx) => {
   const tbody = $('#tb-membros tbody', main);
   const busca = $('.q-membros', main);
   let membros = [];
-  const todasLojas = ctx.me.lojas; // admin vê todas
+  const todasLojas = ctx.me.lojas; // a equipe vê todas
+  const PERFIL = { admin: ['Dev', ' admin'], gestor: ['Gestor', ' gestor'], loja: ['Cliente', ''] };
+  const equipe = (m) => m.papel === 'admin' || m.papel === 'gestor';
+  // Gestor só mexe em acessos de cliente (o banco e a função do servidor também conferem)
+  const podeMexer = (m) => ctx.dev || !equipe(m);
+  $$('#f-membro [data-dev]').forEach((n) => { n.hidden = !ctx.dev; });
 
   const draw = () => {
     const termo = busca.value.trim().toLowerCase();
     const r = membros.filter((m) => !termo || [m.nome, m.email, ...(m.lojas_nomes || [])].join(' ').toLowerCase().includes(termo));
-    $('.slot-total', main).textContent = membros.length + (membros.length === 1 ? ' acesso' : ' acessos') + ' · ' + membros.filter((m) => m.papel === 'admin').length + ' administrador(es)';
+    $('.slot-total', main).textContent = membros.length + (membros.length === 1 ? ' acesso' : ' acessos') + ' · ' + membros.filter(equipe).length + ' da equipe';
     if (!r.length) { tbody.replaceChildren(el('tr', {}, el('td', { class: 'txt muted', colspan: 6, text: termo ? 'Nada encontrado.' : 'Nenhum acesso criado ainda.' }))); return; }
     tbody.replaceChildren(...r.map((m) => el('tr', { 'data-id': m.id },
       el('td', { class: 'txt name' }, el('div', { text: m.nome || '—' }), el('div', { class: 'muted', style: 'font-weight:400;font-size:12px', text: m.email + (m.eu ? ' · você' : '') })),
-      el('td', { class: 'txt' }, el('span', { class: 'lu-badge' + (m.papel === 'admin' ? ' admin' : ''), text: m.papel === 'admin' ? 'Administrador' : 'Membro de loja' })),
-      el('td', { class: 'txt' }, m.papel === 'admin' ? el('span', { class: 'muted', text: 'Todas as lojas' }) : el('div', { class: 'lu-chips' }, ...(m.lojas_nomes || []).map((n) => el('span', { text: n })))),
+      el('td', { class: 'txt' }, el('span', { class: 'lu-badge' + (PERFIL[m.papel] || PERFIL.loja)[1], text: (PERFIL[m.papel] || PERFIL.loja)[0] })),
+      el('td', { class: 'txt' }, equipe(m) ? el('span', { class: 'muted', text: 'Todas as lojas' }) : el('div', { class: 'lu-chips' }, ...(m.lojas_nomes || []).map((n) => el('span', { text: n })))),
       el('td', { class: 'mono hide-sm' }, el('div', { text: m.ultimo_acesso ? fmt.dt(m.ultimo_acesso) : 'nunca entrou' }), Number(m.acessos_30d) ? el('div', { class: 'muted', style: 'font-size:12px', text: fmt.int(m.acessos_30d) + (Number(m.acessos_30d) === 1 ? ' acesso' : ' acessos') + ' em 30 dias' }) : null),
       el('td', { class: 'txt' }, el('span', { class: 'lu-badge' + (m.ativo ? '' : ' off'), text: m.ativo ? 'Ativo' : 'Bloqueado' })),
-      el('td', {}, el('div', { class: 'lu-actions' },
+      el('td', {}, !podeMexer(m) ? el('span', { class: 'muted', style: 'font-size:12px', text: 'Só um dev altera' }) : el('div', { class: 'lu-actions' },
         el('button', { type: 'button', class: 'lu-ghost sm', 'data-act': 'editar', text: 'Editar' }),
         el('button', { type: 'button', class: 'lu-ghost sm', 'data-act': 'senha', text: 'Senha' }),
         m.eu ? null : el('button', { type: 'button', class: 'lu-ghost sm danger', 'data-act': 'remover', text: 'Remover' }))),
@@ -76,7 +81,7 @@ export const renderAcessos = async (main, ctx) => {
   $('.act-todas', form).onclick = () => marcarVisiveis(true);
   $('.act-nenhuma', form).onclick = () => marcarVisiveis(false);
   const papelAtual = () => $('input[name=papel]:checked', form).value;
-  const syncPapel = () => { $('.f-lojas-box', form).hidden = papelAtual() === 'admin'; };
+  const syncPapel = () => { $('.f-lojas-box', form).hidden = papelAtual() !== 'loja'; };
   $$('input[name=papel]', form).forEach((r) => { r.onchange = syncPapel; });
 
   let editando = null;
@@ -115,7 +120,7 @@ export const renderAcessos = async (main, ctx) => {
       } else {
         const r = await funcaoAdmin({ acao: 'criar', nome, email, papel, lojas, senha });
         fechar(dlg);
-        const nomesLojas = papel === 'admin' ? 'Todas (administrador)' : todasLojas.filter((l) => lojas.includes(Number(l.loja_id))).map((l) => l.loja).join(', ');
+        const nomesLojas = papel !== 'loja' ? 'Todas (' + (papel === 'admin' ? 'dev' : 'gestor') + ')' : todasLojas.filter((l) => lojas.includes(Number(l.loja_id))).map((l) => l.loja).join(', ');
         const cred = `Acesso ao Dashboard de Atendimentos – Level Up\n\nSite: ${SITE()}\nE-mail: ${email}\n` +
           (r.ja_existia ? 'Senha: a mesma que você já usa nos painéis da Level Up\n' : `Senha: ${senha}\n`) +
           `Lojas: ${nomesLojas}\n\nDepois de entrar, você pode trocar a senha no menu da sua conta.`;
@@ -189,8 +194,8 @@ const historico = async (main) => {
     tbody.replaceChildren(...r.map((x) => el('tr', {},
       el('td', { class: 'txt mono', text: fmt.dt(x.em) }),
       el('td', { class: 'txt name' }, el('div', { text: x.nome || x.email || '—' }), x.nome ? el('div', { class: 'muted', style: 'font-weight:400;font-size:12px', text: x.email }) : null),
-      el('td', { class: 'txt hide-sm' }, el('span', { class: 'lu-badge' + (x.papel === 'admin' ? ' admin' : ''), text: x.papel === 'admin' ? 'Administrador' : 'Membro de loja' })),
-      el('td', { class: 'txt hide-sm muted wrap', text: x.papel === 'admin' ? 'Todas' : x.lojas || '—' }))));
+      el('td', { class: 'txt hide-sm' }, el('span', { class: 'lu-badge' + (x.papel === 'admin' ? ' admin' : x.papel === 'gestor' ? ' gestor' : ''), text: x.papel === 'admin' ? 'Dev' : x.papel === 'gestor' ? 'Gestor' : 'Cliente' })),
+      el('td', { class: 'txt hide-sm muted wrap', text: x.papel !== 'loja' ? 'Todas' : x.lojas || '—' }))));
   };
   busca.addEventListener('input', draw);
   tbody.replaceChildren(el('tr', {}, el('td', { class: 'txt sk', colspan: 4, text: 'Carregando…' })));

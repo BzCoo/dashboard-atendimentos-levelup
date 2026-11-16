@@ -1,14 +1,20 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611131752';
-import { renderPainel } from './painel.js?v=202611131752';
-import { renderAcessos } from './acessos.js?v=202611131752';
-import { renderRelatorio } from './relatorio.js?v=202611131752';
-import { renderMetas } from './metas.js?v=202611131752';
-import { renderEtapas } from './etapas.js?v=202611131752';
-import { renderVendedor } from './vendedor.js?v=202611131752';
-import { renderSaude } from './saude.js?v=202611131752';
-import { renderAutomacoes } from './automacoes.js?v=202611131752';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161757';
+import { renderPainel } from './painel.js?v=202611161757';
+import { renderAcessos } from './acessos.js?v=202611161757';
+import { renderRelatorio } from './relatorio.js?v=202611161757';
+import { renderMetas } from './metas.js?v=202611161757';
+import { renderEtapas } from './etapas.js?v=202611161757';
+import { renderVendedor } from './vendedor.js?v=202611161757';
+import { renderSaude } from './saude.js?v=202611161757';
+import { renderAutomacoes } from './automacoes.js?v=202611161757';
 
-const PAGINAS_ADM = { acessos: ['Acessos', renderAcessos], relatorio: ['Montar relatório', renderRelatorio], metas: ['Metas', renderMetas], etapas: ['Etapas do funil', renderEtapas], saude: ['Saúde dos dados', renderSaude], automacoes: ['Automações', renderAutomacoes] };
+// [título, função, quem pode abrir] — 'equipe' = Dev ou Gestor; 'dev' = só Dev (o banco confere de novo)
+const PAGINAS_ADM = {
+  acessos: ['Acessos', renderAcessos, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'],
+  etapas: ['Etapas do funil', renderEtapas, 'dev'], saude: ['Saúde dos dados', renderSaude, 'dev'], automacoes: ['Automações', renderAutomacoes, 'dev'],
+};
+const NOME_PERFIL = { admin: 'Dev', gestor: 'Gestor', loja: 'Cliente' };
+const pode = (rota) => !!PAGINAS_ADM[rota] && (PAGINAS_ADM[rota][2] === 'dev' ? ctx.dev : ctx.equipe);
 
 const app = $('#app');
 let ctx = null;          // { me, admin, filtros, trocar }
@@ -98,8 +104,23 @@ const sair = async () => { await sb.auth.signOut(); history.replaceState(null, '
 const montarShell = () => {
   app.replaceChildren(clone('tpl-shell'));
   pintarLogos(app);
-  const { me, admin } = ctx;
-  $$('[data-admin]', app).forEach((n) => { n.hidden = !admin; });
+  const { me, equipe, dev } = ctx;
+  $$('[data-admin], [data-equipe]', app).forEach((n) => { n.hidden = !equipe; });
+  $$('[data-dev]', app).forEach((n) => { n.hidden = !dev; });
+  $('.lu-side-fundo', app).hidden = true;
+  app.classList.toggle('com-side', equipe);
+  $('.slot-perfil', app).textContent = NOME_PERFIL[me.papel] || '';
+  // Menu lateral (no celular abre por cima)
+  const side = $('#lu-side', app), btnSide = $('.act-side', app), fundo = $('.lu-side-fundo', app);
+  const abrirSide = (abrir) => {
+    side.classList.toggle('aberto', abrir); fundo.hidden = !abrir || !equipe;
+    btnSide.setAttribute('aria-expanded', String(abrir));
+    if (abrir) $('a', side)?.focus();
+  };
+  btnSide.addEventListener('click', () => abrirSide(!side.classList.contains('aberto')));
+  $$('.act-side-fechar', app).forEach((b) => b.addEventListener('click', () => abrirSide(false)));
+  side.addEventListener('click', (e) => { if (e.target.closest('a')) abrirSide(false); });
+  side.addEventListener('keydown', (e) => { if (e.key === 'Escape') { abrirSide(false); btnSide.focus(); } });
   $$('#nav-secoes [data-multi]', app).forEach((n) => { n.hidden = (me.lojas || []).length <= 1; });
   $('.slot-inicial', app).textContent = (me.nome || me.email || '?').trim().charAt(0).toUpperCase();
   $('.slot-nome', app).textContent = me.nome || 'Sua conta';
@@ -174,13 +195,13 @@ const rotear = async () => {
   // membros de loja só podem pedir lojas permitidas (o banco também bloqueia)
   if (filtros.conta && !ctx.me.lojas.some((l) => Number(l.loja_id) === filtros.conta)) filtros.conta = null;
   ctx.filtros = filtros;
-  const destino = rota === 'vendedor' ? 'vendedor' : PAGINAS_ADM[rota] && ctx.admin ? rota : 'painel';
+  const destino = rota === 'vendedor' ? 'vendedor' : pode(rota) ? rota : 'painel';
   if (!shellPronto) montarShell();
   limpar?.(); limpar = null;
   const main = $('#conteudo', app);
-  $$('.btn-admin', app).forEach((b) => b.classList.toggle('on', !!PAGINAS_ADM[destino]));
+  $$('.lu-side-nav a[data-rota]', app).forEach((a) => { if (a.dataset.rota === destino) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   $$('#nav-secoes a', app).forEach((a) => a.removeAttribute('aria-current'));
-  document.title = (PAGINAS_ADM[destino]?.[0] || 'Painel') + ' · Dashboard de Atendimentos · Level Up';
+  document.title = (PAGINAS_ADM[destino]?.[0] || 'Painel') + (ctx.equipe ? ' · Central LevelUp' : ' · Dashboard de Atendimentos · Level Up');
   try {
     if (destino === 'vendedor' || PAGINAS_ADM[destino]) {
       const p = destino === 'vendedor' ? renderVendedor(main, ctx, vendedor) : PAGINAS_ADM[destino][1](main, ctx);
@@ -226,7 +247,9 @@ const iniciar = async () => {
   rpc('atend_registrar_acesso').catch(() => {});
   let metas = null;
   try { metas = await rpc('atend_metas'); } catch { /* metas são opcionais */ }
-  ctx = { me, metas, admin: me.papel === 'admin', filtros: lerRota().filtros, trocar: (mud) => trocarFiltros(lerRota().rota === 'relatorio' ? 'relatorio' : 'painel', { ...ctx.filtros, ...mud }) };
+  const equipe = me.papel === 'admin' || me.papel === 'gestor';
+  // admin = vê todas as lojas (equipe); dev = telas técnicas
+  ctx = { me, metas, equipe, admin: equipe, dev: me.papel === 'admin', filtros: lerRota().filtros, trocar: (mud) => trocarFiltros(lerRota().rota === 'relatorio' ? 'relatorio' : 'painel', { ...ctx.filtros, ...mud }) };
   shellPronto = false;
   await rotear();
 };
