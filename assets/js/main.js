@@ -1,21 +1,22 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161830';
-import { renderPainel } from './painel.js?v=202611161830';
-import { renderAcessos } from './acessos.js?v=202611161830';
-import { renderRelatorio } from './relatorio.js?v=202611161830';
-import { renderMetas } from './metas.js?v=202611161830';
-import { renderEtapas } from './etapas.js?v=202611161830';
-import { renderVendedor } from './vendedor.js?v=202611161830';
-import { renderSaude } from './saude.js?v=202611161830';
-import { renderBomDia } from './bomdia.js?v=202611161830';
-import { renderDisparos } from './disparos.js?v=202611161830';
-import { renderControle } from './controle.js?v=202611161830';
-import { renderAutomacoes } from './automacoes.js?v=202611161830';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161831';
+import { renderPainel } from './painel.js?v=202611161831';
+import { renderAcessos } from './acessos.js?v=202611161831';
+import { renderRelatorio } from './relatorio.js?v=202611161831';
+import { renderMetas } from './metas.js?v=202611161831';
+import { renderEtapas } from './etapas.js?v=202611161831';
+import { renderVendedor } from './vendedor.js?v=202611161831';
+import { renderSaude } from './saude.js?v=202611161831';
+import { renderContas } from './contas.js?v=202611161831';
+import { renderBomDia } from './bomdia.js?v=202611161831';
+import { renderDisparos } from './disparos.js?v=202611161831';
+import { renderControle } from './controle.js?v=202611161831';
+import { renderAutomacoes } from './automacoes.js?v=202611161831';
 
 // [título, função, quem pode abrir] — 'equipe' = Dev ou Gestor; 'dev' = só Dev (o banco confere de novo)
 const PAGINAS_ADM = {
   acessos: ['Acessos', renderAcessos, 'equipe'], disparos: ['Disparos', renderDisparos, 'equipe'], bomdia: ['Bom dia', renderBomDia, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'],
   etapas: ['Etapas do funil', renderEtapas, 'dev'], saude: ['Saúde dos dados', renderSaude, 'dev'],
-  automacoes: ['Automações', renderControle, 'dev'], rodar: ['Rodar automações', renderAutomacoes, 'dev'],
+  automacoes: ['Automações', renderControle, 'dev'], contas: ['Contas', renderContas, 'dev'], rodar: ['Rodar automações', renderAutomacoes, 'dev'],
 };
 const NOME_PERFIL = { admin: 'Dev', gestor: 'Gestor', loja: 'Cliente' };
 const pode = (rota) => !!PAGINAS_ADM[rota] && (PAGINAS_ADM[rota][2] === 'dev' ? ctx.dev : ctx.equipe);

@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611161830">
-<link rel="stylesheet" href="assets/app.css?v=202611161830">
-<script type="module" src="assets/js/main.js?v=202611161830"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611161831">
+<link rel="stylesheet" href="assets/app.css?v=202611161831">
+<script type="module" src="assets/js/main.js?v=202611161831"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -108,7 +108,7 @@
       <p class="grp">Gestão</p>
       <a href="#/acessos" data-rota="acessos"><i aria-hidden="true">⚿</i><span>Acessos</span></a>
       <a href="#/metas" data-rota="metas"><i aria-hidden="true">◎</i><span>Metas</span></a>
-      <span class="soon" data-dev title="Etapa 7 do plano"><i aria-hidden="true">▦</i><span>Contas</span><em>em breve</em></span>
+      <a href="#/contas" data-rota="contas" data-dev><i aria-hidden="true">▦</i><span>Contas</span></a>
     </nav>
   </aside>
   <div class="lu-side-fundo act-side-fechar" data-equipe hidden></div>
@@ -727,6 +727,28 @@
 </template>
 
 <!-- ================= AUTOMAÇÕES ================= -->
+<template id="tpl-contas">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>DEV</b> Gestão</span>
+      <h1 class="lu-h2">Contas</h1>
+      <p class="lu-sub">Nome, SLA e situação de cada subconta do GHL, a ligação dos grupos de CRM com cliente e loja, e o registro do que a equipe fez na plataforma.</p>
+    </div>
+  </div>
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-ag-barra"><label class="lu-field lu-search"><span class="lu-sr">Buscar conta</span><input class="q-contas" placeholder="Buscar conta ou cliente…"></label><span class="muted slot-ct-total"></span></div>
+    <div class="lu-table-wrap"><table class="lu-table" id="tb-contas"><thead><tr><th class="txt">Conta</th><th class="txt hide-sm">Cliente</th><th class="txt">SLA (min)</th><th class="txt">Ativa</th><th class="txt hide-sm">Última carga</th><th></th></tr></thead><tbody></tbody></table></div>
+  </div></div>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Grupos de CRM</h2><p class="lu-sub">Cada grupo precisa estar ligado a um cliente (e, se for de uma loja só, à loja) para aparecer no Relatório, nos Disparos e no Bom dia com os números certos. A ligação feita aqui não é desfeita pela atualização automática.</p></div></div>
+    <div class="lu-shell"><div class="lu-core"><div class="lu-table-wrap"><table class="lu-table" id="tb-grupos"><thead><tr><th class="txt">Grupo</th><th class="txt">Cliente</th><th class="txt">Loja</th><th></th></tr></thead><tbody></tbody></table></div></div></div>
+  </section>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Registro de ações</h2><p class="lu-sub">As últimas 60 ações da equipe: acessos, envios, disparos, automações, contas e grupos.</p></div></div>
+    <div class="lu-shell"><div class="lu-core"><div class="lu-table-wrap"><table class="lu-table" id="tb-eventos"><thead><tr><th class="txt">Quando</th><th class="txt">Quem</th><th class="txt">O quê</th><th class="txt hide-sm">Detalhe</th></tr></thead><tbody></tbody></table></div></div></div>
+  </section>
+</template>
+
 <template id="tpl-bomdia">
   <div class="lu-page-head">
     <div>

@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha, URL_SITE } from './core.js?v=202611161830';
+import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha, URL_SITE } from './core.js?v=202611161831';
 
 const SITE = () => location.origin + location.pathname;
 

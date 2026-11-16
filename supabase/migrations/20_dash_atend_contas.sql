@@ -1,0 +1,4 @@
+-- Etapa 7: Contas (aplicada como dash_atend_contas). Só Dev.
+-- atend_dev_contas(): contas (inclusive inativas), clientes, grupos de CRM e as últimas 60 ações (dash_atend.eventos).
+-- atend_dev_conta_salvar(id, nome, ativo, sla_min): renomear/ativar/SLA; registra antes/depois e limpa o cache do painel.
+-- atend_dev_grupo_ligar(jid, cliente, loja): liga grupo a cliente/loja (loja_manual = true, a atualização automática respeita).

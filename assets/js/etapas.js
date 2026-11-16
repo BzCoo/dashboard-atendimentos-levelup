@@ -1,4 +1,4 @@
-import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611161830';
+import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611161831';
 
 export const renderEtapas = async (main, ctx) => {
   main.replaceChildren(clone('tpl-etapas'));

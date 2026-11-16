@@ -1,6 +1,6 @@
 /* Central LevelUp › Automações: saúde e liga/desliga das automações do n8n (só Dev).
    O Monitor (n8n, a cada 5 min) grava a situação no banco e aplica os pedidos feitos aqui. */
-import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611161830';
+import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611161831';
 
 const N8N = 'https://n8n.gabrielcamposia.cloud/workflow/';
 const SIT = {

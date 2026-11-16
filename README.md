@@ -142,3 +142,8 @@ V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.j
 - **Bom dia** (`#/bomdia`, equipe): textos de seg a sex, liga/desliga e quem recebe. O fluxo n8n "WhatsApp - Bom dia grupos etiqueta CRM" (9h15) lê isso no banco.
 - **Relatório agendado** (Relatórios › Envio automático por loja): a função `relatorio-auto` monta o texto com o mesmo código do site
   (`assets/js/relatorio-texto.js`, `plano.js`, `fmt.js`). Ao mudar esses arquivos, copie para `supabase/functions/relatorio-auto/` (sem `?v=`) e republique.
+
+## Portal do cliente e Contas (Etapas 6 e 7)
+- **Acessos**: botão "Convidar do GHL" (usuários da subconta, convite por e-mail para criar a senha) e o link para o Custom Menu Link
+  do GHL: `…/#/painel?ghl={{location.id}}` abre já na loja da subconta.
+- **Contas** (`#/contas`, só Dev): renomear, ativar/desativar e SLA de cada subconta; ligar grupos de CRM a cliente/loja; registro de ações.

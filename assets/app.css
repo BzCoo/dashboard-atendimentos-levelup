@@ -652,3 +652,11 @@ a.lu-ctl-sinal:hover { border-color: var(--lu-ink4); }
 #dlg-convite .lu-dialog-foot { align-items: center; }
 #dlg-convite .slot-cv-cont { margin-right: auto; }
 .lu-page-head .lu-acs-botoes { flex-wrap: nowrap; flex: none; }
+/* ===== Central › Contas ===== */
+#tb-contas .ct-nome { min-width: 200px; min-height: 34px; padding: 4px 8px; font-size: 13.5px; }
+#tb-contas .ct-sla { width: 72px; min-height: 34px; padding: 4px 8px; font-size: 13.5px; }
+#tb-contas tr.off td { opacity: .6; }
+.ct-id { display: block; font-size: 11px; margin-top: 2px; }
+.ct-badge { margin-left: 8px; }
+#tb-grupos select { min-height: 34px; padding: 4px 8px; font-size: 13px; max-width: 240px; }
+#tb-grupos td, #tb-grupos th, #tb-contas td, #tb-contas th, #tb-ag td, #tb-ag th { text-align: left; }
