@@ -1,10 +1,10 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611161827';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611161830';
 
 /* Volta do link de "Esqueci minha senha": lido antes do Supabase limpar o endereço */
 export const RETORNO_AUTH = (() => {
   const p = new URLSearchParams(location.hash.replace(/^#\/?/, ''));
-  if (p.get('type') === 'recovery' && p.get('access_token')) return { tipo: 'recovery' };
+  if ((p.get('type') === 'recovery' || p.get('type') === 'invite') && p.get('access_token')) return { tipo: 'recovery', convite: p.get('type') === 'invite' };
   if (p.get('error_code') || p.get('error')) return { tipo: 'erro', codigo: p.get('error_code') || p.get('error'), texto: p.get('error_description') || '' };
   return null;
 })();
@@ -16,7 +16,7 @@ export const URL_SITE = location.origin + location.pathname;
 /* ---------- Formatação ---------- */
 // Cores dos gráficos via variáveis do CSS: acompanham o tema claro/escuro sem redesenhar
 export const ACC = 'var(--lu-chart)', PREV = 'var(--lu-prev)', GRID = 'rgba(var(--lu-ov), .06)', DEEP = 'var(--lu-chart-deep)', MUTED = 'var(--lu-ink3)';
-import { nf0, nf1, isNum, fmt } from './fmt.js?v=202611161827';
+import { nf0, nf1, isNum, fmt } from './fmt.js?v=202611161830';
 export { nf0, nf1, isNum, fmt };
 
 export const delta = (el, v, kind, better) => {

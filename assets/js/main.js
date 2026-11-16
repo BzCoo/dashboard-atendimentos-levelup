@@ -1,15 +1,15 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161827';
-import { renderPainel } from './painel.js?v=202611161827';
-import { renderAcessos } from './acessos.js?v=202611161827';
-import { renderRelatorio } from './relatorio.js?v=202611161827';
-import { renderMetas } from './metas.js?v=202611161827';
-import { renderEtapas } from './etapas.js?v=202611161827';
-import { renderVendedor } from './vendedor.js?v=202611161827';
-import { renderSaude } from './saude.js?v=202611161827';
-import { renderBomDia } from './bomdia.js?v=202611161827';
-import { renderDisparos } from './disparos.js?v=202611161827';
-import { renderControle } from './controle.js?v=202611161827';
-import { renderAutomacoes } from './automacoes.js?v=202611161827';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611161830';
+import { renderPainel } from './painel.js?v=202611161830';
+import { renderAcessos } from './acessos.js?v=202611161830';
+import { renderRelatorio } from './relatorio.js?v=202611161830';
+import { renderMetas } from './metas.js?v=202611161830';
+import { renderEtapas } from './etapas.js?v=202611161830';
+import { renderVendedor } from './vendedor.js?v=202611161830';
+import { renderSaude } from './saude.js?v=202611161830';
+import { renderBomDia } from './bomdia.js?v=202611161830';
+import { renderDisparos } from './disparos.js?v=202611161830';
+import { renderControle } from './controle.js?v=202611161830';
+import { renderAutomacoes } from './automacoes.js?v=202611161830';
 
 // [título, função, quem pode abrir] — 'equipe' = Dev ou Gestor; 'dev' = só Dev (o banco confere de novo)
 const PAGINAS_ADM = {
@@ -53,7 +53,7 @@ const telaLogin = (modo = 'login', aviso = '') => {
   const fEsq = $('#f-esqueci'), fNova = $('#f-nova-senha'), intro = $('.lu-login-head p');
   const mostrar = (qual) => {
     form.hidden = qual !== 'login'; fEsq.hidden = qual !== 'esqueci'; fNova.hidden = qual !== 'nova';
-    intro.textContent = qual === 'esqueci' ? 'Recuperar o acesso' : qual === 'nova' ? 'Criar nova senha' : 'Entre com o e-mail e a senha que você recebeu.';
+    intro.textContent = qual === 'esqueci' ? 'Recuperar o acesso' : qual === 'nova' ? 'Crie sua senha para entrar no painel' : 'Entre com o e-mail e a senha que você recebeu.';
     const alvo = $('input', qual === 'login' ? form : qual === 'esqueci' ? fEsq : fNova);
     if (alvo && matchMedia('(pointer: fine)').matches) alvo.focus();
   };
@@ -197,6 +197,9 @@ const rotear = async () => {
   if (!ctx) return;
   const { rota, secao, filtros, vendedor } = lerRota();
   // membros de loja só podem pedir lojas permitidas (o banco também bloqueia)
+  // Link do menu do GHL: ?ghl={{location.id}} abre na loja dessa subconta
+  const ghl = new URLSearchParams(location.hash.split('?')[1] || '').get('ghl');
+  if (ghl && !filtros.conta) { const l = ctx.me.lojas.find((x) => x.location_id === ghl); if (l) filtros.conta = Number(l.loja_id); }
   if (filtros.conta && !ctx.me.lojas.some((l) => Number(l.loja_id) === filtros.conta)) filtros.conta = null;
   ctx.filtros = filtros;
   const destino = rota === 'vendedor' ? 'vendedor' : pode(rota) ? rota : 'painel';

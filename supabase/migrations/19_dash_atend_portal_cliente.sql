@@ -1,0 +1,5 @@
+-- Etapa 6: portal do cliente (aplicada como dash_atend_portal_cliente e dash_atend_somar_lojas)
+-- atend_admin_ghl_usuarios(loja): usuários do GHL da loja (metrics_dev.ghl_users) e se já têm acesso.
+-- atend_me agora devolve location_id em cada loja: o link do menu do GHL (#/painel?ghl={{location.id}}) abre na loja certa.
+-- atend_service_somar_lojas(user, lojas, admin): cliente que já tinha acesso ganha a loja nova sem perder as outras.
+-- Edge function atend-admin v5: acao "convidar" (inviteUserByEmail com volta para o site; perfil cliente).

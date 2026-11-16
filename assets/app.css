@@ -640,3 +640,15 @@ a.lu-ctl-sinal:hover { border-color: var(--lu-ink4); }
 .lu-ag-chips input:focus-visible + span { outline: 2px solid var(--lu-accent); outline-offset: 1px; }
 .lu-ag-chips { min-width: 230px; }
 #tb-ag .ag-grupo { max-width: 180px; }
+/* ===== Acessos › convite do GHL e link do menu ===== */
+.lu-acs-botoes { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.lu-acs-link { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; align-items: center; margin: 0 0 16px; padding: 14px 18px; border-radius: 16px; border: 1px dashed var(--lu-line2, var(--lu-line)); }
+.lu-acs-link b { font-size: 14px; }
+.lu-acs-link p { margin: 4px 0 0; font-size: 12.5px; line-height: 1.5; }
+.lu-acs-copia { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lu-acs-copia code { flex: 1; min-width: 0; padding: 8px 10px; border-radius: 10px; background: rgba(var(--lu-ov), .05); font-size: 12px; overflow-wrap: anywhere; }
+@media (max-width: 760px) { .lu-acs-link { grid-template-columns: minmax(0, 1fr); } }
+.lu-cv-lista { display: grid; gap: 2px; max-height: min(50vh, 380px); overflow-y: auto; margin: 12px 0 4px; }
+#dlg-convite .lu-dialog-foot { align-items: center; }
+#dlg-convite .slot-cv-cont { margin-right: auto; }
+.lu-page-head .lu-acs-botoes { flex-wrap: nowrap; flex: none; }

@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611161827">
-<link rel="stylesheet" href="assets/app.css?v=202611161827">
-<script type="module" src="assets/js/main.js?v=202611161827"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611161830">
+<link rel="stylesheet" href="assets/app.css?v=202611161830">
+<script type="module" src="assets/js/main.js?v=202611161830"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -635,11 +635,19 @@
 <template id="tpl-acessos">
   <div class="lu-page-head">
     <div>
-      <span class="lu-eyebrow"><b>ADM</b> Administração</span>
+      <span class="lu-eyebrow"><b>EQUIPE</b> Gestão</span>
       <h1 class="lu-h2">Acessos ao painel</h1>
       <p class="lu-sub">Crie o login de cada pessoa e escolha o que ela vê. Clientes só enxergam o dashboard das lojas marcadas aqui. Gestores veem todas as lojas e criam acessos de clientes; devs veem tudo.</p>
     </div>
-    <button class="lu-primary act-novo" type="button">Novo acesso <span aria-hidden="true">+</span></button>
+    <div class="lu-acs-botoes">
+      <button class="lu-ghost act-convidar" type="button">Convidar do GHL</button>
+      <button class="lu-primary act-novo" type="button">Novo acesso <span aria-hidden="true">+</span></button>
+    </div>
+  </div>
+  <div class="lu-acs-link">
+    <div><b>Link do painel para o menu do GHL</b>
+      <p class="muted">Em cada subconta: Configurações › Custom Menu Links › novo link com este endereço, abrindo em <b>nova aba</b> (dentro do GHL alguns navegadores bloqueiam o login). O <code>{{location.id}}</code> faz o painel abrir já na loja certa.</p></div>
+    <div class="lu-acs-copia"><code class="slot-link-ghl"></code><button type="button" class="lu-ghost sm act-copiar-link">Copiar</button></div>
   </div>
   <div class="lu-shell"><div class="lu-core">
     <div class="lu-tablebar">
@@ -865,6 +873,20 @@
     </div></div>
   </section>
 </template>
+
+<dialog class="lu-dialog lu-dialog-lg" id="dlg-convite" aria-labelledby="dlg-convite-t">
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-dlg-head"><div><h3 id="dlg-convite-t">Convidar usuários do GHL</h3>
+      <p class="sub">Escolha a loja e marque quem vai ver o painel. Cada pessoa recebe um e-mail para criar a própria senha e vê só o dashboard dessa loja.</p></div>
+      <button class="lu-x act-cancelar" type="button" aria-label="Fechar">×</button></div>
+    <label class="lu-field">Loja<select class="f-cv-loja"></select></label>
+    <div class="lu-cv-lista slot-cv"></div>
+    <p class="lu-msg erro" hidden></p>
+    <div class="lu-dialog-foot"><span class="muted slot-cv-cont"></span>
+      <button class="lu-ghost act-cancelar" type="button">Fechar</button>
+      <button class="lu-primary act-cv-enviar" type="button">Enviar convites</button></div>
+  </div></div>
+</dialog>
 
 <dialog class="lu-dialog" id="dlg-ctl" aria-labelledby="dlg-ctl-t">
   <div class="lu-shell"><div class="lu-core">

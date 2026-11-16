@@ -1,8 +1,8 @@
-import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara, sb } from './core.js?v=202611161827';
-import { montarAgendas } from './agendas.js?v=202611161827';
-import { montarTexto } from './relatorio-texto.js?v=202611161827';
-import { N8N_GRUPOS } from './config.js?v=202611161827';
-import { montarFiltros } from './filtros.js?v=202611161827';
+import { $, $$, el, clone, rpc, fmt, isNum, toast, copiar, LOGO, metaPara, sb } from './core.js?v=202611161830';
+import { montarAgendas } from './agendas.js?v=202611161830';
+import { montarTexto } from './relatorio-texto.js?v=202611161830';
+import { N8N_GRUPOS } from './config.js?v=202611161830';
+import { montarFiltros } from './filtros.js?v=202611161830';
 
 /* Prévia com a formatação do WhatsApp (*negrito* e _itálico_), montada sem HTML */
 const previa = (alvo, texto) => {

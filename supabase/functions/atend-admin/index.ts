@@ -86,6 +86,36 @@ Deno.serve(async (req) => {
     return json({ ok: true, membro_id: membroId, ja_existia: jaExistia });
   }
 
+  // Convite por e-mail para cliente (perfil "loja"): cria o login sem senha e o Supabase manda o link para a pessoa criar a dela
+  if (acao === "convidar") {
+    const email = String(body.email ?? "").trim().toLowerCase();
+    const nome = String(body.nome ?? "").trim() || email.split("@")[0];
+    const lojas = Array.isArray(body.lojas) ? body.lojas.map(Number).filter((n) => Number.isInteger(n) && n > 0) : [];
+    const volta = String(body.redireciona ?? "");
+    if (!EMAIL.test(email)) return json({ erro: "E-mail inválido." }, 400);
+    if (!lojas.length) return json({ erro: "Escolha ao menos uma loja." }, 400);
+    if (!/^https:\/\/[a-z0-9-]+\.github\.io\//i.test(volta)) return json({ erro: "Endereço de volta inválido." }, 400);
+    let userId: string | null = null;
+    let convidado = false;
+    const { data: existente } = await admin.rpc("atend_service_user_id", { p_email: email });
+    if (existente) {
+      userId = existente as string;
+      const { data: papelAtual } = await admin.rpc("atend_service_papel", { p_user: userId });
+      if (papelAtual === "admin" || papelAtual === "gestor") return json({ erro: "Este e-mail é de alguém da equipe." }, 403);
+    } else {
+      const { data: conv, error: iErr } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: volta, data: { nome } });
+      if (iErr || !conv?.user) return json({ erro: "Não foi possível enviar o convite: " + (iErr?.message ?? "erro") }, 400);
+      userId = conv.user.id; convidado = true;
+    }
+    // Quem já é cliente ganha as lojas novas sem perder as que já tinha
+    const { data: papelHoje } = await admin.rpc("atend_service_papel", { p_user: userId });
+    const { data: membroId, error: vErr } = papelHoje === "loja"
+      ? await admin.rpc("atend_service_somar_lojas", { p_user: userId, p_lojas: lojas, p_admin: adminId })
+      : await admin.rpc("atend_service_vincular", { p_user_id: userId, p_nome: nome, p_papel: "loja", p_lojas: lojas, p_admin: adminId });
+    if (vErr) return json({ erro: "Convite feito, mas o vínculo falhou: " + vErr.message }, 500);
+    return json({ ok: true, membro_id: membroId, convidado, ja_existia: !convidado });
+  }
+
   if (acao === "senha") {
     const membro = String(body.membro_id ?? "");
     const senha = String(body.senha ?? "");

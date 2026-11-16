@@ -1,4 +1,4 @@
-import { fmt, isNum } from './fmt.js?v=202611161827';
+import { fmt, isNum } from './fmt.js?v=202611161830';
 
 /* Plano de ação do relatório: regras sobre os números do período.
    Cada regra devolve { peso, titulo, acoes[], meta }: o título já traz o número do problema,

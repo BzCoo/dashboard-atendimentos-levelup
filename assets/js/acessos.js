@@ -1,4 +1,4 @@
-import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha } from './core.js?v=202611161827';
+import { $, $$, el, clone, rpc, funcaoAdmin, fmt, toast, copiar, gerarSenha, URL_SITE } from './core.js?v=202611161830';
 
 const SITE = () => location.origin + location.pathname;
 
@@ -54,6 +54,49 @@ export const renderAcessos = async (main, ctx) => {
     catch (e) { tbody.replaceChildren(el('tr', {}, el('td', { class: 'txt', colspan: 6 }, el('div', { class: 'lu-fail', text: e.message })))); }
   };
   busca.addEventListener('input', draw);
+
+  /* ---- Link para o Custom Menu Link do GHL ---- */
+  const linkGhl = URL_SITE.replace(/index\.html$/, '') + '#/painel?ghl={{location.id}}';
+  $('.slot-link-ghl', main).textContent = linkGhl;
+  $('.act-copiar-link', main).addEventListener('click', () => copiar(linkGhl));
+
+  /* ---- Convidar usuários do GHL (perfil cliente, convite por e-mail) ---- */
+  const dlgCv = $('#dlg-convite'), selCv = $('.f-cv-loja', dlgCv), boxCv = $('.slot-cv', dlgCv), msgCv = $('.lu-msg', dlgCv), btnCv = $('.act-cv-enviar', dlgCv);
+  $$('.act-cancelar', dlgCv).forEach((b2) => { b2.onclick = () => dlgCv.close(); });
+  selCv.replaceChildren(el('option', { value: '', text: 'Escolha a loja…' }), ...[...todasLojas].sort((x, y) => String(x.loja).localeCompare(String(y.loja), 'pt-BR')).map((l) => el('option', { value: l.loja_id, text: l.loja })));
+  const contarCv = () => { const n = $$('input:checked', boxCv).length; $('.slot-cv-cont', dlgCv).textContent = n ? n + (n === 1 ? ' selecionado' : ' selecionados') : ''; btnCv.disabled = !n; };
+  boxCv.addEventListener('change', contarCv);
+  selCv.addEventListener('change', async () => {
+    msgCv.hidden = true;
+    if (!selCv.value) { boxCv.replaceChildren(); contarCv(); return; }
+    boxCv.replaceChildren(el('p', { class: 'muted', text: 'Buscando usuários do GHL…' }));
+    try {
+      const us = await rpc('atend_admin_ghl_usuarios', { p_loja: Number(selCv.value) }) || [];
+      boxCv.replaceChildren(...(us.length ? us.map((u) => {
+        const cb = el('input', { type: 'checkbox', class: 'lu-check', value: u.email, 'data-nome': u.nome || '', disabled: u.tem_acesso && u.papel !== 'loja' });
+        const det = [u.email, !u.ativo ? 'inativo no GHL' : null, u.tem_acesso ? (u.papel === 'loja' ? 'já tem acesso (ganha esta loja)' : 'é da equipe') : null].filter(Boolean).join(' · ');
+        return el('label', { class: 'lu-dsp-g' + (cb.disabled ? ' off' : '') }, cb, el('span', {}, el('b', { text: u.nome || u.email }), el('small', { text: det })));
+      }) : [el('p', { class: 'muted', text: 'Nenhum usuário com e-mail nessa loja (a lista vem da última carga do GHL).' })]));
+    } catch (e) { boxCv.replaceChildren(el('div', { class: 'lu-fail', text: e.message })); }
+    contarCv();
+  });
+  btnCv.addEventListener('click', async () => {
+    const marcados = $$('input:checked', boxCv);
+    if (!marcados.length) return;
+    btnCv.disabled = true; msgCv.hidden = true;
+    let ok = 0; const erros = [];
+    for (const c of marcados) {
+      try {
+        await funcaoAdmin({ acao: 'convidar', email: c.value, nome: c.dataset.nome, lojas: [Number(selCv.value)], redireciona: URL_SITE });
+        ok++; c.checked = false; c.disabled = true;
+        c.closest('label').querySelector('small').textContent = c.value + ' · convite enviado';
+      } catch (e) { erros.push(c.value + ': ' + e.message); }
+    }
+    if (erros.length) { msgCv.textContent = erros.join(' | '); msgCv.hidden = false; }
+    if (ok) { toast(ok + (ok === 1 ? ' convite enviado.' : ' convites enviados.')); await carregar(); }
+    contarCv();
+  });
+  $('.act-convidar', main).addEventListener('click', () => { msgCv.hidden = true; dlgCv.showModal(); });
 
   /* ---- Formulário de acesso (novo / editar) ---- */
   const dlg = $('#dlg-membro'), form = $('#f-membro');

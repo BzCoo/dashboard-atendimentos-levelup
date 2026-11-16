@@ -1,6 +1,6 @@
 /* Central LevelUp › Bom dia: textos de segunda a sexta, liga/desliga e grupos que recebem.
    Quem envia é o fluxo n8n "WhatsApp - Bom dia grupos etiqueta CRM" (9h15), que lê esta configuração no banco. */
-import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611161827';
+import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611161830';
 
 const DIAS = { segunda: 'segunda', terca: 'terça', quarta: 'quarta', quinta: 'quinta', sexta: 'sexta' };
 const formatar = (alvo, texto) => {
