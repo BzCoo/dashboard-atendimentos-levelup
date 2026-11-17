@@ -1,7 +1,7 @@
 /* Texto do relatório (puro, sem navegador): o site usa ao montar o relatório e a função
    relatorio-auto do Supabase usa no envio agendado. Mesma regra nos dois lugares. */
-import { fmt, isNum } from './fmt.js?v=202611161831';
-import { diagnosticar, textoPlano } from './plano.js?v=202611161831';
+import { fmt, isNum } from './fmt.js?v=202611171427';
+import { diagnosticar, textoPlano } from './plano.js?v=202611171427';
 
 export const etapasVisiveis = (rows, max) => {
   const com = (rows || []).filter((d) => Number(d.leads) > 0 || Number(d.leads_ant) > 0);

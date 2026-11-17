@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611161831';
+import { SUPABASE_URL, SUPABASE_KEY, FUNCAO_ADMIN } from './config.js?v=202611171427';
 
 /* Volta do link de "Esqueci minha senha": lido antes do Supabase limpar o endereço */
 export const RETORNO_AUTH = (() => {
@@ -16,7 +16,7 @@ export const URL_SITE = location.origin + location.pathname;
 /* ---------- Formatação ---------- */
 // Cores dos gráficos via variáveis do CSS: acompanham o tema claro/escuro sem redesenhar
 export const ACC = 'var(--lu-chart)', PREV = 'var(--lu-prev)', GRID = 'rgba(var(--lu-ov), .06)', DEEP = 'var(--lu-chart-deep)', MUTED = 'var(--lu-ink3)';
-import { nf0, nf1, isNum, fmt } from './fmt.js?v=202611161831';
+import { nf0, nf1, isNum, fmt } from './fmt.js?v=202611171427';
 export { nf0, nf1, isNum, fmt };
 
 export const delta = (el, v, kind, better) => {
@@ -73,7 +73,18 @@ const traduzErro = (e) => {
    renova a sessão uma vez e repete a chamada, em vez de mandar a pessoa para o login */
 let renovando = null;
 const renovar = () => (renovando ??= sb.auth.refreshSession().finally(() => { renovando = null; }));
+/* No máximo 4 consultas ao banco ao mesmo tempo: com o cache vazio (logo depois de uma carga ou num período novo),
+   10 consultas pesadas juntas estouravam o limite de tempo do banco */
+const MAX_RPC = 4;
+let emCurso = 0;
+const fila = [];
+const vez = () => new Promise((ok) => { if (emCurso < MAX_RPC) { emCurso++; ok(); } else fila.push(ok); });
+const libera = () => { const prox = fila.shift(); if (prox) prox(); else emCurso--; };
 export const rpc = async (nome, args = {}) => {
+  await vez();
+  try { return await rpcSolto(nome, args); } finally { libera(); }
+};
+const rpcSolto = async (nome, args = {}) => {
   let { data, error } = await sb.rpc(nome, args);
   if (error && /JWT|token/i.test(String(error.message || ''))) {
     const r = await renovar();
