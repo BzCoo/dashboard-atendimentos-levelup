@@ -1,5 +1,5 @@
 /* Central LevelUp › Contas (só Dev): nome/SLA/ativa das subcontas, ligação dos grupos de CRM e registro de ações. */
-import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611231234';
+import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611231241';
 
 const ACOES = {
   conta_salvar: 'Alterou conta', grupo_ligar: 'Ligou grupo', criar_membro: 'Criou acesso', salvar_membro: 'Editou acesso', remover_membro: 'Removeu acesso',

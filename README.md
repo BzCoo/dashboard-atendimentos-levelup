@@ -155,3 +155,11 @@ V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.j
 - Alerta no WhatsApp: o workflow **[META-ADS-REPORT] ALERTA DE SALDO BAIXO** (`w4yxo6vmh96aCUhj`) chama `atend_service_saldo_alertas` depois de cada atualização de saldo (8h30 e 16h30) e grava o histórico em `dash_atend.trafego_alertas`. Código do nó em `n8n/saldo/preparar_alerta.js`.
 - Sincronização de gasto: **…Sincronização diária de anúncios e métricas - V05** (`BsiBtBcaYi7FfX0V`, 9h) usa a credencial do Facebook do n8n em vez de token fixo. A V04 (`JobXhhTsi0qSXSZC`) ficou despublicada. Para renovar o token, basta trocar a credencial no n8n.
 - Migração: `supabase/migrations/22_dash_atend_trafego_central.sql`.
+
+## Tráfego › Resultados (Dev e Gestor)
+
+- Página `#/resultados`: período de 7, 14 ou 30 dias até ontem, comparado com o período anterior.
+- Por cliente: investimento e conversas do Meta (`public.account_daily_reports`), leads do anúncio no CRM (`metrics_dev.ghl_lead_ad_attribution`), quantos avançaram no funil, vendas e custo por lead. O "—" indica cliente sem a origem do anúncio ligada.
+- Ranking de anúncios (`public.ad_daily_reports` + atribuição): Melhores, Sem resultado (R$ 50+ sem conversa nem lead) e Todos.
+- RPC `atend_trafego_resultados(p_dias)`; migração `23_dash_atend_trafego_resultados.sql` (também passou o gasto da página Saldos para `account_daily_reports`).
+- A automação **Anúncio de Origem no GHL** (`kZ0Gs5bv6HrGpFyX`) parou em 12/11 porque `refresh_lead_ad_attribution` passava de 8 s; agora roda conta a conta.

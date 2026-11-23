@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611231234">
-<link rel="stylesheet" href="assets/app.css?v=202611231234">
-<script type="module" src="assets/js/main.js?v=202611231234"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611231241">
+<link rel="stylesheet" href="assets/app.css?v=202611231241">
+<script type="module" src="assets/js/main.js?v=202611231241"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -102,6 +102,7 @@
       <a href="#/bomdia" data-rota="bomdia"><i aria-hidden="true">☀</i><span>Bom dia</span></a>
       <p class="grp">Tráfego</p>
       <a href="#/trafego" data-rota="trafego"><i aria-hidden="true">$</i><span>Saldos</span></a>
+      <a href="#/resultados" data-rota="resultados"><i aria-hidden="true">↗</i><span>Resultados</span></a>
       <p class="grp" data-dev>Operação</p>
       <a href="#/automacoes" data-rota="automacoes" data-dev><i aria-hidden="true">⚙</i><span>Automações</span><em class="slot-side-alerta" hidden></em></a>
       <a href="#/rodar" data-rota="rodar" data-dev><i aria-hidden="true">▶</i><span>Rodar automações</span></a>
@@ -872,6 +873,46 @@
   <section class="lu-section lu-dsp-sec">
     <div class="lu-head"><div><h2 class="lu-h3">Pausar grupos</h2><p class="lu-sub">Grupo pausado não recebe disparos (nem os agendados) até ser liberado.</p></div></div>
     <div class="lu-shell"><div class="lu-core"><div class="lu-dsp-pausa slot-pausa"></div></div></div>
+  </section>
+</template>
+
+<template id="tpl-trafego-res">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>EQUIPE</b> Tráfego</span>
+      <h1 class="lu-h2">Resultados</h1>
+      <p class="lu-sub">Quanto cada cliente investiu e o que voltou: conversas no Meta e leads que chegaram ao CRM pelo anúncio, avançaram no funil e viraram venda. Embaixo, o ranking de anúncios de todas as contas.</p>
+    </div>
+    <div class="lu-seg" role="radiogroup" aria-label="Período">
+      <label><input type="radio" name="res-dias" value="7" checked>7 dias</label>
+      <label><input type="radio" name="res-dias" value="14">14 dias</label>
+      <label><input type="radio" name="res-dias" value="30">30 dias</label>
+    </div>
+  </div>
+  <p class="lu-help slot-res-periodo"></p>
+  <p class="lu-help trf-aviso slot-res-aviso" role="status" hidden></p>
+  <div class="lu-vend-kpis res-kpis slot-res-kpis"></div>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Por cliente</h2><p class="lu-sub">Investimento e conversas vêm do Meta. Leads, avanço e vendas vêm do CRM e só aparecem para clientes com a origem do anúncio ligada (o "—" indica que ainda não está ligada).</p></div></div>
+    <div class="lu-shell"><div class="lu-core"><div class="lu-table-wrap"><table class="lu-table res-tabela" id="tb-res-cli"><thead><tr><th class="txt">Cliente</th><th>Investimento</th><th>Conversas</th><th>Custo/conversa</th><th>Leads CRM</th><th class="hide-sm">Avançaram</th><th class="hide-sm">Vendas</th><th>Custo/lead</th></tr></thead><tbody></tbody></table></div></div></div>
+  </section>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Ranking de anúncios</h2><p class="lu-sub">"Melhores" ordena pelos leads que avançaram no funil. "Sem resultado" mostra quem gastou R$ 50 ou mais sem nenhuma conversa nem lead: candidatos a pausar.</p></div></div>
+    <div class="lu-shell"><div class="lu-core">
+      <div class="lu-ag-barra trf-barra">
+        <div class="trf-filtros" role="group" aria-label="Ranking">
+          <button type="button" class="lu-ghost sm trf-f res-aba" data-aba="melhores">Melhores</button>
+          <button type="button" class="lu-ghost sm trf-f res-aba" data-aba="sem">Sem resultado <em></em></button>
+          <button type="button" class="lu-ghost sm trf-f res-aba" data-aba="todos">Todos por investimento</button>
+        </div>
+        <div class="res-filtros">
+          <label class="lu-field"><span class="lu-sr">Cliente</span><select class="f-res-cli"></select></label>
+          <label class="lu-field lu-search"><span class="lu-sr">Buscar anúncio</span><input class="q-res" placeholder="Buscar anúncio…"></label>
+        </div>
+      </div>
+      <div class="lu-table-wrap"><table class="lu-table res-tabela" id="tb-res-ad"><thead><tr><th class="txt">Anúncio</th><th>Investimento</th><th>Conversas</th><th class="hide-sm">Custo/conversa</th><th>Leads CRM</th><th>Avançaram</th><th class="hide-sm">Vendas</th></tr></thead><tbody></tbody></table></div>
+      <p class="lu-help slot-res-mais"></p>
+    </div></div>
   </section>
 </template>
 

@@ -1,5 +1,5 @@
 /* Relatórios › Envio automático por loja (equipe). A função relatorio-auto envia no horário marcado. */
-import { $, el, rpc, fmt, toast } from './core.js?v=202611231234';
+import { $, el, rpc, fmt, toast } from './core.js?v=202611231241';
 
 const DIAS = [[1, 'Seg'], [2, 'Ter'], [3, 'Qua'], [4, 'Qui'], [5, 'Sex'], [6, 'Sáb'], [7, 'Dom']];
 const OPC = [['plano', 'Plano'], ['funil', 'Funil'], ['vend', 'Vendedores'], ['traf', 'Tráfego'], ['inv', 'Investimento']];

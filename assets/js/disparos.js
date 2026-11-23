@@ -1,6 +1,6 @@
 /* Central LevelUp › Disparos: mensagens para os grupos de CRM (agora, agendadas ou recorrentes).
    O banco guarda o disparo; a fila do n8n (a cada minuto) transforma em envios, 5 por minuto, entre 7h e 21h. */
-import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611231234';
+import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611231241';
 
 const DIAS = ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 const STATUS = { pendente: ['Na fila', ''], enviando: ['Enviando', ''], enviado: ['Enviado', ' ok'], falhou: ['Falhou', ' off'], incerto: ['Sem confirmação', ' warn'] };

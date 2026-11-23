@@ -684,3 +684,13 @@ a.lu-ctl-sinal:hover { border-color: var(--lu-ink4); }
 .lu-ctl-sinal.warn b { color: var(--lu-warn); }
 .lu-ctl-sinal.bad b { color: var(--lu-bad); }
 .lu-page-head > .lu-ctl-topo { display: flex; }
+
+/* ---------- Tráfego › Resultados ---------- */
+.res-kpis { margin-bottom: 8px; }
+.res-tabela td.num .lu-delta { margin-left: 6px; font-size: 11px; padding: 1px 6px; }
+.res-filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.res-filtros select { min-height: 40px; }
+.res-ad { display: block; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-cli { display: block; margin-top: 2px; font-size: 12px; }
+#tb-res-ad tr.res-sem td.name b { color: var(--lu-bad); }
+@media (max-width: 720px) { .res-ad { max-width: none; white-space: normal; } }

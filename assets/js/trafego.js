@@ -1,6 +1,6 @@
 /* Central LevelUp › Tráfego › Saldos (Dev e Gestor): saldo de cada conta de anúncio, quanto ainda dura,
    limite de aviso por conta e histórico dos avisos de saldo baixo. Clientes não veem esta página. */
-import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611231234';
+import { $, $$, el, clone, rpc, fmt, toast } from './core.js?v=202611231241';
 
 const CRIT = 2, ATENC = 5;   // dias de saldo: vermelho abaixo de 2, amarelo abaixo de 5
 
@@ -97,7 +97,7 @@ export const renderTrafego = async (main) => {
     const ult = dados.ult_dia_dados;
     if (ult && ult < ontem()) {
       av.hidden = false;
-      av.textContent = 'Os dados de gasto vão só até ' + fmt.dm(ult) + '. Os dias restantes podem estar errados até a sincronização do Meta terminar (roda todo dia às 9h).';
+      av.textContent = 'Os dados de gasto vão só até ' + fmt.dm(ult) + '. Os dias restantes podem estar desatualizados.';
     } else av.hidden = true;
     $('.slot-trf-quando', main).textContent = dados.saldo_em ? 'Saldo atualizado em ' + fmt.dt(dados.saldo_em) + ' · atualiza às 8h30 e 16h30' : '';
   };
