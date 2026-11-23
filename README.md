@@ -147,3 +147,11 @@ V=$(date +%Y%m%d%H%M); sed -i -E "s/\?v=[0-9]+/?v=$V/g" index.html assets/js/*.j
 - **Acessos**: botão "Convidar do GHL" (usuários da subconta, convite por e-mail para criar a senha) e o link para o Custom Menu Link
   do GHL: `…/#/painel?ghl={{location.id}}` abre já na loja da subconta.
 - **Contas** (`#/contas`, só Dev): renomear, ativar/desativar e SLA de cada subconta; ligar grupos de CRM a cliente/loja; registro de ações.
+
+## Tráfego › Saldos (Dev e Gestor)
+
+- Página `#/trafego`: saldo de cada conta de anúncio (`public.ad_accounts`), gasto médio dos últimos 7 dias, quantos dias o saldo ainda dura, situação da coleta de gasto e o valor de aviso por conta.
+- Limite de aviso: `dash_atend.trafego_limites` (sem linha = pré-paga avisa abaixo de R$ 200; pós-paga não avisa). Royal Motors começou com R$ 3.000.
+- Alerta no WhatsApp: o workflow **[META-ADS-REPORT] ALERTA DE SALDO BAIXO** (`w4yxo6vmh96aCUhj`) chama `atend_service_saldo_alertas` depois de cada atualização de saldo (8h30 e 16h30) e grava o histórico em `dash_atend.trafego_alertas`. Código do nó em `n8n/saldo/preparar_alerta.js`.
+- Sincronização de gasto: **…Sincronização diária de anúncios e métricas - V05** (`BsiBtBcaYi7FfX0V`, 9h) usa a credencial do Facebook do n8n em vez de token fixo. A V04 (`JobXhhTsi0qSXSZC`) ficou despublicada. Para renovar o token, basta trocar a credencial no n8n.
+- Migração: `supabase/migrations/22_dash_atend_trafego_central.sql`.

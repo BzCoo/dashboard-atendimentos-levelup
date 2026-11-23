@@ -660,3 +660,27 @@ a.lu-ctl-sinal:hover { border-color: var(--lu-ink4); }
 .ct-badge { margin-left: 8px; }
 #tb-grupos select { min-height: 34px; padding: 4px 8px; font-size: 13px; max-width: 240px; }
 #tb-grupos td, #tb-grupos th, #tb-contas td, #tb-contas th, #tb-ag td, #tb-ag th { text-align: left; }
+
+/* ---------- Tráfego › Saldos ---------- */
+.trf-aviso { padding: 10px 14px; border-radius: 12px; background: rgba(255, 176, 32, .1); color: var(--lu-ink2); border: 1px solid rgba(255, 176, 32, .3); }
+.trf-barra { flex-wrap: wrap; gap: 10px; justify-content: space-between; }
+.trf-filtros { display: flex; flex-wrap: wrap; gap: 6px; }
+.trf-f em { font-style: normal; margin-left: 4px; font-variant-numeric: tabular-nums; color: var(--lu-ink4); }
+.trf-f[aria-pressed="true"] { background: var(--lu-accent-soft); border-color: var(--lu-accent); color: var(--lu-accent); }
+.trf-f[aria-pressed="true"] em { color: inherit; }
+.trf-tabela td.name { min-width: 180px; }
+.trf-pt { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; vertical-align: 1px; background: var(--c, var(--lu-ink4)); }
+.trf-pt.ok { --c: var(--lu-good); } .trf-pt.warn { --c: var(--lu-warn); } .trf-pt.bad { --c: var(--lu-bad); } .trf-pt.off { --c: var(--lu-ink4); }
+.trf-nome { font-weight: 600; }
+.trf-cli { display: block; margin: 2px 0 0 16px; font-size: 12px; }
+.lu-table td .trf-cli { white-space: normal; }
+.trf-saldo { display: block; font-variant-numeric: tabular-nums; }
+.lu-table td.num small { display: block; font-size: 11.5px; }
+.trf-dias { font-variant-numeric: tabular-nums; }
+.trf-lim-cel { display: inline-flex; align-items: center; gap: 6px; }
+.trf-rs { font-size: 12px; color: var(--lu-ink4); }
+.trf-lim { width: 92px; min-height: 34px; padding: 4px 8px; font-size: 13.5px; box-sizing: border-box; }
+.lu-link.sm { padding: 4px 6px; font-size: 12px; }
+.lu-ctl-sinal.warn b { color: var(--lu-warn); }
+.lu-ctl-sinal.bad b { color: var(--lu-bad); }
+.lu-page-head > .lu-ctl-topo { display: flex; }

@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://jlhhlqvukhmdeomnvcnf.supabase.co" crossorigin>
 <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/base.css?v=202611171427">
-<link rel="stylesheet" href="assets/app.css?v=202611171427">
-<script type="module" src="assets/js/main.js?v=202611171427"></script>
+<link rel="stylesheet" href="assets/base.css?v=202611231234">
+<link rel="stylesheet" href="assets/app.css?v=202611231234">
+<script type="module" src="assets/js/main.js?v=202611231234"></script>
 </head>
 <body>
 <a class="lu-skip" href="#conteudo">Pular para o conteúdo</a>
@@ -100,6 +100,8 @@
       <a href="#/relatorio" data-rota="relatorio"><i aria-hidden="true">✉</i><span>Relatórios</span></a>
       <a href="#/disparos" data-rota="disparos"><i aria-hidden="true">➤</i><span>Disparos</span></a>
       <a href="#/bomdia" data-rota="bomdia"><i aria-hidden="true">☀</i><span>Bom dia</span></a>
+      <p class="grp">Tráfego</p>
+      <a href="#/trafego" data-rota="trafego"><i aria-hidden="true">$</i><span>Saldos</span></a>
       <p class="grp" data-dev>Operação</p>
       <a href="#/automacoes" data-rota="automacoes" data-dev><i aria-hidden="true">⚙</i><span>Automações</span><em class="slot-side-alerta" hidden></em></a>
       <a href="#/rodar" data-rota="rodar" data-dev><i aria-hidden="true">▶</i><span>Rodar automações</span></a>
@@ -870,6 +872,39 @@
   <section class="lu-section lu-dsp-sec">
     <div class="lu-head"><div><h2 class="lu-h3">Pausar grupos</h2><p class="lu-sub">Grupo pausado não recebe disparos (nem os agendados) até ser liberado.</p></div></div>
     <div class="lu-shell"><div class="lu-core"><div class="lu-dsp-pausa slot-pausa"></div></div></div>
+  </section>
+</template>
+
+<template id="tpl-trafego">
+  <div class="lu-page-head">
+    <div>
+      <span class="lu-eyebrow"><b>EQUIPE</b> Tráfego</span>
+      <h1 class="lu-h2">Saldos</h1>
+      <p class="lu-sub">Saldo de cada conta de anúncio e por quantos dias ele ainda dura no ritmo de gasto da última semana. Ajuste o valor de aviso por conta: o alerta vai para o grupo de saldo no WhatsApp a cada atualização.</p>
+    </div>
+    <div class="lu-ctl-topo">
+      <span class="lu-ctl-ver slot-trf-quando"></span>
+      <button class="lu-ghost act-trf-atualizar" type="button">Atualizar</button>
+    </div>
+  </div>
+  <p class="lu-help trf-aviso slot-trf-aviso" role="status" hidden></p>
+  <div class="lu-ctl-sinais slot-trf-resumo"></div>
+  <div class="lu-shell"><div class="lu-core">
+    <div class="lu-ag-barra trf-barra">
+      <div class="trf-filtros" role="group" aria-label="Filtrar contas">
+        <button type="button" class="lu-ghost sm trf-f" data-f="atencao">Precisam de atenção <em></em></button>
+        <button type="button" class="lu-ghost sm trf-f" data-f="pre">Pré-pagas <em></em></button>
+        <button type="button" class="lu-ghost sm trf-f" data-f="pos">Pós-pagas <em></em></button>
+        <button type="button" class="lu-ghost sm trf-f" data-f="todas">Todas <em></em></button>
+      </div>
+      <label class="lu-field lu-search"><span class="lu-sr">Buscar conta</span><input class="q-trf" placeholder="Buscar conta ou cliente…"></label>
+    </div>
+    <div class="lu-table-wrap"><table class="lu-table trf-tabela" id="tb-trf"><thead><tr><th class="txt">Conta</th><th>Saldo</th><th class="txt">Dura</th><th class="hide-sm">Média/dia</th><th class="hide-sm">Ontem</th><th class="txt">Avisar abaixo de</th><th class="txt hide-sm">Dados de gasto</th></tr></thead><tbody></tbody></table></div>
+    <p class="lu-help">Pré-paga sem valor próprio avisa abaixo de R$ 200; pós-paga só avisa se você definir um valor. Deixe o campo vazio e salve para não avisar.</p>
+  </div></div>
+  <section class="lu-section lu-dsp-sec">
+    <div class="lu-head"><div><h2 class="lu-h3">Avisos enviados</h2><p class="lu-sub">Os últimos avisos de saldo baixo que foram para o WhatsApp.</p></div></div>
+    <div class="lu-shell"><div class="lu-core"><div class="lu-table-wrap"><table class="lu-table" id="tb-trf-hist"><thead><tr><th class="txt">Quando</th><th class="txt">Conta</th><th>Saldo</th><th class="hide-sm">Limite</th><th class="txt hide-sm">Dava para</th></tr></thead><tbody></tbody></table></div></div></div>
   </section>
 </template>
 

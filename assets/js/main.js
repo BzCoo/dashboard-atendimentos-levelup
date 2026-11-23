@@ -1,20 +1,21 @@
-import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611171427';
-import { renderPainel } from './painel.js?v=202611171427';
-import { renderAcessos } from './acessos.js?v=202611171427';
-import { renderRelatorio } from './relatorio.js?v=202611171427';
-import { renderMetas } from './metas.js?v=202611171427';
-import { renderEtapas } from './etapas.js?v=202611171427';
-import { renderVendedor } from './vendedor.js?v=202611171427';
-import { renderSaude } from './saude.js?v=202611171427';
-import { renderContas } from './contas.js?v=202611171427';
-import { renderBomDia } from './bomdia.js?v=202611171427';
-import { renderDisparos } from './disparos.js?v=202611171427';
-import { renderControle } from './controle.js?v=202611171427';
-import { renderAutomacoes } from './automacoes.js?v=202611171427';
+import { sb, $, $$, clone, rpc, toast, lerRota, irPara, trocarFiltros, LOGO, RETORNO_AUTH, URL_SITE, baixarCsv, temaSalvo, aplicarTema } from './core.js?v=202611231234';
+import { renderPainel } from './painel.js?v=202611231234';
+import { renderAcessos } from './acessos.js?v=202611231234';
+import { renderRelatorio } from './relatorio.js?v=202611231234';
+import { renderMetas } from './metas.js?v=202611231234';
+import { renderEtapas } from './etapas.js?v=202611231234';
+import { renderVendedor } from './vendedor.js?v=202611231234';
+import { renderSaude } from './saude.js?v=202611231234';
+import { renderContas } from './contas.js?v=202611231234';
+import { renderBomDia } from './bomdia.js?v=202611231234';
+import { renderDisparos } from './disparos.js?v=202611231234';
+import { renderControle } from './controle.js?v=202611231234';
+import { renderAutomacoes } from './automacoes.js?v=202611231234';
+import { renderTrafego } from './trafego.js?v=202611231234';
 
 // [título, função, quem pode abrir] — 'equipe' = Dev ou Gestor; 'dev' = só Dev (o banco confere de novo)
 const PAGINAS_ADM = {
-  acessos: ['Acessos', renderAcessos, 'equipe'], disparos: ['Disparos', renderDisparos, 'equipe'], bomdia: ['Bom dia', renderBomDia, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'],
+  acessos: ['Acessos', renderAcessos, 'equipe'], disparos: ['Disparos', renderDisparos, 'equipe'], bomdia: ['Bom dia', renderBomDia, 'equipe'], relatorio: ['Relatórios', renderRelatorio, 'equipe'], metas: ['Metas', renderMetas, 'equipe'], trafego: ['Saldos', renderTrafego, 'equipe'],
   etapas: ['Etapas do funil', renderEtapas, 'dev'], saude: ['Saúde dos dados', renderSaude, 'dev'],
   automacoes: ['Automações', renderControle, 'dev'], contas: ['Contas', renderContas, 'dev'], rodar: ['Rodar automações', renderAutomacoes, 'dev'],
 };

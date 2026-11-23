@@ -1,12 +1,12 @@
 /* Central LevelUp › Contas (só Dev): nome/SLA/ativa das subcontas, ligação dos grupos de CRM e registro de ações. */
-import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611171427';
+import { $, el, clone, rpc, fmt, toast } from './core.js?v=202611231234';
 
 const ACOES = {
   conta_salvar: 'Alterou conta', grupo_ligar: 'Ligou grupo', criar_membro: 'Criou acesso', salvar_membro: 'Editou acesso', remover_membro: 'Removeu acesso',
   redefinir_senha: 'Redefiniu senha', somar_lojas: 'Deu loja a cliente', enviar_whatsapp: 'Enviou relatório', disparo_criar: 'Criou disparo',
   disparo_pausar: 'Pausou disparo', disparo_retomar: 'Retomou disparo', disparo_cancelar: 'Cancelou disparo', disparo_reenviar: 'Reenviou mensagem',
   grupo_pausar: 'Pausou grupo', grupo_retomar: 'Liberou grupo', automacao_ligar: 'Pediu para ligar automação', automacao_desligar: 'Pediu para desligar automação',
-  automacao_conta: 'Mudou automação por conta', bom_dia_salvar: 'Salvou o Bom dia', relatorio_agenda: 'Mudou relatório automático',
+  automacao_conta: 'Mudou automação por conta', bom_dia_salvar: 'Salvou o Bom dia', relatorio_agenda: 'Mudou relatório automático', trafego_limite: 'Mudou aviso de saldo',
 };
 const resumo = (d) => {
   if (!d || typeof d !== 'object') return '';
